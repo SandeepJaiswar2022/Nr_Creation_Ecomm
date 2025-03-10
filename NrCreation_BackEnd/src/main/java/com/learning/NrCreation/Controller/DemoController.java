@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class DemoController {
 
-    @GetMapping("hello")
+    @GetMapping("/hello")
     public String hello()
     {
         return "Hello From NR Creation";

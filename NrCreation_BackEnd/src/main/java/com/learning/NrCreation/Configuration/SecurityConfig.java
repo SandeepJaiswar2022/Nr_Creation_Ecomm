@@ -18,8 +18,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 	private final AuthenticationProvider authProvider;
-
-
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter)throws Exception{
 		http.csrf(AbstractHttpConfigurer::disable)
@@ -28,8 +26,6 @@ public class SecurityConfig {
 		         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 		         .authenticationProvider(authProvider)
 		         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-		
 		return http.build();
 	}
-
 }
