@@ -25,7 +25,7 @@ public class AuthController {
 	//Only this End Point's Exceptions are getting handled by the GlobalExceptionHandler
 	
 	@PostMapping("/register")
-	public ResponseEntity<ApiResponse> register(@RequestBody RegisterRequest request)
+	public ResponseEntity<ApiResponse> register(@Valid @RequestBody RegisterRequest request)
 	{
 		AuthResponse authResponse = authService.register(request);
 			
