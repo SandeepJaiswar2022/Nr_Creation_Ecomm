@@ -32,8 +32,7 @@ public class AuthController {
 		return new ResponseEntity<>(new ApiResponse(
 				"Registered Succesfully ",authResponse),HttpStatus.OK);
 	}
-	
-	
+
 	@PostMapping("/login")
     public ResponseEntity<ApiResponse> authenticate(@RequestBody LoginRequest request) {
 		
