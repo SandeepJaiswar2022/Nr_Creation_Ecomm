@@ -1,6 +1,7 @@
 package com.learning.NrCreation.Controller;
 
 import com.learning.NrCreation.Entity.Category;
+import com.learning.NrCreation.Response.ApiResponse;
 import com.learning.NrCreation.Service.Order.CategoryService;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,10 +29,9 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Category> getCategoryById(@PathVariable Integer id) {
-        Optional<Category> category = categoryService.getCategoryById(id);
-        return category.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<ApiResponse> getCategoryById(@PathVariable Integer id) {
+        Category category = categoryService.getCategoryById(id);
+        return new ResponseEntity<>(new ApiResponse("Category Found.",category),HttpStatus.OK);
     }
 
     @PostMapping("/create")

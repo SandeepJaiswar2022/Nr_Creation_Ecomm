@@ -1,10 +1,10 @@
 package com.learning.NrCreation.ServiceImpls;
 
 import com.learning.NrCreation.Entity.Category;
+import com.learning.NrCreation.Exception.ResourceNotFoundException;
 import com.learning.NrCreation.Repository.CategoryRepository;
 import com.learning.NrCreation.Service.Order.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,8 +20,10 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Optional<Category> getCategoryById(Integer id) {
-        return categoryRepository.findById(id).orElseThrow((exc)->new );
+    public Category getCategoryById(Integer id) {
+        return categoryRepository
+                .findById(id)
+                .orElseThrow(()->new ResourceNotFoundException("No Category found with id: " + id));
     }
 
     @Override
