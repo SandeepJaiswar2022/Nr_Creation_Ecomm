@@ -1,10 +1,12 @@
 package com.learning.NrCreation.Service.Auth;
 
 
+import com.learning.NrCreation.Entity.Customer;
 import com.learning.NrCreation.Entity.User;
 import com.learning.NrCreation.Enum.Role;
 import com.learning.NrCreation.Exception.AlreadyExistException;
 import com.learning.NrCreation.Exception.ResourceNotFoundException;
+import com.learning.NrCreation.Repository.CustomerRepository;
 import com.learning.NrCreation.Repository.UserRepository;
 import com.learning.NrCreation.Request.LoginRequest;
 import com.learning.NrCreation.Request.RegisterRequest;
@@ -22,6 +24,7 @@ public class AuthService implements IAuthService {
 	private final IJwtService jwtService;
 	private final PasswordEncoder passwordEncoder;
 	private final AuthenticationManager authManager;
+	private final CustomerRepository customerRepo;
 	
 	@Override
 	public AuthResponse register(RegisterRequest request) {
@@ -34,10 +37,19 @@ public class AuthService implements IAuthService {
 		user.setEmail(request.getEmail());
 		user.setFirstName(request.getFirstName());
 		user.setLastName(request.getLastName());
+		user.setPhone(request.getPhone());
 		user.setPassword(passwordEncoder.encode(request.getPassword()));
 		user.setRole(Role.USER);
 		
 		userRepo.save(user);
+
+		Customer newCustomer = new Customer();
+		newCustomer.setFirstName(request.getFirstName());
+		newCustomer.setLastName(request.getLastName());
+		newCustomer.setPhone(request.getPhone());
+		newCustomer.setEmail(request.getEmail());
+		customerRepo.save(newCustomer);
+
 		
 		String token = jwtService.generateToken(user);
 		
