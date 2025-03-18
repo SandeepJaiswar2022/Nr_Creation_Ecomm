@@ -1,5 +1,6 @@
 package com.learning.NrCreation.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -17,11 +18,12 @@ import java.util.List;
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer categoryId;
-    private String categoryName;
-    private String description;
+    private Long id;
 
-    @OneToMany(mappedBy = "category")
+    private String name;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Product> products;
 
 }

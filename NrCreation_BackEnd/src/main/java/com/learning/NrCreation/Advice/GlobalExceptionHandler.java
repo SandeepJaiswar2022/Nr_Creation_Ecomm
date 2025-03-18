@@ -2,6 +2,7 @@ package com.learning.NrCreation.Advice;
 
 
 import com.learning.NrCreation.Exception.AlreadyExistException;
+import com.learning.NrCreation.Exception.ResourceNotFoundException;
 import com.learning.NrCreation.Response.ApiResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -45,6 +46,11 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ApiResponse> handleAlreadyExistException(AlreadyExistException ex) {
         return new ResponseEntity<>(new ApiResponse(ex.getMessage(), null), HttpStatus.CONFLICT);
     }
+
+	@ExceptionHandler(ResourceNotFoundException.class)
+	public ResponseEntity<ApiResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
+		return new ResponseEntity<>(new ApiResponse(ex.getMessage(), null), HttpStatus.NOT_FOUND);
+	}
 
 
 }

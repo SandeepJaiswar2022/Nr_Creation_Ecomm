@@ -2,7 +2,7 @@ package com.learning.NrCreation.Controller;
 
 import com.learning.NrCreation.Entity.Category;
 import com.learning.NrCreation.Response.ApiResponse;
-import com.learning.NrCreation.Service.Order.CategoryService;
+import com.learning.NrCreation.Service.Category.CategoryService;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/categories")
@@ -29,7 +28,7 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse> getCategoryById(@PathVariable Integer id) {
+    public ResponseEntity<ApiResponse> getCategoryById(@PathVariable Long id) {
         Category category = categoryService.getCategoryById(id);
         return new ResponseEntity<>(new ApiResponse("Category Found.",category),HttpStatus.OK);
     }
@@ -40,7 +39,7 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Category> updateCategory(@PathVariable Integer id, @RequestBody Category category) {
+    public ResponseEntity<Category> updateCategory(@PathVariable Long id, @RequestBody Category category) {
         Category updatedCategory = categoryService.updateCategory(id, category);
         if (updatedCategory != null) {
             return new ResponseEntity<>(updatedCategory, HttpStatus.OK);
@@ -49,7 +48,7 @@ public class CategoryController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCategory(@PathVariable Integer id) {
+    public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
         categoryService.deleteCategory(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }

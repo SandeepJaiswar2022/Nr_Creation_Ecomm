@@ -15,7 +15,7 @@ import java.util.Date;
 public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer paymentId;
+    private Long paymentId;
 
     @ManyToOne
     @JoinColumn(name = "order_id")

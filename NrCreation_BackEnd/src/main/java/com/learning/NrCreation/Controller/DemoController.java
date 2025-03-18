@@ -11,5 +11,4 @@ public class DemoController {
     {
         return "Hello From NR Creation";
     }
-
 }

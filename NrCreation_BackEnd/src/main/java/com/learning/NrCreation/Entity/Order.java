@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -17,9 +18,9 @@ import java.util.List;
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer orderId;
+    private Long orderId;
     private Date orderDate;
-    private Float orderAmount;
+    private BigDecimal orderAmount;
     private Date shippingDate;
 
     @Enumerated(EnumType.STRING)

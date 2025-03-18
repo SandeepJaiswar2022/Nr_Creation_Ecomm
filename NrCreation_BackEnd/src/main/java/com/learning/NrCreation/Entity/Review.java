@@ -13,7 +13,7 @@ import lombok.Setter;
 public class Review {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer reviewId;
+    private Long reviewId;
     private String description;
 
     @Enumerated(EnumType.STRING)

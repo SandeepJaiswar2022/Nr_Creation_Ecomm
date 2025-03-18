@@ -5,7 +5,7 @@ import com.learning.NrCreation.Request.LoginRequest;
 import com.learning.NrCreation.Request.RegisterRequest;
 import com.learning.NrCreation.Response.ApiResponse;
 import com.learning.NrCreation.Response.AuthResponse;
-import com.learning.NrCreation.Service.Auth.IAuthService;
+import com.learning.NrCreation.Service.Auth.AuthService;
 import jakarta.validation.Valid;
 import lombok.*;
 import org.springframework.http.HttpStatus;
@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 @RequestMapping("${api.prefix}/auth")
 public class AuthController {
-	private final IAuthService authService;
+	private final AuthService authService;
 	
 	//Only this End Point's Exceptions are getting handled by the GlobalExceptionHandler
 	

@@ -1,7 +1,7 @@
 package com.learning.NrCreation.Configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.learning.NrCreation.Service.Auth.IJwtService;
+import com.learning.NrCreation.Service.Auth.JwtService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -26,7 +26,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    private final IJwtService jwtService;
+    private final JwtService jwtService;
 
     private final UserDetailsService userDetailsService;
 
