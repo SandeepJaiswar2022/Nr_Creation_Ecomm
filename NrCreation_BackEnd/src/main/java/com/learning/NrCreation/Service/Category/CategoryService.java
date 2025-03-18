@@ -1,12 +1,16 @@
 package com.learning.NrCreation.Service.Category;
+
 import com.learning.NrCreation.Entity.Category;
 
 import java.util.List;
 
 public interface CategoryService {
-    List<Category> getAllCategories();
-    Category getCategoryById(Long id);
-    Category createCategory(Category category);
-    Category updateCategory(Long id, Category category);
-    void deleteCategory(Long id);
+	
+	Category getCategoryById(Long categoryId);
+	Category getCategoryByName(String name);
+	List<Category> getAllCategories();
+	Category addCategory(Category category);
+	Category updateCategory(Category category, Long categoryId);
+	void deleteCategoryById(Long categoryId);
+
 }

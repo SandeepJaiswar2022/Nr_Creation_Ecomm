@@ -21,7 +21,7 @@ public class SecurityConfig {
 	@Bean
 	public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter)throws Exception{
 		http.csrf(AbstractHttpConfigurer::disable)
-		         .authorizeHttpRequests(request -> request.requestMatchers("/api/nr-creation/v1/auth/**")
+		         .authorizeHttpRequests(request -> request.requestMatchers("/api/nr-creation/v1/auth/**","/api/nr-creation/v1/public/**")
 		        		 .permitAll().anyRequest().authenticated())
 		         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 		         .authenticationProvider(authProvider)

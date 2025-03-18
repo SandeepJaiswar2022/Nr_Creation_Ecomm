@@ -1,42 +1,67 @@
 package com.learning.NrCreation.Service.Category;
 
 import com.learning.NrCreation.Entity.Category;
+import com.learning.NrCreation.Exception.AlreadyExistException;
 import com.learning.NrCreation.Exception.ResourceNotFoundException;
 import com.learning.NrCreation.Repository.CategoryRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
-    @Autowired
-    CategoryRepository categoryRepository;
+	private final CategoryRepository categoryRepo;
 
-    @Override
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
-    }
+	@Override
+	public Category getCategoryById(Long categoryId) {
+		return categoryRepo.findById(categoryId)
+				.orElseThrow(() -> new ResourceNotFoundException
+						("Category Not Found with Id : "+categoryId));
+	}
 
-    @Override
-    public Category getCategoryById(Long id) {
-        return categoryRepository
-                .findById(id)
-                .orElseThrow(()->new ResourceNotFoundException("No Category found with id: " + id));
-    }
+	@Override
+	public Category getCategoryByName(String name) {
+		return categoryRepo.findByName(name).orElseThrow(() -> new ResourceNotFoundException
+				("Category Not Found with name : "+name));
+	}
 
-    @Override
-    public Category createCategory(Category category) {
-        return null;
-    }
+	@Override
+	public List<Category> getAllCategories() {
+		return categoryRepo.findAll();
+	}
 
-    @Override
-    public Category updateCategory(Long id, Category category) {
-        return null;
-    }
+	@Override
+	public Category addCategory(Category category) {
+//		System.out.println("\n\ncategory : "+category.getName());
+		return Optional.of(category)
+				.filter(c -> !categoryRepo.existsByName(c.getName()))
+				.map(categoryRepo::save)
+				.orElseThrow(()->new AlreadyExistException
+						("Category Already Exist with Name : "+category.getName()));
+	}
 
-    @Override
-    public void deleteCategory(Long id) {
+	@Override
+	public Category updateCategory(Category category, Long categoryId) {
+		//findyById if exists then update else throw not Found
+		return categoryRepo.findById(categoryId)
+				.map((foundCategory -> {
+					foundCategory.setName(category.getName());
+					return foundCategory;
+				}))
+				.map(categoryRepo::save)
+				.orElseThrow(() -> new ResourceNotFoundException
+						("Category Not Found with Id : "+categoryId));
+	}
 
-    }
+	@Override
+	public void deleteCategoryById(Long categoryId) {
+		categoryRepo.findById(categoryId)
+		.ifPresentOrElse(categoryRepo::delete, () -> {
+			throw new ResourceNotFoundException("Category Not Found with Id : "+categoryId);
+		 });
+	}
+
 }
