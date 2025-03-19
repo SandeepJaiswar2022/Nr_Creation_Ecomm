@@ -145,7 +145,7 @@ const HomePage = () => {
                             className="relative h-[500px] rounded-lg overflow-hidden "
                         >
                             <Link to="/men">
-                                <div className="absolute inset-0 bg-[url('Images/men-collection.jpg')] bg-cover bg-center transition-transform duration-500 group-hover:scale-110" />
+                                <div className="absolute inset-0 bg-[url('/Images/men-collection.jpg')] bg-cover bg-center transition-transform duration-500 group-hover:scale-110" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
                                 <div className="absolute bottom-8 left-8 text-white">
                                     <h3 className="text-3xl font-bold mb-4">Men's Collection</h3>
@@ -160,7 +160,7 @@ const HomePage = () => {
                             className="relative h-[32rem] rounded-lg overflow-hidden "
                         >
                             <Link to="/women">
-                                <div className="absolute inset-0 bg-[url('Images/women-collection.jpg')] bg-cover bg-center transition-transform duration-500 group-hover:scale-110" />
+                                <div className="absolute inset-0 bg-[url('/Images/women-collection.jpg')] bg-cover bg-center transition-transform duration-500 group-hover:scale-110" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
                                 <div className="absolute bottom-8 left-8 text-white">
                                     <h3 className="text-3xl font-bold mb-4">Men's Collection</h3>
