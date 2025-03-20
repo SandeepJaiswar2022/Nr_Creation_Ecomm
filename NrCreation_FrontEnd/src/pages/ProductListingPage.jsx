@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
@@ -10,7 +10,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
-import { SlidersHorizontal } from 'lucide-react'
+import { SlidersHorizontal, Filter } from 'lucide-react'
 import {
     Sheet,
     SheetContent,
@@ -20,10 +20,64 @@ import {
 } from "@/components/ui/sheet"
 import ProductCard from '../components/ReusableComponents/ProductCard'
 import { mensProducts, womensProducts } from '../data/products'
+import { PageLoader, SkeletonLoader, EmptyState } from '@/components/ReusableComponents'
 
 const ProductListingPage = () => {
     const { category } = useParams()
+    const [isLoading, setIsLoading] = useState(true)
+    const [products, setProducts] = useState([])
     const [showFilters, setShowFilters] = useState(false)
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            setIsLoading(true)
+            try {
+                // Simulate API call
+                await new Promise(resolve => setTimeout(resolve, 2000))
+                // Use the category from URL params to determine which products to show
+                const productsList = category === 'men' ? mensProducts : womensProducts
+                setProducts(productsList)
+            } catch (error) {
+                console.error('Error fetching products:', error)
+            } finally {
+                setIsLoading(false)
+            }
+        }
+
+        fetchProducts()
+    }, [category])
+
+    if (isLoading) {
+        return (
+            <div className="container mx-auto px-4 py-8">
+                <div className="flex justify-between items-center mb-8">
+                    <SkeletonLoader className="h-8 w-32" />
+                    <SkeletonLoader className="h-8 w-24" />
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {Array.from({ length: 8 }).map((_, index) => (
+                        <div key={index} className="space-y-4">
+                            <SkeletonLoader className="h-64" /> {/* Image */}
+                            <SkeletonLoader className="h-6 w-3/4" /> {/* Title */}
+                            <SkeletonLoader className="h-6 w-1/4" /> {/* Price */}
+                        </div>
+                    ))}
+                </div>
+            </div>
+        )
+    }
+
+    if (products.length === 0) {
+        return (
+            <div className="container mx-auto px-4 py-8">
+                <EmptyState
+                    title="No Products Found"
+                    description="Try adjusting your filters or check back later"
+                    icon={Filter}
+                />
+            </div>
+        )
+    }
 
     return (
         <div className="container py-10  mx-auto px-4">
@@ -50,7 +104,7 @@ const ProductListingPage = () => {
                         <Sheet open={showFilters} onOpenChange={setShowFilters}>
                             <SheetTrigger asChild>
                                 <Button variant="outline" className="w-full">
-                                    <SlidersHorizontal className="mr-2 h-4 w-4" />
+                                    <Filter className="mr-2 h-4 w-4" />
                                     Filters
                                 </Button>
                             </SheetTrigger>
