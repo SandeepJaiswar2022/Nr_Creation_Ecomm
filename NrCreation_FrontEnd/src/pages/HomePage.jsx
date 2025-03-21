@@ -163,7 +163,7 @@ const HomePage = () => {
                                 <div className="absolute inset-0 bg-[url('/Images/women-collection.jpg')] bg-cover bg-center transition-transform duration-500 group-hover:scale-110" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
                                 <div className="absolute bottom-8 left-8 text-white">
-                                    <h3 className="text-3xl font-bold mb-4">Men's Collection</h3>
+                                    <h3 className="text-3xl font-bold mb-4">Women's Collection</h3>
                                     <Button variant="outline" className="text-black py-6 rounded-none font-semibold text-lg border-white hover:bg-white hover:text-black transition-colors duration-300">
                                         Shop Women <ArrowRight className="ml-2 h-4 w-4" />
                                     </Button>
@@ -178,15 +178,18 @@ const HomePage = () => {
                     <h2 className="text-3xl font-bold mb-8 text-center">Featured Products</h2>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {featuredProducts.map((product, index) => (
-                            <motion.div
-                                key={product.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1 }}
-                                whileHover={{ y: -5 }}
-                            >
-                                <ProductCard product={product} />
-                            </motion.div>
+                            <Link to={`/product/${product.id}`} key={product.id}>
+                                <motion.div
+                                    key={product.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.1 }}
+                                    whileHover={{ y: -5 }}
+                                >
+                                    <ProductCard product={product} />
+                                </motion.div>
+                            </Link>
+
                         ))}
                     </div>
                 </section>

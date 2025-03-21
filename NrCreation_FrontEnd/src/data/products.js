@@ -4,28 +4,28 @@ export const featuredProducts = [
         productName: "Royal Blue Silk Dupatta",
         rating: 4,
         price: "4,999",
-        image: "Images/Duppta5.jpeg"
+        image: "/Images/Duppta5.jpeg"
     },
     {
         id: "dupatta-2",
         productName: "Pink Embroidered Dupatta",
         rating: 5,
         price: "5,499",
-        image: "Images/Duppta2.jpeg"
+        image: "/Images/Duppta2.jpeg"
     },
     {
         id: "dupatta-3",
         productName: "Green Zari Work Dupatta",
         rating: 4,
         price: "6,999",
-        image: "Images/Duppta3.jpeg"
+        image: "/Images/Duppta3.jpeg"
     },
     {
         id: "dupatta-4",
         productName: "Red Banarasi Dupatta",
         rating: 5,
         price: "7,499",
-        image: "Images/Duppta4.jpeg"
+        image: "/Images/Duppta4.jpeg"
     }
 ]
 
@@ -35,28 +35,28 @@ export const womensProducts = [
         productName: "Royal Blue Embroidered Lehenga",
         rating: 5,
         price: "12,999",
-        image: "Images/lehnga1.jpeg"
+        image: "/Images/lehnga1.jpeg"
     },
     {
         id: "lehenga-2",
         productName: "Pink Zari Work Lehenga",
         rating: 4,
         price: "11,499",
-        image: "Images/lehnga2.jpeg"
+        image: "/Images/lehnga2.jpeg"
     },
     {
         id: "lehenga-3",
         productName: "Green Silk Lehenga",
         rating: 5,
         price: "10,999",
-        image: "Images/lehnga3.jpeg"
+        image: "/Images/lehnga3.jpeg"
     },
     {
         id: "lehenga-4",
         productName: "Red Banarasi Lehenga",
         rating: 4,
         price: "9,999",
-        image: "Images/lehnga4.jpeg"
+        image: "/Images/lehnga4.jpeg"
     }
 ]
 

@@ -28,8 +28,8 @@ const Navbar = () => {
                 {/* Navigation Links - Hidden on md and below */}
                 <div className="hidden lg:flex items-center space-x-6">
                     <NavLink to="/" isActive={location.pathname === '/'}>Home</NavLink>
-                    <NavLink to="/men" isActive={location.pathname === '/men'}>Men</NavLink>
-                    <NavLink to="/women" isActive={location.pathname === '/women'}>Women</NavLink>
+                    <NavLink to="category/men" isActive={location.pathname === '/category/men'}>Men</NavLink>
+                    <NavLink to="category/women" isActive={location.pathname === '/category/women'}>Women</NavLink>
                 </div>
 
                 {/* Search Bar */}
@@ -46,17 +46,17 @@ const Navbar = () => {
 
                 {/* Actions */}
                 <div className="flex items-center  space-x-4">
-                    <Button variant="ghost" size="icon" className="relative bg-gray-300 hover:bg-gray-400">
+                    <Link to="/cart" variant="ghost" size="icon" className="relative p-2 rounded-sm bg-gray-300 hover:bg-gray-400">
                         <ShoppingCart className="h-5 w-5" />
                         <span className="absolute -top-3 -right-2 bg-[#871845] text-primary-foreground rounded-full w-6 h-6 text-xs flex items-center justify-center">
                             <p>
                                 0
                             </p>
                         </span>
-                    </Button>
-                    <Button variant="ghost" size="icon" className="bg-gray-300 hover:bg-gray-400">
+                    </Link>
+                    <Link to="/profile" variant="ghost" size="icon" className="bg-gray-300 p-2 rounded-sm hover:bg-gray-400">
                         <User className="h-5 w-5" />
-                    </Button>
+                    </Link>
                     <Button className="hidden bg-[#871845] text-white hover:bg-[#611031] lg:flex">Login</Button>
                 </div>
 
@@ -71,8 +71,8 @@ const Navbar = () => {
 
                         <div className="mt-8 space-y-4">
                             <MobileNavLink to="/" isActive={location.pathname === '/'} onClick={() => setIsOpen(false)}>Home</MobileNavLink>
-                            <MobileNavLink to="/men" isActive={location.pathname === '/men'} onClick={() => setIsOpen(false)}>Men</MobileNavLink>
-                            <MobileNavLink to="/women" isActive={location.pathname === '/women'} onClick={() => setIsOpen(false)}>Women</MobileNavLink>
+                            <MobileNavLink to="category/men" isActive={location.pathname === '/category/men'} onClick={() => setIsOpen(false)}>Men</MobileNavLink>
+                            <MobileNavLink to="category/women" isActive={location.pathname === '/category/women'} onClick={() => setIsOpen(false)}>Women</MobileNavLink>
                         </div>
                     </SheetContent>
                 </Sheet>

@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Plus, Minus, ChevronDown, ChevronUp, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react'
 import ProductCard from '@/components/ReusableComponents/ProductCard'
-import { featuredProducts } from '@/data/products'
+import { featuredProducts, mensProducts, womensProducts } from '@/data/products'
+import { Link, useParams } from 'react-router-dom'
 
 const ProductDescription = () => {
     const [selectedImage, setSelectedImage] = useState(0)
@@ -12,6 +13,23 @@ const ProductDescription = () => {
     const [selectedSize, setSelectedSize] = useState('M')
     const [openSection, setOpenSection] = useState(null)
     const [startIndex, setStartIndex] = useState(0)
+    const { id } = useParams();
+
+    const product = [...featuredProducts, ...womensProducts, ...mensProducts].find(product => product.id === id);
+
+    useEffect(() => {
+        if (product) {
+            console.log(product);
+
+            setSelectedImage(product.image)
+            setQuantity(1)
+            setSelectedColor('maroon')
+            setSelectedSize('M')
+        }
+
+        console.log(id);
+
+    }, [product])
 
     const images = [
         "/Images/Duppta1.jpeg",
@@ -98,19 +116,20 @@ const ProductDescription = () => {
                                 className="relative pt-[150%]" // 3:2 aspect ratio
                             >
                                 <img
-                                    src={images[selectedImage]}
+                                    src={selectedImage}
                                     alt="Main product view"
                                     className="absolute inset-0 w-full h-full object-cover"
                                 />
                             </motion.div>
                             {/* Action Buttons */}
-                            <div className="flex gap-4 pt-4">
-                                <Button className="flex-1 py-3 bg-[#871845] hover:bg-[#611031]">
-                                    <ShoppingCart className="mr-2 h-4 w-4" /> Add to Cart
-                                </Button>
-                                <Button className="flex-1 bg-[#871845] hover:bg-[#611031]">
+                            <div className="grid grid-cols-2 gap-2 pt-4">
+                                <button className="flex justify-center items-center md:p-3.5 max-sm:py-1.5 max-sm:px-0.5 font-medium text-white bg-[#871845] hover:bg-[#611031]">
+                                    <ShoppingCart className="mr-2 h-4 w-4" />
+                                    <h1>Add to Cart</h1>
+                                </button>
+                                <button className=" text-white bg-[#871845] font-medium hover:bg-[#611031]">
                                     Buy Now
-                                </Button>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -120,10 +139,10 @@ const ProductDescription = () => {
                 <div className="lg:col-span-8 space-y-8">
                     {/* Product Info */}
                     <div className="space-y-6">
-                        <h1 className="text-3xl font-bold">Royal Blue Silk Dupatta</h1>
+                        <h1 className="text-3xl font-bold">{product?.productName}</h1>
                         <div className="flex items-center gap-4">
-                            <span className="text-2xl font-bold text-[#871845]">₹4,999</span>
-                            <span className="text-lg text-gray-500 line-through">₹6,999</span>
+                            <span className="text-2xl font-bold text-[#871845]">₹{product?.price}</span>
+                            <span className="text-lg text-gray-500 line-through">₹{product?.price}</span>
                             <span className="text-green-600 font-medium">30% off</span>
                         </div>
 
@@ -220,16 +239,16 @@ const ProductDescription = () => {
                     {/* Accordion Sections */}
                     <div className="space-y-4">
                         {/* Product Description */}
-                        <div className="border rounded-lg">
+                        <div className="border border-[#871845] rounded-lg">
                             <button
                                 className="w-full px-6 py-4 flex justify-between items-center"
                                 onClick={() => toggleSection('description')}
                             >
                                 <span className="font-medium">Product Description</span>
                                 {openSection === 'description' ? (
-                                    <Minus className="h-4 w-4" />
+                                    <Minus className="h-4 text-[#871845] w-4" />
                                 ) : (
-                                    <Plus className="h-4 w-4" />
+                                    <Plus className="h-4 text-[#871845] w-4" />
                                 )}
                             </button>
                             <AnimatePresence>
@@ -240,13 +259,16 @@ const ProductDescription = () => {
                                         exit={{ height: 0 }}
                                         className="overflow-hidden"
                                     >
-                                        <div className="px-6 py-4 border-t">
-                                            <p className="text-gray-600">
-                                                Our Royal Blue Silk Dupatta is crafted from the finest silk fabric,
-                                                featuring intricate zari work that adds a touch of elegance to your outfit.
-                                                The dupatta measures 2.5 meters in length and comes with carefully
-                                                finished edges to ensure durability.
-                                            </p>
+                                        <div className="px-6 border-[#871845] ">
+                                            <div className=''>
+                                                <div className='h-[1px] w-full bg-[#871845]'></div>
+                                                <p className="text-gray-600 py-5">
+                                                    Our Royal Blue Silk Dupatta is crafted from the finest silk fabric,
+                                                    featuring intricate zari work that adds a touch of elegance to your outfit.
+                                                    The dupatta measures 2.5 meters in length and comes with carefully
+                                                    finished edges to ensure durability.
+                                                </p>
+                                            </div>
                                         </div>
                                     </motion.div>
                                 )}
@@ -254,16 +276,16 @@ const ProductDescription = () => {
                         </div>
 
                         {/* Return Policy */}
-                        <div className="border rounded-lg">
+                        <div className="border border-[#871845] rounded-lg">
                             <button
                                 className="w-full px-6 py-4 flex justify-between items-center"
                                 onClick={() => toggleSection('returns')}
                             >
                                 <span className="font-medium">Return & Refund Policy</span>
                                 {openSection === 'returns' ? (
-                                    <Minus className="h-4 w-4" />
+                                    <Minus className="h-4 text-[#871845] w-4" />
                                 ) : (
-                                    <Plus className="h-4 w-4" />
+                                    <Plus className="h-4 text-[#871845] w-4" />
                                 )}
                             </button>
                             <AnimatePresence>
@@ -274,12 +296,15 @@ const ProductDescription = () => {
                                         exit={{ height: 0 }}
                                         className="overflow-hidden"
                                     >
-                                        <div className="px-6 py-4 border-t">
-                                            <p className="text-gray-600">
-                                                We accept returns within 7 days of delivery. The product must be unused
-                                                and in its original packaging. Refunds will be processed within 5-7
-                                                business days after we receive the returned item.
-                                            </p>
+                                        <div className="px-6">
+                                            <div className=''>
+                                                <div className='h-[1px] w-full bg-[#871845]'></div>
+                                                <p className="text-gray-600 py-5">
+                                                    We accept returns within 7 days of delivery. The product must be unused
+                                                    and in its original packaging. Refunds will be processed within 5-7
+                                                    business days after we receive the returned item.
+                                                </p>
+                                            </div>
                                         </div>
                                     </motion.div>
                                 )}
@@ -287,16 +312,16 @@ const ProductDescription = () => {
                         </div>
 
                         {/* Shipping Info */}
-                        <div className="border rounded-lg">
+                        <div className="border border-[#871845] rounded-lg">
                             <button
                                 className="w-full px-6 py-4 flex justify-between items-center"
                                 onClick={() => toggleSection('shipping')}
                             >
                                 <span className="font-medium">Shipping Information</span>
                                 {openSection === 'shipping' ? (
-                                    <Minus className="h-4 w-4" />
+                                    <Minus className="h-4 text-[#871845] w-4" />
                                 ) : (
-                                    <Plus className="h-4 w-4" />
+                                    <Plus className="h-4 text-[#871845] w-4" />
                                 )}
                             </button>
                             <AnimatePresence>
@@ -307,12 +332,15 @@ const ProductDescription = () => {
                                         exit={{ height: 0 }}
                                         className="overflow-hidden"
                                     >
-                                        <div className="px-6 py-4 border-t">
-                                            <p className="text-gray-600">
-                                                We offer free shipping on all orders above ₹999. Standard delivery takes
-                                                3-5 business days. Express delivery (additional charges apply) takes
-                                                1-2 business days. We ship to all major cities in India.
-                                            </p>
+                                        <div className="px-6">
+                                            <div className=''>
+                                                <div className='h-[1px] w-full bg-[#871845]'></div>
+                                                <p className="text-gray-600 py-5">
+                                                    We offer free shipping on all orders above ₹999. Standard delivery takes
+                                                    3-5 business days. Express delivery (additional charges apply) takes
+                                                    1-2 business days. We ship to all major cities in India.
+                                                </p>
+                                            </div>
                                         </div>
                                     </motion.div>
                                 )}
@@ -325,9 +353,11 @@ const ProductDescription = () => {
             {/* Similar Products */}
             <div>
                 <h2 className="text-2xl font-bold mb-8">Similar Products</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {featuredProducts.slice(0, 4).map((product) => (
-                        <ProductCard key={product.id} product={product} />
+                        <Link to={`/product/${product.id}`} key={product.id}>
+                            <ProductCard key={product.id} product={product} />
+                        </Link>
                     ))}
                 </div>
             </div>

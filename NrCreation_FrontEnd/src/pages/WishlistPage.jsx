@@ -7,17 +7,17 @@ import EmptyState from '@/components/ReusableComponents/EmptyState'
 const WishlistPage = () => {
     const [wishlistItems, setWishlistItems] = useState([])
 
-    if (wishlistItems.length === 0) {
-        return (
-            <EmptyState
-                icon={Heart}
-                title="Your wishlist is empty"
-                description="Save items you love to your wishlist and review them anytime."
-                link="/"
-                linkText="Start Shopping"
-            />
-        )
-    }
+    // if (wishlistItems.length === 0) {
+    //     return (
+    //         <EmptyState
+    //             icon={Heart}
+    //             title="Your wishlist is empty"
+    //             description="Save items you love to your wishlist and review them anytime."
+    //             link="/"
+    //             linkText="Start Shopping"
+    //         />
+    //     )
+    // }
 
     return (
         <div className="container mx-auto px-4 py-8">

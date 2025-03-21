@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import {
     Select,
@@ -33,7 +33,7 @@ const ProductListingPage = () => {
             setIsLoading(true)
             try {
                 // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 2000))
+                await new Promise(resolve => setTimeout(resolve, 500))
                 // Use the category from URL params to determine which products to show
                 const productsList = category === 'men' ? mensProducts : womensProducts
                 setProducts(productsList)
@@ -147,27 +147,32 @@ const ProductListingPage = () => {
                     {/* Product Grid */}
                     {category === 'men' ? (<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {mensProducts.map((product, index) => (
-                            <motion.div
-                                key={product.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1 }}
-                                whileHover={{ y: -5 }}
-                            >
-                                <ProductCard product={product} />
-                            </motion.div>
+                            <Link to={`/product/${product.id}`} key={product.id}>
+                                <motion.div
+                                    key={product.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.1 }}
+                                    whileHover={{ y: -5 }}
+                                >
+                                    <ProductCard product={product} />
+                                </motion.div>
+                            </Link>
                         ))}
                     </div>) : (<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         {womensProducts.map((product, index) => (
-                            <motion.div
-                                key={product.id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.1 }}
-                                whileHover={{ y: -5 }}
-                            >
-                                <ProductCard product={product} />
-                            </motion.div>
+                            <Link to={`/product/${product.id}`} key={product.id}>
+                                <motion.div
+                                    key={product.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: index * 0.1 }}
+                                    whileHover={{ y: -5 }}
+                                >
+                                    <ProductCard product={product} />
+                                </motion.div>
+                            </Link>
+
                         ))}
                     </div>)}
                 </div>

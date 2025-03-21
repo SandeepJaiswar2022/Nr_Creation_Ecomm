@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { User, Settings, ShoppingBag, Heart, LogOut } from 'lucide-react'
 import { Link } from 'react-router-dom'
+import WishlistPage from './WishlistPage'
 
 const ProfilePage = () => {
     const [activeTab, setActiveTab] = useState('profile')
@@ -28,8 +29,8 @@ const ProfilePage = () => {
                                     key={tab.id}
                                     onClick={() => setActiveTab(tab.id)}
                                     className={`w-full flex items-center gap-3 px-4 py-2 rounded-lg transition-colors ${activeTab === tab.id
-                                            ? 'bg-[#871845] text-white'
-                                            : 'hover:bg-gray-100'
+                                        ? 'bg-[#871845] text-white'
+                                        : 'hover:bg-gray-100'
                                         }`}
                                 >
                                     <Icon className="h-5 w-5" />
@@ -74,6 +75,9 @@ const ProfilePage = () => {
                             </div>
                         )}
 
+                        {activeTab === 'wishlist' && (
+                            <WishlistPage />
+                        )}
                         {activeTab === 'orders' && (
                             <div className="space-y-6">
                                 <h2 className="text-2xl font-semibold">My Orders</h2>

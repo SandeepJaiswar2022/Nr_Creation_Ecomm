@@ -5,7 +5,7 @@ const ProductCard = ({ product }) => {
 
     return (
         <div className="cursor-pointer h-[40rem] w-full ">
-            <div className="aspect-square h-[32rem] w-full rounded-lg overflow-hidden bg-muted relative">
+            <div className="aspect-square h-[32rem] w-full overflow-hidden bg-muted relative">
                 <img
                     src={image}
                     alt={productName}

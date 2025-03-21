@@ -20,6 +20,13 @@ const CartPage = () => {
     //     )
     // }
 
+    const images = [
+        "/Images/Duppta1.jpeg",
+        "/Images/Duppta2.jpeg",
+        "/Images/Duppta3.jpeg",
+        "/Images/Duppta4.jpeg",
+    ]
+
     return (
         <div className="container mx-auto px-4 py-8">
             <h1 className="text-3xl font-bold mb-8">Shopping Cart</h1>
@@ -28,7 +35,7 @@ const CartPage = () => {
                 {/* Cart Items */}
                 <div className="lg:col-span-8">
                     <div className="space-y-4">
-                        {[1, 2].map((item) => (
+                        {images.map((item) => (
                             <motion.div
                                 key={item}
                                 initial={{ opacity: 0, y: 20 }}
@@ -36,7 +43,8 @@ const CartPage = () => {
                                 className="flex gap-4 bg-white p-4 rounded-lg shadow-sm"
                             >
                                 <div className="w-24 h-32 bg-gray-200 rounded-md">
-                                    <span className="sr-only">Product Image</span>
+                                    {/* <span className="sr-only">Product Image</span> */}
+                                    <img src={item} alt="Product Image" className="w-full h-full object-cover" />
                                 </div>
 
                                 <div className="flex-1 space-y-2">
