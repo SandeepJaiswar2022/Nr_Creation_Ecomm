@@ -2,6 +2,7 @@ package com.learning.NrCreation.Service.Product;
 
 import com.learning.NrCreation.Entity.Category;
 import com.learning.NrCreation.Entity.Product;
+import com.learning.NrCreation.Exception.ResourceNotFoundException;
 import com.learning.NrCreation.Repository.CategoryRepository;
 import com.learning.NrCreation.Repository.ProductRepository;
 import com.learning.NrCreation.Request.ProductRequest;
@@ -106,5 +107,10 @@ public class ProductServiceImpl implements ProductService{
     @Transactional
     public List<ProductDTO> getConvertedProducts(List<Product> products) {
         return products.stream().map(this::convertToDto).toList();
+    }
+
+    @Override
+    public Product getProductById(Long productId) {
+        return productRepo.findById(productId).orElseThrow(()->new ResourceNotFoundException("Product not found"));
     }
 }

@@ -4,6 +4,7 @@ package com.learning.NrCreation.Service.User;
 import com.learning.NrCreation.Entity.*;
 import com.learning.NrCreation.Exception.InvalidInputException;
 import com.learning.NrCreation.Exception.ResourceNotFoundException;
+import com.learning.NrCreation.Repository.CartRepository;
 import com.learning.NrCreation.Repository.CustomerRepository;
 import com.learning.NrCreation.Repository.UserRepository;
 import com.learning.NrCreation.Request.RegisterRequest;
@@ -23,7 +24,8 @@ public class UserServiceImpl implements UserService {
 	private final JwtService jwtService;
 	private final PasswordEncoder passwordEncoder;
 	private final CustomerRepository customerRepo;
-	
+	private final CartRepository cartRepository;
+
 	@Override
 	public List<User> getAllUsers() {
 		return userRepo.findAll();
@@ -213,6 +215,14 @@ public class UserServiceImpl implements UserService {
         }
         return user.get();
     }
+
+	@Override
+	public Customer getUserById(Long userId) {
+		Customer user = customerRepo.findById(userId)
+				.orElseThrow(()-> new ResourceNotFoundException("User not found with id : "+userId));
+		return user;
+	}
+
 
 	@Override
 	public void deleteUserById(Long userId) {

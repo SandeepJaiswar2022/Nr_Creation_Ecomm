@@ -12,4 +12,5 @@ public interface ProductService {
     List<Product> addMultipleProducts(List<ProductRequest> requests);
     ProductDTO convertToDto(Product product);
     List<ProductDTO> getConvertedProducts(List<Product> products);
+    Product getProductById(Long productId);
 }

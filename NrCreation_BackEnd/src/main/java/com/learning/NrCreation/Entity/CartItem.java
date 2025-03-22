@@ -33,7 +33,24 @@ public class CartItem {
     @JoinColumn(name = "cart_id")
     private Cart cart;
 
-    public void computeAndSetTotalPrice() {
-        this.totalPrice = this.unitPrice.multiply(new BigDecimal(quantity));
+//    public void computeAndSetTotalPrice() {
+//        this.totalPrice = this.unitPrice.multiply(new BigDecimal(quantity));
+//    }
+public void computeAndSetTotalPrice() {
+    if (unitPrice == null || quantity == null) {
+        this.totalPrice = BigDecimal.ZERO;
+    } else {
+        this.totalPrice = unitPrice.multiply(BigDecimal.valueOf(quantity));
+    }
+}
+
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
+        computeAndSetTotalPrice();
+    }
+
+    public void setUnitPrice(BigDecimal unitPrice) {
+        this.unitPrice = unitPrice;
+        computeAndSetTotalPrice();
     }
 }

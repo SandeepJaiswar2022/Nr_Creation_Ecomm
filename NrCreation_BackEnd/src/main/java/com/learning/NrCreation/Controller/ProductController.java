@@ -21,8 +21,8 @@ import java.util.List;
 public class ProductController {
     private final ProductService productService;
 
-    @PostMapping("add")
     @PreAuthorize("hasAuthority('admin:create')")
+    @PostMapping("add")
     public ResponseEntity<ApiResponse> addProduct(@RequestBody ProductRequest request)
     {
         try {
