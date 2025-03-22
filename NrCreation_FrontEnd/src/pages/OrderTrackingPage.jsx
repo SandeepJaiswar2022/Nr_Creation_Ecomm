@@ -9,7 +9,7 @@ import EmptyState from '@/components/ReusableComponents/EmptyState'
 
 const OrderTrackingPage = () => {
     const [isLoading, setIsLoading] = useState(false)
-    const [orderFound, setOrderFound] = useState(false)
+    const [orderFound, setOrderFound] = useState(true)
     const [orderId, setOrderId] = useState('')
 
     const breadcrumbItems = [
@@ -109,10 +109,10 @@ const OrderTrackingPage = () => {
                                             <div className="relative">
                                                 <div
                                                     className={`w-8 h-8 rounded-full flex items-center justify-center ${step.status === 'completed'
-                                                            ? 'bg-[#871845] text-white'
-                                                            : step.status === 'current'
-                                                                ? 'bg-[#871845] bg-opacity-20 text-[#871845]'
-                                                                : 'bg-gray-100 text-gray-400'
+                                                        ? 'bg-[#871845] text-white'
+                                                        : step.status === 'current'
+                                                            ? 'bg-[#871845] bg-opacity-20 text-[#871845]'
+                                                            : 'bg-gray-100 text-gray-400'
                                                         }`}
                                                 >
                                                     <Icon className="w-4 h-4" />
@@ -120,8 +120,8 @@ const OrderTrackingPage = () => {
                                                 {index !== steps.length - 1 && (
                                                     <div
                                                         className={`absolute top-8 left-4 w-0.5 h-12 ${step.status === 'completed'
-                                                                ? 'bg-[#871845]'
-                                                                : 'bg-gray-200'
+                                                            ? 'bg-[#871845]'
+                                                            : 'bg-gray-200'
                                                             }`}
                                                     />
                                                 )}

@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
-import { Plus, Minus, ChevronDown, ChevronUp, ShoppingCart, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Plus, Minus, ChevronDown, ChevronUp, ShoppingCart, ChevronLeft, ChevronRight, Heart, Share2, Star } from 'lucide-react'
 import ProductCard from '@/components/ReusableComponents/ProductCard'
 import { featuredProducts, mensProducts, womensProducts } from '@/data/products'
 import { Link, useParams } from 'react-router-dom'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import ReviewSection from '@/components/ReusableComponents/ReviewSection'
 
 const ProductDescription = () => {
     const [selectedImage, setSelectedImage] = useState(0)
@@ -14,6 +16,7 @@ const ProductDescription = () => {
     const [openSection, setOpenSection] = useState(null)
     const [startIndex, setStartIndex] = useState(0)
     const { id } = useParams();
+    const [activeTab, setActiveTab] = useState('description')
 
     const product = [...featuredProducts, ...womensProducts, ...mensProducts].find(product => product.id === id);
 
@@ -63,12 +66,39 @@ const ProductDescription = () => {
 
     const visibleThumbnails = images.slice(startIndex, startIndex + 4)
 
+    // Mock data for reviews
+    const mockReviews = [
+        {
+            userName: 'John Doe',
+            date: '2024-03-15',
+            rating: 5,
+            comment: 'Excellent product! The quality is outstanding and it fits perfectly. Would definitely recommend.',
+            images: ['/Images/lehnga5.jpeg', '/Images/lehnga6.jpeg']
+        },
+        {
+            userName: 'Jane Smith',
+            date: '2024-03-10',
+            rating: 4,
+            comment: 'Great product overall. The only minor issue was the delivery time, but the product itself is worth it.',
+            images: []
+        },
+        {
+            userName: 'Mike Johnson',
+            date: '2024-03-05',
+            rating: 5,
+            comment: 'Absolutely love this product! The design is beautiful and the material is high quality.',
+            images: ['/Images/lehnga3.jpeg']
+        }
+    ]
+
+    const averageRating = mockReviews.reduce((acc, review) => acc + review.rating, 0) / mockReviews.length
+
     return (
         <div className="container mx-auto px-4 py-16">
             {/* Product Details Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
                 {/* Left Column - Image Gallery */}
-                <div className="lg:col-span-4">
+                <div className="lg:col-span-4 lg:sticky lg:top-8 lg:self-start">
                     <div className="flex gap-4 h-full">
                         {/* Thumbnail List */}
                         <div className="relative flex flex-col">
@@ -81,12 +111,12 @@ const ProductDescription = () => {
                             </button>
 
                             <div className="flex flex-col gap-4 py-2 h-[calc(6*5rem+3*1rem)] overflow-hidden">
-                                {visibleThumbnails.map((img, index) => (
+                                {images.map((img, index) => (
                                     <motion.div
                                         key={startIndex + index}
                                         className={`w-20 max-sm:w-16 h-28 max-sm:h-24 cursor-pointer border-2 ${selectedImage === startIndex + index ? 'border-[#871845]' : 'border-transparent'}`}
                                         whileHover={{ scale: 1.05 }}
-                                        onClick={() => setSelectedImage(startIndex + index)}
+                                        onClick={() => setSelectedImage(img)}
                                     >
                                         <img
                                             src={img}
@@ -169,9 +199,9 @@ const ProductDescription = () => {
                             </div>
                         </div>
 
-                        <div className='grid grid-cols-2 gap-4'>
+                        <div className='grid grid-cols-2 gap-4 max-sm:gap-2'>
                             {/* Size Selection */}
-                            <div className="space-y-3 bg-[#f0e3e9]  p-4">
+                            <div className="space-y-2 bg-[#f0e3e9] p-4 max-sm:p-2">
                                 <h3 className="font-medium">Select Size</h3>
                                 <div className="relative">
                                     <Button
@@ -209,7 +239,7 @@ const ProductDescription = () => {
                             </div>
 
                             {/* Quantity Selection */}
-                            <div className="space-y-3 bg-[#f0e3e9]  p-4">
+                            <div className="space-y-2 bg-[#f0e3e9]  p-4 max-sm:p-2">
                                 <h3 className="font-medium">Quantity</h3>
                                 <div className="flex items-center gap-4">
                                     <Button
@@ -347,12 +377,57 @@ const ProductDescription = () => {
                             </AnimatePresence>
                         </div>
                     </div>
+
+                    {/* Tabs */}
+                    <Tabs value={activeTab} onValueChange={setActiveTab}>
+                        <TabsList className="grid w-full gap-2 grid-cols-3">
+                            <TabsTrigger value="description">Full Description</TabsTrigger>
+                            <TabsTrigger value="specifications">Specifications</TabsTrigger>
+                            <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                        </TabsList>
+                        <TabsContent value="description" className="mt-4">
+                            <p className="text-gray-600">
+                                Detailed product description goes here. Lorem ipsum dolor sit amet,
+                                consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore
+                                et dolore magna aliqua.
+                            </p>
+                        </TabsContent>
+                        <TabsContent value="specifications" className="mt-4">
+                            <div className="space-y-4">
+                                <div>
+                                    <h4 className="font-semibold">Material</h4>
+                                    <p className="text-gray-600">100% Cotton</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold">Care Instructions</h4>
+                                    <p className="text-gray-600">Machine wash cold</p>
+                                </div>
+                                <div>
+                                    <h4 className="font-semibold">Origin</h4>
+                                    <p className="text-gray-600">Made in India</p>
+                                </div>
+                            </div>
+                        </TabsContent>
+                        <TabsContent value="reviews" className="mt-4">
+                            <ReviewSection
+                                reviews={mockReviews}
+                                averageRating={averageRating}
+                                totalReviews={mockReviews.length}
+                            />
+                        </TabsContent>
+                    </Tabs>
                 </div>
             </div>
 
             {/* Similar Products */}
             <div>
-                <h2 className="text-2xl font-bold mb-8">Similar Products</h2>
+                <div className="mb-16">
+                    <h2 className="text-3xl font-bold mb-4 text-center">Similar Products</h2>
+                    <div className="flex justify-center items-center gap-2">
+                        <div className="h-[0.2rem] w-[80px] bg-[#871845] rounded-full"></div>
+                        <div className="h-[0.2rem] w-[25px] bg-gray-400 rounded-full"></div>
+                    </div>
+                </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {featuredProducts.slice(0, 4).map((product) => (
                         <Link to={`/product/${product.id}`} key={product.id}>

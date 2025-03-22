@@ -175,7 +175,13 @@ const HomePage = () => {
 
                 {/* Featured Products */}
                 <section className="pb-24">
-                    <h2 className="text-3xl font-bold mb-8 text-center">Featured Products</h2>
+                    <div className="mb-16">
+                        <h2 className="text-3xl font-bold mb-4 text-center">Featured Products</h2>
+                        <div className="flex justify-center items-center gap-2">
+                            <div className="h-[0.2rem] w-[80px] bg-[#871845] rounded-full"></div>
+                            <div className="h-[0.2rem] w-[25px] bg-gray-400 rounded-full"></div>
+                        </div>
+                    </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
                         {featuredProducts.map((product, index) => (
                             <Link to={`/product/${product.id}`} key={product.id}>
