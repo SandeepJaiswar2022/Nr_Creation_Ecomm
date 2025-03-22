@@ -38,6 +38,7 @@ class CartItemServiceImpl implements CartItemService {
 		CartItem cartItem = cart.getItems().stream()
 				.filter(item -> item.getProduct().getId().equals(productId))
 				.findFirst().orElse(new CartItem());
+
 		if(cartItem.getId()==null)
 		{
 			cartItem.setCart(cart);

@@ -3,15 +3,27 @@ import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
+import {
     Search,
     Filter,
     Package,
-    Truck,
+    DollarSign,
+    Calendar,
+    Clock,
     CheckCircle,
     XCircle,
-    Clock,
     AlertCircle,
-    ChevronDown
+    ChevronDown,
+    Truck,
+    ShoppingBag,
+    CreditCard,
+    User
 } from "lucide-react"
 
 const OrderManagement = () => {
@@ -19,52 +31,118 @@ const OrderManagement = () => {
         {
             id: "ORD001",
             customer: "John Doe",
-            email: "john@example.com",
-            items: [
-                { name: "Silk Dupatta", quantity: 2, price: 1999 },
-                { name: "Lehenga Set", quantity: 1, price: 15999 }
-            ],
-            total: 19997,
+            date: "2024-02-20",
+            time: "14:30",
+            total: "₹2,499",
             status: "Processing",
-            date: "2024-03-20",
-            shippingAddress: "123 Main St, City, Country",
-            paymentMethod: "Credit Card"
+            items: [
+                { name: "Silk Dupatta", quantity: 2, price: 999 },
+                { name: "Lehenga Set", quantity: 1, price: 1499 }
+            ],
+            paymentStatus: "Paid"
         },
-        // Add more mock orders as needed
+        {
+            id: "ORD002",
+            customer: "Jane Smith",
+            date: "2024-02-19",
+            time: "16:45",
+            total: "₹1,999",
+            status: "Shipped",
+            items: [
+                { name: "Designer Saree", quantity: 1, price: 1999 }
+            ],
+            paymentStatus: "Paid"
+        },
+        {
+            id: "ORD003",
+            customer: "Mike Johnson",
+            date: "2024-02-18",
+            time: "09:15",
+            total: "₹3,499",
+            status: "Delivered",
+            items: [
+                { name: "Bridal Lehenga", quantity: 1, price: 3499 }
+            ],
+            paymentStatus: "Paid"
+        }
     ])
 
     const [searchQuery, setSearchQuery] = useState("")
     const [selectedStatus, setSelectedStatus] = useState("all")
-    const [selectedDateRange, setSelectedDateRange] = useState("all")
     const [expandedOrder, setExpandedOrder] = useState(null)
 
-    const statuses = ["all", "Pending", "Processing", "Shipped", "Delivered", "Cancelled"]
-    const dateRanges = ["all", "Today", "This Week", "This Month", "Last Month"]
+    const statuses = [
+        "all",
+        "Pending",
+        "Processing",
+        "Confirmed",
+        "Shipped",
+        "Out for Delivery",
+        "Delivered",
+        "Cancelled",
+        "Refunded",
+        "Failed Delivery"
+    ]
+
+    // Filter orders based on search query and status
+    const filteredOrders = orders.filter(order => {
+        const searchLower = searchQuery.toLowerCase()
+        const matchesSearch = searchQuery === "" ||
+            order.id.toLowerCase().includes(searchLower) ||
+            order.customer.toLowerCase().includes(searchLower) ||
+            order.status.toLowerCase().includes(searchLower) ||
+            order.total.toLowerCase().includes(searchLower) ||
+            order.paymentStatus.toLowerCase().includes(searchLower)
+
+        const matchesStatus = selectedStatus === "all" || order.status === selectedStatus
+
+        return matchesSearch && matchesStatus
+    })
 
     const getStatusIcon = (status) => {
         switch (status) {
+            case "Pending":
+                return <Clock className="w-4 h-4 text-yellow-500" />
             case "Processing":
-                return <Clock className="w-4 h-4" />
+                return <Package className="w-4 h-4 text-blue-500" />
+            case "Confirmed":
+                return <CheckCircle className="w-4 h-4 text-green-500" />
             case "Shipped":
-                return <Truck className="w-4 h-4" />
+                return <Truck className="w-4 h-4 text-indigo-500" />
+            case "Out for Delivery":
+                return <ShoppingBag className="w-4 h-4 text-purple-500" />
             case "Delivered":
-                return <CheckCircle className="w-4 h-4" />
+                return <CheckCircle className="w-4 h-4 text-green-500" />
             case "Cancelled":
-                return <XCircle className="w-4 h-4" />
+                return <XCircle className="w-4 h-4 text-red-500" />
+            case "Refunded":
+                return <CreditCard className="w-4 h-4 text-orange-500" />
+            case "Failed Delivery":
+                return <AlertCircle className="w-4 h-4 text-red-500" />
             default:
-                return <Package className="w-4 h-4" />
+                return <Package className="w-4 h-4 text-gray-500" />
         }
     }
 
     const getStatusColor = (status) => {
         switch (status) {
-            case "Processing":
+            case "Pending":
                 return "bg-yellow-100 text-yellow-800"
-            case "Shipped":
+            case "Processing":
                 return "bg-blue-100 text-blue-800"
+            case "Confirmed":
+                return "bg-green-100 text-green-800"
+            case "Shipped":
+                return "bg-indigo-100 text-indigo-800"
+            case "Out for Delivery":
+                return "bg-purple-100 text-purple-800"
             case "Delivered":
                 return "bg-green-100 text-green-800"
             case "Cancelled":
+                return "bg-red-100 text-red-800"
+            case "Refunded":
+                return "bg-orange-100 text-orange-800"
+            case "Failed Delivery":
                 return "bg-red-100 text-red-800"
             default:
                 return "bg-gray-100 text-gray-800"
@@ -103,38 +181,35 @@ const OrderManagement = () => {
                     />
                 </div>
                 <div className="flex flex-wrap gap-2">
-                    <select
-                        className="border rounded-md px-2 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base flex-1 sm:flex-none"
-                        value={selectedStatus}
-                        onChange={(e) => setSelectedStatus(e.target.value)}
+                    <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                        <SelectTrigger className="w-full sm:w-[180px] text-sm sm:text-base">
+                            <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {statuses.map(status => (
+                                <SelectItem key={status} value={status}>
+                                    {status.charAt(0).toUpperCase() + status.slice(1)}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <Button
+                        variant="outline"
+                        className="text-sm sm:text-base px-3 sm:px-4 py-1.5 sm:py-2"
+                        onClick={() => {
+                            setSelectedStatus("all")
+                            setSearchQuery("")
+                        }}
                     >
-                        {statuses.map(status => (
-                            <option key={status} value={status}>
-                                {status.charAt(0).toUpperCase() + status.slice(1)}
-                            </option>
-                        ))}
-                    </select>
-                    <select
-                        className="border rounded-md px-2 sm:px-4 py-1.5 sm:py-2 text-sm sm:text-base flex-1 sm:flex-none"
-                        value={selectedDateRange}
-                        onChange={(e) => setSelectedDateRange(e.target.value)}
-                    >
-                        {dateRanges.map(range => (
-                            <option key={range} value={range}>
-                                {range.charAt(0).toUpperCase() + range.slice(1)}
-                            </option>
-                        ))}
-                    </select>
-                    <Button variant="outline" className="text-sm sm:text-base px-3 sm:px-4 py-1.5 sm:py-2">
                         <Filter className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
-                        Filter
+                        Reset Filters
                     </Button>
                 </div>
             </div>
 
             {/* Orders List - Mobile View */}
             <div className="block sm:hidden space-y-3">
-                {orders.map((order) => (
+                {filteredOrders.map((order) => (
                     <div key={order.id} className="bg-white rounded-lg shadow-md p-3">
                         <div className="flex items-center justify-between mb-3">
                             <div>
@@ -156,10 +231,10 @@ const OrderManagement = () => {
                                         <span className="font-medium">Customer:</span> {order.customer}
                                     </div>
                                     <div className="text-xs">
-                                        <span className="font-medium">Email:</span> {order.email}
+                                        <span className="font-medium">Date:</span> {order.date}
                                     </div>
                                     <div className="text-xs">
-                                        <span className="font-medium">Address:</span> {order.shippingAddress}
+                                        <span className="font-medium">Time:</span> {order.time}
                                     </div>
                                 </div>
 
@@ -171,7 +246,7 @@ const OrderManagement = () => {
                                         </div>
                                     ))}
                                     <div className="text-xs font-medium mt-1">
-                                        Total: ₹{order.total}
+                                        Total: {order.total}
                                     </div>
                                 </div>
 
@@ -182,31 +257,26 @@ const OrderManagement = () => {
                                     </span>
                                 </div>
 
-                                <div className="flex gap-1.5">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleStatusUpdate(order.id, "Processing")}
-                                        className="flex-1 text-xs px-2 py-1"
+                                <div className="flex gap-2">
+                                    <Select
+                                        value={order.status}
+                                        onValueChange={(value) => handleStatusUpdate(order.id, value)}
                                     >
-                                        Process
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleStatusUpdate(order.id, "Shipped")}
-                                        className="flex-1 text-xs px-2 py-1"
-                                    >
-                                        Ship
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleStatusUpdate(order.id, "Cancelled")}
-                                        className="flex-1 text-xs px-2 py-1 text-red-500"
-                                    >
-                                        Cancel
-                                    </Button>
+                                        <SelectTrigger className="flex-1 text-xs px-2 py-1">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="Pending">Pending</SelectItem>
+                                            <SelectItem value="Processing">Processing</SelectItem>
+                                            <SelectItem value="Confirmed">Confirmed</SelectItem>
+                                            <SelectItem value="Shipped">Shipped</SelectItem>
+                                            <SelectItem value="Out for Delivery">Out for Delivery</SelectItem>
+                                            <SelectItem value="Delivered">Delivered</SelectItem>
+                                            <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                            <SelectItem value="Refunded">Refunded</SelectItem>
+                                            <SelectItem value="Failed Delivery">Failed Delivery</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                 </div>
                             </div>
                         )}
@@ -231,13 +301,12 @@ const OrderManagement = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {orders.map((order) => (
+                                {filteredOrders.map((order) => (
                                     <tr key={order.id} className="border-b hover:bg-gray-50 transition-colors">
                                         <td className="py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">{order.id}</td>
                                         <td className="py-3 sm:py-4 px-3 sm:px-6 whitespace-nowrap">
                                             <div>
                                                 <div className="font-medium text-sm sm:text-base">{order.customer}</div>
-                                                <div className="text-xs sm:text-sm text-gray-500">{order.email}</div>
                                             </div>
                                         </td>
                                         <td className="py-3 sm:py-4 px-3 sm:px-6">
@@ -261,30 +330,25 @@ const OrderManagement = () => {
                                         <td className="py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">{order.date}</td>
                                         <td className="py-3 sm:py-4 px-3 sm:px-6 whitespace-nowrap">
                                             <div className="flex gap-1.5">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleStatusUpdate(order.id, "Processing")}
-                                                    className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5"
+                                                <Select
+                                                    value={order.status}
+                                                    onValueChange={(value) => handleStatusUpdate(order.id, value)}
                                                 >
-                                                    Process
-                                                </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleStatusUpdate(order.id, "Shipped")}
-                                                    className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5"
-                                                >
-                                                    Ship
-                                                </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleStatusUpdate(order.id, "Cancelled")}
-                                                    className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5 text-red-500"
-                                                >
-                                                    Cancel
-                                                </Button>
+                                                    <SelectTrigger className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5">
+                                                        <SelectValue />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="Pending">Pending</SelectItem>
+                                                        <SelectItem value="Processing">Processing</SelectItem>
+                                                        <SelectItem value="Confirmed">Confirmed</SelectItem>
+                                                        <SelectItem value="Shipped">Shipped</SelectItem>
+                                                        <SelectItem value="Out for Delivery">Out for Delivery</SelectItem>
+                                                        <SelectItem value="Delivered">Delivered</SelectItem>
+                                                        <SelectItem value="Cancelled">Cancelled</SelectItem>
+                                                        <SelectItem value="Refunded">Refunded</SelectItem>
+                                                        <SelectItem value="Failed Delivery">Failed Delivery</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
                                             </div>
                                         </td>
                                     </tr>
