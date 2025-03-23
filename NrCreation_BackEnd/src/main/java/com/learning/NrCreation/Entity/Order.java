@@ -7,11 +7,14 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
-@Table(name = "`Order`")
+@Table(name = "Orders")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,24 +22,22 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderId;
-    private Date orderDate;
+    private LocalDate orderDate;
     private BigDecimal orderAmount;
     private Date shippingDate;
 
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
-    @ManyToOne
-    @JoinColumn(name = "cart_id")
-    private Cart cart;
 
-    @ManyToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+@ManyToOne
+@JoinColumn(name = "customerId")
+private Customer customer;
+
 
     @OneToMany(mappedBy = "order")
     private List<Payment> payments;
 
-    @OneToMany(mappedBy = "order")
-    private List<OrderItem> orderItems;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<OrderItem> orderItems = new HashSet<>();
 }

@@ -83,6 +83,8 @@ public class CartServiceImpl implements CartService{
 
     @Override
     public Cart getCartByUserId(Long userId) {
-        return cartRepo.findByCustomer_CustomerId(userId);
+        Cart cart = cartRepo.findByCustomer_CustomerId(userId);
+        System.out.println("\nCart by customerId : "+cart.toString());
+        return cart;
     }
 }

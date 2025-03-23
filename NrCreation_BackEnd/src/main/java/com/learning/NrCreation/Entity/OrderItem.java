@@ -22,7 +22,7 @@ public class OrderItem {
     private BigDecimal price;
 
     @ManyToOne
-    @JoinColumn(name = "order_id")
+    @JoinColumn(name = "order_id", nullable = false)
     private Order order;
 
     @ManyToOne
