@@ -30,6 +30,7 @@ public class OrderServiceImpl implements OrderService {
     private final CartService cartService;
     private final OrderRepository orderRepo;
     private final OrderItemRepository orderItemRepo;
+
     @Transactional
     @Override
     public Order placeOrder(Long userId) {
@@ -54,7 +55,8 @@ public class OrderServiceImpl implements OrderService {
         return orders.stream().map(this :: convertToDto).toList();
     }
 
-    private Order createOrder(Cart cart)
+    @Transactional
+    public Order createOrder(Cart cart)
     {
 
         // Step 1: Save Order first
@@ -63,31 +65,20 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderStatus(OrderStatus.PENDING);
         order.setCustomer(cart.getCustomer());
         order.setOrderAmount(BigDecimal.ZERO); // Temporary amount
+
         order = orderRepo.save(order);
 
-//        List<OrderItem> orderItemList = createOrderItems(order, cart);
-//        BigDecimal totalAmount = calculateTotalAmount(orderItemList);
-//        order.setOrderItems(new HashSet<>(orderItemList));
-//        order.setOrderDate(LocalDate.now());
-//        order.setOrderAmount(totalAmount);
-//        order.setOrderStatus(OrderStatus.PENDING);
-//        order.setCustomer(cart.getCustomer());
-        // Step 2: Create Order Items
         List<OrderItem> orderItemList = createOrderItems(order, cart);
-
-        // Step 3: Save Order Items
-        orderItemRepo.saveAll(orderItemList);
-
-        // Step 4: Update Order with correct total amount and items
         BigDecimal totalAmount = calculateTotalAmount(orderItemList);
         order.setOrderAmount(totalAmount);
         order.setOrderItems(new HashSet<>(orderItemList));
-        
+        System.out.println("\ncreate Order Called\n");
         return orderRepo.save(order);
     }
 
     private List<OrderItem> createOrderItems(Order order, Cart cart)
     {
+        System.out.println("\nCreate Order Items\n");
         return cart.getItems().stream()
                 .map(cartItem -> {
                     Product product = cartItem.getProduct();
@@ -99,7 +90,7 @@ public class OrderServiceImpl implements OrderService {
                     orderItem.setQuantity(cartItem.getQuantity());
                     orderItem.setPrice(cartItem.getUnitPrice());
 
-                    return orderItem;
+                    return orderItemRepo.save(orderItem);
                 })
                 .toList();
     }
