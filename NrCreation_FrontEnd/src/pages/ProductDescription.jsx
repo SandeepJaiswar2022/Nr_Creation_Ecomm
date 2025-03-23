@@ -1,12 +1,15 @@
 import { useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from '@/components/ui/button'
-import { Plus, Minus, ChevronDown, ChevronUp, ShoppingCart, ChevronLeft, ChevronRight, Heart, Share2, Star } from 'lucide-react'
+import { Plus, Minus, ChevronDown, ChevronUp, ShoppingCart, ChevronLeft, ChevronRight, Heart, Share2, Star, Filter } from 'lucide-react'
 import ProductCard from '@/components/ReusableComponents/ProductCard'
 import { featuredProducts, mensProducts, womensProducts } from '@/data/products'
 import { Link, useParams } from 'react-router-dom'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import ReviewSection from '@/components/ReusableComponents/ReviewSection'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchSingleProduct } from '@/store/slices/productSlice'
+import { EmptyState, PageLoader } from '@/components/ReusableComponents'
 
 const ProductDescription = () => {
     const [selectedImage, setSelectedImage] = useState(0)
@@ -16,9 +19,18 @@ const ProductDescription = () => {
     const [openSection, setOpenSection] = useState(null)
     const [startIndex, setStartIndex] = useState(0)
     const { id } = useParams();
-    const [activeTab, setActiveTab] = useState('description')
+    const [activeTab, setActiveTab] = useState('reviews')
 
-    const product = [...featuredProducts, ...womensProducts, ...mensProducts].find(product => product.id === id);
+    // const product = [...featuredProducts, ...womensProducts, ...mensProducts].find(product => product.id === id);
+
+    const dispatch = useDispatch();
+    const { product, loading, error } = useSelector((state) => state.product);
+
+    useEffect(() => {
+        if (id) {
+            dispatch(fetchSingleProduct(id));
+        }
+    }, [dispatch, id]);
 
     useEffect(() => {
         if (product) {
@@ -33,6 +45,24 @@ const ProductDescription = () => {
         console.log(id);
 
     }, [product])
+
+    if (loading) {
+        return (
+            <PageLoader />
+        )
+    }
+
+    if (!product) {
+        return (
+            <div className="container mx-auto px-4 py-8">
+                <EmptyState
+                    title="No Product Found"
+                    description="Try adjusting your filters or check back later"
+                    icon={Filter}
+                />
+            </div>
+        )
+    }
 
     const images = [
         "/Images/Duppta1.jpeg",
@@ -380,10 +410,10 @@ const ProductDescription = () => {
 
                     {/* Tabs */}
                     <Tabs value={activeTab} onValueChange={setActiveTab}>
-                        <TabsList className="grid w-full gap-2 grid-cols-3">
-                            <TabsTrigger value="description">Full Description</TabsTrigger>
-                            <TabsTrigger value="specifications">Specifications</TabsTrigger>
-                            <TabsTrigger value="reviews">Reviews</TabsTrigger>
+                        <TabsList className="grid rounded-full w-full gap-2 grid-cols-3">
+                            <TabsTrigger className="rounded-full" value="description">Full Description</TabsTrigger>
+                            <TabsTrigger className="rounded-full" value="specifications">Specifications</TabsTrigger>
+                            <TabsTrigger className="rounded-full" value="reviews">Reviews</TabsTrigger>
                         </TabsList>
                         <TabsContent value="description" className="mt-4">
                             <p className="text-gray-600">

@@ -4,7 +4,7 @@ const ProductCard = ({ product }) => {
     const { productName, rating, price, image } = product
 
     return (
-        <div className="cursor-pointer h-[40rem] w-full ">
+        <div className="cursor-pointer border-2 p-2 h-[38rem] w-full ">
             <div className="aspect-square h-[32rem] w-full overflow-hidden bg-muted relative">
                 <img
                     src={image}

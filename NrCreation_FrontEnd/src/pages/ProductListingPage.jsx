@@ -10,7 +10,7 @@ import {
     SelectValue,
 } from '@/components/ui/select'
 import { Slider } from '@/components/ui/slider'
-import { SlidersHorizontal, Filter } from 'lucide-react'
+import { Filter } from 'lucide-react'
 import {
     Sheet,
     SheetContent,
@@ -20,34 +20,43 @@ import {
 } from "@/components/ui/sheet"
 import ProductCard from '../components/ReusableComponents/ProductCard'
 import { mensProducts, womensProducts } from '../data/products'
-import { PageLoader, SkeletonLoader, EmptyState } from '@/components/ReusableComponents'
+import { SkeletonLoader, EmptyState } from '@/components/ReusableComponents'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchProducts } from '@/store/slices/productSlice'
 
 const ProductListingPage = () => {
     const { category } = useParams()
     const [isLoading, setIsLoading] = useState(true)
-    const [products, setProducts] = useState([])
-    const [showFilters, setShowFilters] = useState(false)
+    // const [products, setProducts] = useState([])
+    const [showFilters, setShowFilters] = useState(false);
+    const { products, loading, error } = useSelector((state) => state.product);
+    const dispatch = useDispatch();
+
+
+    // useEffect(() => {
+    //     const fetchProducts = async () => {
+    //         setIsLoading(true)
+    //         try {
+    //             // Simulate API call
+    //             await new Promise(resolve => setTimeout(resolve, 500))
+    //             // Use the category from URL params to determine which products to show
+    //             const productsList = category === 'men' ? mensProducts : womensProducts
+    //             setProducts(productsList)
+    //         } catch (error) {
+    //             console.error('Error fetching products:', error)
+    //         } finally {
+    //             setIsLoading(false)
+    //         }
+    //     }
+
+    //     fetchProducts()
+    // }, [category])
 
     useEffect(() => {
-        const fetchProducts = async () => {
-            setIsLoading(true)
-            try {
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 500))
-                // Use the category from URL params to determine which products to show
-                const productsList = category === 'men' ? mensProducts : womensProducts
-                setProducts(productsList)
-            } catch (error) {
-                console.error('Error fetching products:', error)
-            } finally {
-                setIsLoading(false)
-            }
-        }
+        dispatch(fetchProducts());
+    }, [dispatch]);
 
-        fetchProducts()
-    }, [category])
-
-    if (isLoading) {
+    if (loading) {
         return (
             <div className="container mx-auto px-4 py-8">
                 <div className="flex justify-between items-center mb-8">
@@ -57,7 +66,8 @@ const ProductListingPage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {Array.from({ length: 8 }).map((_, index) => (
                         <div key={index} className="space-y-4">
-                            <SkeletonLoader className="h-64" /> {/* Image */}
+                            <SkeletonLoader className="h-64" />
+                            <h1></h1> {/* Image */}
                             <SkeletonLoader className="h-6 w-3/4" /> {/* Title */}
                             <SkeletonLoader className="h-6 w-1/4" /> {/* Price */}
                         </div>
@@ -67,17 +77,17 @@ const ProductListingPage = () => {
         )
     }
 
-    if (products.length === 0) {
-        return (
-            <div className="container mx-auto px-4 py-8">
-                <EmptyState
-                    title="No Products Found"
-                    description="Try adjusting your filters or check back later"
-                    icon={Filter}
-                />
-            </div>
-        )
-    }
+    // if (products.length === 0) {
+    //     return (
+    //         <div className="container mx-auto px-4 py-8">
+    //             <EmptyState
+    //                 title="No Products Found"
+    //                 description="Try adjusting your filters or check back later"
+    //                 icon={Filter}
+    //             />
+    //         </div>
+    //     )
+    // }
 
     return (
         <div className="container py-10  mx-auto px-4">
@@ -145,8 +155,8 @@ const ProductListingPage = () => {
                     </div>
 
                     {/* Product Grid */}
-                    {category === 'men' ? (<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {mensProducts.map((product, index) => (
+                    {category === 'men' ? (<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-16">
+                        {products.map((product, index) => (
                             <Link to={`/product/${product.id}`} key={product.id}>
                                 <motion.div
                                     key={product.id}
