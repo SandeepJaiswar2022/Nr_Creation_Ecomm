@@ -47,6 +47,7 @@ public class OrderController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('user:read')")
     public ResponseEntity<ApiResponse> getOrderById(@RequestParam Long orderId)
     {
         try {

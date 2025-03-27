@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RestController;
 @PreAuthorize("hasAnyRole('ADMIN','USER')")
 public class CartController {
     private final CartService cartService;
-
     @GetMapping("/{cartId}")
     public ResponseEntity<ApiResponse> getCart(@PathVariable Long cartId)
     {
