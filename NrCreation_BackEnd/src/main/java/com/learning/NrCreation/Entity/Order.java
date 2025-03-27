@@ -25,16 +25,12 @@ public class Order {
     private LocalDate orderDate;
     private BigDecimal orderAmount;
     private Date shippingDate;
-
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
-
 
 @ManyToOne
 @JoinColumn(name = "customerId")
 private Customer customer;
-
-
     @OneToMany(mappedBy = "order")
     private List<Payment> payments;
 

@@ -8,23 +8,24 @@ import com.learning.NrCreation.Service.Cart.CartItemService;
 import com.learning.NrCreation.Service.Cart.CartService;
 import com.learning.NrCreation.Service.User.UserService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import org.springframework.web.bind.annotation.*;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-
+@Slf4j
 @RestController
 @RequestMapping("${api.prefix}/cart-item")
 @RequiredArgsConstructor
+@PreAuthorize("hasAnyRole('USER')")
 public class CartItemController {
     private final CartItemService cartItemService;
     private final CartService cartService;
     private final UserService userService;
 
     //Handle Exception if the quantity to update is greater than the Stock(Inventory)
+    @PreAuthorize("hasAuthority('user:create')")
     @PostMapping("/add")
     public ResponseEntity<ApiResponse> addItemToCart(
             @RequestParam Long userId,
@@ -32,8 +33,11 @@ public class CartItemController {
             @RequestParam Integer quantity)
     {
         try {
+            log.debug("Adding product to user {}", userId);
             Customer user = userService.getUserById(userId);
+            log.debug("customer by id user found ");
             Cart cart = cartService.initializeNewCart(user);
+            log.debug("customer cart found ");
             cartItemService.addItemToCart(cart.getCartId(), productId, quantity);
             return new ResponseEntity<>(new
                     ApiResponse("Item Added Successfully", null), HttpStatus.OK);

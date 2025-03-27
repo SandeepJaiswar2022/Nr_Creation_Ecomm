@@ -7,7 +7,7 @@ import com.learning.NrCreation.Response.OrderDTO;
 import com.learning.NrCreation.Service.Order.OrderService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import lombok.extern.slf4j.XSlf4j;
+
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,20 +28,20 @@ import java.util.List;
 public class OrderController {
     private final OrderService orderService;
 
+    @PreAuthorize("hasAuthority('user:create')")
     @PostMapping
     public ResponseEntity<ApiResponse> createOrder(@RequestParam Long userId)
     {
         try {
-//            System.out.println("\n\tCreate Order with id " + userId);
+            log.debug("Create order");
             Order order =orderService.placeOrder(userId);
             log.info("Order fetched successfully");
             OrderDTO orderDTO = orderService.convertToDto(order);
             return new ResponseEntity<>(new ApiResponse("Order Created Successfully", orderDTO),
                     HttpStatus.CREATED);
-
         } catch (Exception e) {
             return new ResponseEntity<>
-                    (new ApiResponse("Error Occurred! : "+e.getMessage(), null)
+                    (new ApiResponse("Error Occurred!: "+e.getMessage(), null)
                             ,HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -80,5 +80,4 @@ public class OrderController {
                             ,HttpStatus.NOT_FOUND);
         }
     }
-
 }
