@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 public interface OrderService {
-    public Order placeOrder(Long userId);
+    public Order placeOrder(Long customerId);
     OrderDTO getOrder(Long orderId);
     List<OrderDTO> getUserOrders(Long userId);
     public OrderDTO convertToDto(Order order);

@@ -72,19 +72,18 @@ public class CartServiceImpl implements CartService{
     }
 
     @Override
-    public Cart initializeNewCart(Customer user) {
-        return Optional.ofNullable(getCartByUserId(user.getCustomerId()))
+    public Cart initializeNewCart(Customer customer) {
+        return Optional.ofNullable(getCartByCustomerId(customer.getCustomerId()))
                 .orElseGet(()->{
                     Cart cart = new Cart();
-                    cart.setCustomer(user);
+                    cart.setCustomer(customer);
                     return cartRepo.save(cart);
                 });
     }
 
     @Override
-    public Cart getCartByUserId(Long userId) {
-        Cart cart = cartRepo.findByCustomer_CustomerId(userId);
-        System.out.println("\nCart by customerId : "+cart.toString());
-        return cart;
+    public Cart getCartByCustomerId(Long userId) {
+        return cartRepo.findByCustomer_CustomerId(userId).orElseThrow(()->new ResourceNotFoundException("Cart Not Found!"));
+//        System.out.println("\nCart by customerId : "+cart.toString());
     }
 }

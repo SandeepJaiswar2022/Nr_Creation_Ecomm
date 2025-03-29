@@ -6,8 +6,10 @@ import org.springframework.stereotype.Repository;
 
 import com.learning.NrCreation.Entity.Cart;
 
+import java.util.Optional;
+
 @Repository
 public interface CartRepository extends JpaRepository<Cart, Long> {
 
-	Cart findByCustomer_CustomerId(Long customerId);
+	Optional<Cart> findByCustomer_CustomerId(Long customerId);
 }

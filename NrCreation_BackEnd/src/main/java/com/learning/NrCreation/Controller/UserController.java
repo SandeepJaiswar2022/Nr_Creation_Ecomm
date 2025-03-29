@@ -24,6 +24,7 @@ public class UserController {
     @GetMapping()
     @PreAuthorize("hasAnyAuthority('admin:read','user:read')")
     public ResponseEntity<ApiResponse> getUserProfile(@RequestHeader("Authorization") String authHeader) {
+        System.out.println(authHeader);
         User user = userServiceImpl.findUserByJwtToken(authHeader);
         UserDTO userDTO = userServiceImpl.convertToDtoResponse(user);
         return new ResponseEntity<>(new ApiResponse("User Fetched!",userDTO), HttpStatus.OK);

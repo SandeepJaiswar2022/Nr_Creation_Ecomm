@@ -33,9 +33,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional
     @Override
-    public Order placeOrder(Long userId) {
+    public Order placeOrder(Long customerId) {
 
-        Cart cart = cartService.getCartByUserId(userId);
+        Cart cart = cartService.getCartByCustomerId(customerId);
 
         Order order = createOrder(cart);
         cartService.clearCart(cart.getCartId());

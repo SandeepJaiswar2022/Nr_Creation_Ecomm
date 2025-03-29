@@ -1,24 +1,25 @@
 package com.learning.NrCreation.Controller;
 
+import com.learning.NrCreation.Entity.Customer;
 import com.learning.NrCreation.Entity.Order;
+import com.learning.NrCreation.Entity.User;
 import com.learning.NrCreation.Exception.ResourceNotFoundException;
+import com.learning.NrCreation.Repository.CustomerRepository;
 import com.learning.NrCreation.Response.ApiResponse;
 import com.learning.NrCreation.Response.OrderDTO;
 import com.learning.NrCreation.Service.Order.OrderService;
+import com.learning.NrCreation.Service.User.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -27,14 +28,22 @@ import java.util.List;
 @RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;
+    private final UserService userService;
+    private final CustomerRepository customerRepo;
 
-    @PreAuthorize("hasAuthority('user:create')")
-    @PostMapping
-    public ResponseEntity<ApiResponse> createOrder(@RequestParam Long userId)
+    @PreAuthorize("hasAnyAuthority('admin:read','user:read')")
+    @PostMapping("create")
+    public ResponseEntity<ApiResponse> createOrder(@RequestHeader("Authorization") String authHeader)
     {
         try {
             log.debug("Create order");
-            Order order =orderService.placeOrder(userId);
+            User user = userService.findUserByJwtToken(authHeader);
+            Optional<Customer> customer = customerRepo.findByEmail(user.getEmail());
+            if (customer.isEmpty()) {
+                return new ResponseEntity<>(new ApiResponse("Customer not found with email : "+user.getEmail(), null)
+                        ,HttpStatus.NOT_FOUND);
+            }
+            Order order =orderService.placeOrder(customer.get().getCustomerId());
             log.info("Order fetched successfully");
             OrderDTO orderDTO = orderService.convertToDto(order);
             return new ResponseEntity<>(new ApiResponse("Order Created Successfully", orderDTO),
@@ -47,7 +56,11 @@ public class OrderController {
     }
 
     @GetMapping
+<<<<<<< Updated upstream
     @PreAuthorize("hasAuthority('user:read')")
+=======
+    @PreAuthorize("hasAnyAuthority('admin:read','user:read')")
+>>>>>>> Stashed changes
     public ResponseEntity<ApiResponse> getOrderById(@RequestParam Long orderId)
     {
         try {
@@ -63,6 +76,7 @@ public class OrderController {
     }
 
     @GetMapping("get-user-orders")
+    @PreAuthorize("hasAnyAuthority('admin:read','user:read')")
     public ResponseEntity<ApiResponse> getUserOrders(@RequestParam Long userId)
     {
         try {
@@ -81,4 +95,6 @@ public class OrderController {
                             ,HttpStatus.NOT_FOUND);
         }
     }
+
+    //Have to implement get all the Orders of all the users
 }
