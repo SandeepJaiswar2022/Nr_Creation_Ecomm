@@ -83,7 +83,7 @@ public class CartServiceImpl implements CartService{
 
     @Override
     public Cart getCartByCustomerId(Long userId) {
-        return cartRepo.findByCustomer_CustomerId(userId).orElseThrow(()->new ResourceNotFoundException("Cart Not Found!"));
+        return cartRepo.findByCustomer_CustomerId(userId);
 //        System.out.println("\nCart by customerId : "+cart.toString());
     }
 }
