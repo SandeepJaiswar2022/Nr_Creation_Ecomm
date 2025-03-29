@@ -56,11 +56,7 @@ public class OrderController {
     }
 
     @GetMapping
-<<<<<<< Updated upstream
-    @PreAuthorize("hasAuthority('user:read')")
-=======
     @PreAuthorize("hasAnyAuthority('admin:read','user:read')")
->>>>>>> Stashed changes
     public ResponseEntity<ApiResponse> getOrderById(@RequestParam Long orderId)
     {
         try {

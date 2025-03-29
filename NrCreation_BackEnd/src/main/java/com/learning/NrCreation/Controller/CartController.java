@@ -25,8 +25,6 @@ import org.springframework.web.bind.annotation.*;
 @PreAuthorize("hasAnyRole('ADMIN','USER')")
 public class CartController {
     private final CartService cartService;
-<<<<<<< Updated upstream
-=======
     private final UserService userService;
     private final CustomerRepository customerRepo;
 
@@ -53,7 +51,6 @@ public class CartController {
     }
 
 
->>>>>>> Stashed changes
     @GetMapping("/{cartId}")
     @PreAuthorize("hasAnyAuthority('admin:read')")
     public ResponseEntity<ApiResponse> getCartByID(@PathVariable Long cartId)
