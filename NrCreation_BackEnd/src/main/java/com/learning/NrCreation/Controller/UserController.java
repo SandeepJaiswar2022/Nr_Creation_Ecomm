@@ -18,11 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("${api.prefix}/get-user-profile")
 @RequiredArgsConstructor
 public class UserController {
-
     private final UserServiceImpl userServiceImpl;
-
-    @GetMapping()
     @PreAuthorize("hasAnyAuthority('admin:read','user:read')")
+    @GetMapping
     public ResponseEntity<ApiResponse> getUserProfile(@RequestHeader("Authorization") String authHeader) {
         System.out.println(authHeader);
         User user = userServiceImpl.findUserByJwtToken(authHeader);

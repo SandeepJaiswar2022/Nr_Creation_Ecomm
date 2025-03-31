@@ -21,8 +21,6 @@ public class RegisterRequest {
 		    message = "Password must contain at least one digit, one lowercase letter, one uppercase letter, and one special character (@#$%^&+=!)"
 	)
 	private String password;
-
-	@NotNull(message = "Phone number cannot be null")
 	@Pattern(
 			regexp = "^[1-9][0-9]{9}$",
 			message = "Phone number must be exactly 10 digits and cannot start with 0"
