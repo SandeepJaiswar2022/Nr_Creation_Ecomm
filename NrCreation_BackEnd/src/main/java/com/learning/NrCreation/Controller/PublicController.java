@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -41,4 +42,17 @@ public class PublicController {
         List<ProductDTO> productDTOs = productService.getConvertedProducts(products);
         return new ResponseEntity<>(new ApiResponse("All Product Fetched",productDTOs) ,HttpStatus.OK);
     }
+
+
+    //1. Get all the images(Cloudinary urls) of particular product
+    @GetMapping("get-all/{productId}")
+    public ResponseEntity<ApiResponse> getProductImages(@PathVariable("productId") Long productId) {
+        Product product = productService.getProductById(productId);
+        if(product.getImageUrls().isEmpty())
+        {
+            return new ResponseEntity<>(new ApiResponse("No Image URLs found!",new ArrayList<>()), HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(new ApiResponse("Product Image URLs Fetched!",product.getImageUrls()), HttpStatus.OK);
+    }
+
 }

@@ -1,9 +1,11 @@
 package com.learning.NrCreation.Configuration;
 
 
+import com.cloudinary.Cloudinary;
 import com.learning.NrCreation.Exception.ResourceNotFoundException;
 import com.learning.NrCreation.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,11 +16,33 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.HashMap;
+import java.util.Map;
+
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationConfig {
+
+	@Value("${cloudinary.cloud_name}")
+	private String cloudName;
+
+	@Value("${cloudinary.api_key}")
+	private String apiKey;
+
+	@Value("${cloudinary.api_secret}")
+	private String apiSecret;
 	
 	private final UserRepository userRepo;
+
+
+	@Bean
+	public Cloudinary getCloudinary() {
+		Map config = new HashMap();
+		config.put("cloud_name", cloudName);
+		config.put("api_key", apiKey);
+		config.put("api_secret", apiSecret);
+		return new Cloudinary(config);
+	}
 	
 	@Bean
 	public UserDetailsService userDetailsService() 

@@ -2,6 +2,7 @@ package com.learning.NrCreation.Service.Cart;
 
 import java.math.BigDecimal;
 
+import com.learning.NrCreation.Repository.CartItemRepository;
 import com.learning.NrCreation.Service.Product.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,14 +11,13 @@ import com.learning.NrCreation.Exception.ResourceNotFoundException;
 import com.learning.NrCreation.Entity.Cart;
 import com.learning.NrCreation.Entity.CartItem;
 import com.learning.NrCreation.Entity.Product;
-import com.learning.NrCreation.Repository.CartItemRepository;
 import com.learning.NrCreation.Repository.CartRepository;
 
 @Service
 @RequiredArgsConstructor
 class CartItemServiceImpl implements CartItemService {
 	
-	private final CartItemRepository cartitemRepo;
+	private final CartItemRepository cartItemRepo;
 	private final CartRepository cartRepo;
 	private final ProductService productService;
 	private final CartServiceImpl cartService;
@@ -52,7 +52,7 @@ class CartItemServiceImpl implements CartItemService {
 		}
 		cartItem.computeAndSetTotalPrice();
 		cart.addItem(cartItem);
-		cartitemRepo.save(cartItem);
+		cartItemRepo.save(cartItem);
 		cartRepo.save(cart);
 	}
 

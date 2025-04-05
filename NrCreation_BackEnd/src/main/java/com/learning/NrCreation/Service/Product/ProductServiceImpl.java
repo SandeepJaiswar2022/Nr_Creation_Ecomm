@@ -8,10 +8,13 @@ import com.learning.NrCreation.Repository.ProductRepository;
 import com.learning.NrCreation.Request.ProductRequest;
 import com.learning.NrCreation.Response.ImageDTO;
 import com.learning.NrCreation.Response.ProductDTO;
+import com.learning.NrCreation.Service.Cloudinary.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -22,6 +25,7 @@ import java.util.stream.Collectors;
 public class ProductServiceImpl implements ProductService{
     private final CategoryRepository categoryRepo;
     private final ProductRepository productRepo;
+    private final CloudinaryService cloudinaryService;
 
     @Override
     public Product addProduct(ProductRequest request) {
@@ -82,14 +86,6 @@ public class ProductServiceImpl implements ProductService{
     @Override
     @Transactional
     public ProductDTO convertToDto(Product product) {
-        List<ImageDTO> imageDTOs = (product.getImages() == null || product.getImages().isEmpty())
-                ? Collections.emptyList()
-                : product.getImages().stream()
-                .map(image -> new ImageDTO(
-                        image.getId(),
-                        image.getFileName(),
-                        image.getDownloadUrl()))
-                .collect(Collectors.toList());
 
         return new ProductDTO(
                 product.getId(),
@@ -99,7 +95,7 @@ public class ProductServiceImpl implements ProductService{
                 product.getInventory(),
                 product.getCategory(),
                 product.getDescription(),
-                imageDTOs
+                product.getImageUrls()
         );
     }
 
@@ -112,5 +108,19 @@ public class ProductServiceImpl implements ProductService{
     @Override
     public Product getProductById(Long productId) {
         return productRepo.findById(productId).orElseThrow(()->new ResourceNotFoundException("Product not found"));
+    }
+
+    @Override
+    public List<String> addImagesToProduct(Long productId, List<MultipartFile> images) throws IOException {
+        Product product = getProductById(productId);
+        List<String> imageUrls = new ArrayList<>();
+        for (MultipartFile image : images) {
+            String imageUrl = cloudinaryService.uploadImage(image);
+            imageUrls.add(imageUrl);
+        }
+        product.setImageUrls(imageUrls);
+        productRepo.save(product);
+
+        return product.getImageUrls();
     }
 }
