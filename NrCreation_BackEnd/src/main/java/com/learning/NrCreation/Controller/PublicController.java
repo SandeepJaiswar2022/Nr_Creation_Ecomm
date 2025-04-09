@@ -43,6 +43,15 @@ public class PublicController {
         return new ResponseEntity<>(new ApiResponse("All Product Fetched",productDTOs) ,HttpStatus.OK);
     }
 
+    @GetMapping("product/get/{productId}")
+    public ResponseEntity<ApiResponse> getSingleProduct(@PathVariable Long productId)
+    {
+        Product product = productService.getProductById(productId);
+
+        ProductDTO productDTO = productService.convertToDto(product);
+        return new ResponseEntity<>(new ApiResponse("Product Fetched!",productDTO) ,HttpStatus.OK);
+    }
+
 
     //1. Get all the images(Cloudinary urls) of particular product
     @GetMapping("get-all-images/{productId}")

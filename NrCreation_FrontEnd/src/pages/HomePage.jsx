@@ -8,7 +8,7 @@ import { featuredProducts } from '@/data/products'
 
 const slides = [
     {
-        image: "https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=2070&auto=format&fit=crop",
+        image: ["https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=2070&auto=format&fit=crop"],
         title: "Discover Your Style",
         subtitle: "Explore our latest collection of trendy fashion for men and women.",
         cta: "Shop Now",

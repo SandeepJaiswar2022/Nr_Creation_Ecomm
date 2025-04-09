@@ -4,14 +4,14 @@ export const featuredProducts = [
         productName: "Royal Pink Embroidered Lehenga",
         rating: 5,
         price: "12,999",
-        image: "/Images/lehnga6.jpeg"
+        imageUrls: ["/Images/lehnga6.jpeg"]
     },
     {
         id: "dupatta-1",
         productName: "Red Zari Work Dupatta",
         rating: 4,
         price: "4,999",
-        image: "/Images/Duppta5.jpeg"
+        imageUrls: ["/Images/Duppta5.jpeg"]
     },
     // {
     //     id: "dupatta-2",
@@ -25,7 +25,7 @@ export const featuredProducts = [
         productName: "Royal Pink Embroidered Lehenga",
         rating: 5,
         price: "12,999",
-        image: "/Images/lehnga5.jpeg"
+        imageUrls: ["/Images/lehnga5.jpeg"]
     },
 
     {
@@ -33,7 +33,7 @@ export const featuredProducts = [
         productName: "Royal Maroon Silk Dupatta",
         rating: 4,
         price: "6,999",
-        image: "/Images/Duppta3.jpeg"
+        imageUrls: ["/Images/Duppta3.jpeg"]
     },
     // {
     //     id: "dupatta-4",

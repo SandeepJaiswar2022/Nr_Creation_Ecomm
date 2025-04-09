@@ -1,13 +1,13 @@
 import { Star } from 'lucide-react'
 
 const ProductCard = ({ product }) => {
-    const { productName, rating, price, image } = product
+    const { productName, rating, price, imageUrls } = product
 
     return (
-        <div className="cursor-pointer border-2 p-2 h-[38rem] w-full ">
+        <div className="cursor-pointer p-2 h-[38rem] w-full ">
             <div className="aspect-square h-[32rem] w-full overflow-hidden bg-muted relative">
                 <img
-                    src={image}
+                    src={imageUrls?.[0] || "/fallback.jpg"}
                     alt={productName}
                     className="w-full h-full object-fit"
                 />

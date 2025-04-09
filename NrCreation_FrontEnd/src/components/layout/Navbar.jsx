@@ -37,17 +37,12 @@ const Navbar = () => {
             Home
           </NavLink>
           <NavLink
-            to="category/men"
-            isActive={location.pathname === "/category/men"}
+            to="/category/dupattas"
+            isActive={location.pathname === "/category/dupattas"}
           >
-            Men
+            Dupattas
           </NavLink>
-          <NavLink
-            to="category/women"
-            isActive={location.pathname === "/category/women"}
-          >
-            Women
-          </NavLink>
+
         </div>
 
         {/* Search Bar */}
@@ -188,15 +183,13 @@ const Navbar = () => {
 const NavLink = ({ to, children, isActive }) => (
   <Link
     to={to}
-    className={`relative hover:text-[#871845] transition-colors ${
-      isActive ? `text-[#871845]` : ""
-    }`}
+    className={`relative hover:text-[#871845] transition-colors ${isActive ? `text-[#871845]` : ""
+      }`}
   >
     {children}
     <div
-      className={`absolute -bottom-1 left-0 rounded-full w-full h-[0.2rem] bg-[#871845] transform transition-transform duration-300 ${
-        isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-      }`}
+      className={`absolute -bottom-1 left-0 rounded-full w-full h-[0.2rem] bg-[#871845] transform transition-transform duration-300 ${isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+        }`}
     />
   </Link>
 );
@@ -205,15 +198,13 @@ const MobileNavLink = ({ to, children, isActive, onClick }) => (
   <Link
     to={to}
     onClick={onClick}
-    className={`block w-fit text-lg font-medium hover:text-[#871845] transition-colors relative ${
-      isActive ? "text-[#871845]" : ""
-    }`}
+    className={`block w-fit text-lg font-medium hover:text-[#871845] transition-colors relative ${isActive ? "text-[#871845]" : ""
+      }`}
   >
     {children}
     <div
-      className={`absolute -bottom-1 left-0 w-full h-[0.2rem] rounded-full bg-[#871845] transform transition-transform duration-300 ${
-        isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-      }`}
+      className={`absolute -bottom-1 left-0 w-full h-[0.2rem] rounded-full bg-[#871845] transform transition-transform duration-300 ${isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+        }`}
     />
   </Link>
 );

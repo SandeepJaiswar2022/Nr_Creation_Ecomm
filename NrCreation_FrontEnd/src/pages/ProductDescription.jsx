@@ -36,7 +36,7 @@ const ProductDescription = () => {
         if (product) {
             console.log(product);
 
-            setSelectedImage(product.image)
+            setSelectedImage(product.imageUrls[0])
             setQuantity(1)
             setSelectedColor('maroon')
             setSelectedSize('M')
@@ -202,15 +202,24 @@ const ProductDescription = () => {
                         <h1 className="text-3xl font-bold">{product?.productName}</h1>
                         <div className="flex items-center gap-4">
                             <span className="text-2xl font-bold text-[#871845]">₹{product?.price}</span>
-                            <span className="text-lg text-gray-500 line-through">₹{product?.price}</span>
+                            <span className="text-lg text-gray-500 line-through">₹{product?.price ? product.price + 400 : 0}</span>
                             <span className="text-green-600 font-medium">30% off</span>
                         </div>
 
-                        {/* Description */}
-                        <p className="text-gray-600">
-                            Luxurious silk dupatta with intricate zari work. Perfect for special occasions and festivals.
-                            Features traditional motifs and premium quality fabric.
+                        {/* Product Name */}
+                        <p className="text-lg">
+                            {/* Luxurious silk dupatta with intricate zari work. Perfect for special occasions and festivals.
+                            Features traditional motifs and premium quality fabric. */}
+                            {product?.name}
                         </p>
+
+                        {/* Description */}
+                        <div className="text-lg font-bold flex">
+                            {/* Luxurious silk dupatta with intricate zari work. Perfect for special occasions and festivals.
+                            Features traditional motifs and premium quality fabric. */}
+                            <p className=''>Inventory : </p>
+                            <p className='ml-2 bg-orange-700 text-white py-0.5 px-2'>{product?.inventory}</p>
+                        </div>
 
                         {/* Color Selection */}
                         <div className="space-y-3">
@@ -322,11 +331,8 @@ const ProductDescription = () => {
                                         <div className="px-6 border-[#871845] ">
                                             <div className=''>
                                                 <div className='h-[1px] w-full bg-[#871845]'></div>
-                                                <p className="text-gray-600 py-5">
-                                                    Our Royal Blue Silk Dupatta is crafted from the finest silk fabric,
-                                                    featuring intricate zari work that adds a touch of elegance to your outfit.
-                                                    The dupatta measures 2.5 meters in length and comes with carefully
-                                                    finished edges to ensure durability.
+                                                <p className="text-black py-5">
+                                                    {product?.description}
                                                 </p>
                                             </div>
                                         </div>

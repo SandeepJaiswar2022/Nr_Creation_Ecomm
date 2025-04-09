@@ -125,7 +125,7 @@ const App = () => {
         {/* Main layout routes */}
         <Route path="/" element={<RootLayout />}>
           <Route index element={<HomePage />} />
-          <Route path="category/:category" element={<ProductListingPage />} />
+          <Route path="category/dupattas" element={<ProductListingPage />} />
           <Route path="product/:id" element={<ProductDescription />} />
           <Route path="cart" element={<CartPage />} />
           <Route path="wishlist" element={<WishlistPage />} />

@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import { toast } from "react-toastify";
+import { API_BASE_URL } from "../api";
 
 const BASE_URL = "https://fakestoreapi.com/products"; // Example API
 
@@ -9,7 +10,7 @@ export const fetchProducts = createAsyncThunk(
   "products/fetchAll",
   async (_, { rejectWithValue }) => {
     try {
-      const response = await axios.get(BASE_URL);
+      const response = await axios.get(`${API_BASE_URL}/public/product/get/all`);
       // console.log(response.data);
 
       return response.data;
@@ -24,7 +25,7 @@ export const fetchSingleProduct = createAsyncThunk(
   "products/fetchSingle",
   async (productId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${BASE_URL}/${productId}`);
+      const response = await axios.get(`${API_BASE_URL}/public/product/get/${productId}`);
       return response.data;
     } catch (error) {
       toast.error("Failed to fetch product details!");
@@ -51,7 +52,7 @@ const productSlice = createSlice({
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = action.payload;
+        state.products = action.payload.data;
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
@@ -64,7 +65,7 @@ const productSlice = createSlice({
       })
       .addCase(fetchSingleProduct.fulfilled, (state, action) => {
         state.loading = false;
-        state.product = action.payload;
+        state.product = action.payload.data;
       })
       .addCase(fetchSingleProduct.rejected, (state, action) => {
         state.loading = false;
