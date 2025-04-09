@@ -23,6 +23,8 @@ public class CloudinaryServiceImpl implements CloudinaryService {
     @Override
     public void deleteImage(String imageUrl) throws IOException {
         String publicId = imageUrl.substring(imageUrl.lastIndexOf("/") + 1).split("\\.")[0];
-        cloudinary.uploader().destroy(publicId, ObjectUtils.emptyMap());
+        cloudinary.uploader().destroy(publicId, ObjectUtils.asMap(
+                "invalidate", true
+        ));
     }
 }

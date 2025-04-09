@@ -23,7 +23,7 @@ public class ImageController {
 
     //1. Adding Single/Multiple images to particular product and providing urls
     @PostMapping("add/{productId}")
-    public ResponseEntity<ApiResponse> addProductImage(@PathVariable Long productId, List<MultipartFile> images) {
+    public ResponseEntity<ApiResponse> addProductImage(@PathVariable Long productId,@RequestParam List<MultipartFile> images) {
         try {
             List<String> imageUrls = productService.addImagesToProduct(productId,images);
             return new ResponseEntity<>(new ApiResponse("Product Images Added!",imageUrls), HttpStatus.OK);
@@ -35,6 +35,17 @@ public class ImageController {
     }
 
     //2. Delete a particular Image url from the Product
+    @DeleteMapping("delete/{productId}")
+    public ResponseEntity<ApiResponse> deleteProductImage(@PathVariable Long productId, @RequestParam String url) {
+        try {
+            productService.deleteProductImage(productId,url);
+            return new ResponseEntity<>(new ApiResponse("Product Images Deleted!",null), HttpStatus.OK);
+        }
+        catch (Exception e)
+        {
+            return new ResponseEntity<>(new ApiResponse(e.getMessage(),null), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     //3. Delete all image urls from the product
 

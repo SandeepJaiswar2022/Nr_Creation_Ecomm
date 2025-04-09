@@ -53,6 +53,7 @@ public class ProductServiceImpl implements ProductService{
                 request.getBrand(),
                 request.getPrice(),
                 request.getInventory(),
+                request.getSize(),
                 request.getCategory(),
                 request.getDescription()
         );
@@ -93,6 +94,7 @@ public class ProductServiceImpl implements ProductService{
                 product.getBrand(),
                 product.getPrice(),
                 product.getInventory(),
+                product.getSize(),
                 product.getCategory(),
                 product.getDescription(),
                 product.getImageUrls()
@@ -122,5 +124,20 @@ public class ProductServiceImpl implements ProductService{
         productRepo.save(product);
 
         return product.getImageUrls();
+    }
+
+    @Override
+    public void deleteProductImage(Long productId, String url) throws IOException {
+        Product product = getProductById(productId);
+        if(product.getImageUrls().contains(url))
+        {
+            product.getImageUrls().remove(url);
+        }
+        else
+        {
+            throw new ResourceNotFoundException("Product Image not found or already deleted");
+        }
+        cloudinaryService.deleteImage(url);
+        productRepo.save(product);
     }
 }

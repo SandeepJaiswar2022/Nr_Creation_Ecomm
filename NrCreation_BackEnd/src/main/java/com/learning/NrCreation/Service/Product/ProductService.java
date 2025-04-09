@@ -17,4 +17,6 @@ public interface ProductService {
     Product getProductById(Long productId);
 
     List<String> addImagesToProduct(Long productId, List<MultipartFile> images) throws IOException;
+
+    void deleteProductImage(Long productId, String url) throws IOException;
 }

@@ -45,7 +45,7 @@ public class PublicController {
 
 
     //1. Get all the images(Cloudinary urls) of particular product
-    @GetMapping("get-all/{productId}")
+    @GetMapping("get-all-images/{productId}")
     public ResponseEntity<ApiResponse> getProductImages(@PathVariable("productId") Long productId) {
         Product product = productService.getProductById(productId);
         if(product.getImageUrls().isEmpty())

@@ -25,6 +25,8 @@ public class Product {
 
     private Integer inventory;
 
+    private Integer size;
+
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
@@ -36,11 +38,12 @@ public class Product {
 
     //Constructor
     public Product(String name, String brand, BigDecimal price,
-                   Integer inventory, Category category, String description) {
+                   Integer inventory, Integer size, Category category, String description) {
         this.name = name;
         this.brand = brand;
         this.price = price;
         this.inventory = inventory;
+        this.size = size;
         this.category = category;
         this.description = description;
     }
