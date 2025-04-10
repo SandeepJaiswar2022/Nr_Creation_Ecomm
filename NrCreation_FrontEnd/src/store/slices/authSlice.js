@@ -46,12 +46,14 @@ export const loginUser = createAsyncThunk(
 export const registerUser = createAsyncThunk(
   "auth/register",
   async (userData, { dispatch, rejectWithValue }) => {
+    console.log("userData : ", userData);
     try {
       const response = await api.post("/auth/register", userData);
       if (response.data.data.token) {
-        localStorage.setItem("token", response.data.data.token);
+        localStorage.setItem("token", response?.data?.data?.token);
       }
       const userDetails = await dispatch(fetchUserDetails());
+      console.log("userDetails : ", userDetails);
       return { ...response.data, userDetails };
     } catch (error) {
       return rejectWithValue(
@@ -114,7 +116,8 @@ const authSlice = createSlice({
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
         state.isAuthenticated = true;
-        state.token = action.payload.token;
+        state.token = action.payload?.data?.data?.token;
+        state.user = action.payload.userDetails.payload.data.firstName;
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;

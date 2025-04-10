@@ -40,7 +40,6 @@ public class AuthServiceImpl implements AuthService {
 		user.setPhone(request.getPhone());
 		user.setPassword(passwordEncoder.encode(request.getPassword()));
 		user.setRole(Role.USER);
-		
 		userRepo.save(user);
 
 		Customer newCustomer = new Customer();

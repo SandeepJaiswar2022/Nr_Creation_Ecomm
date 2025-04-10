@@ -33,6 +33,7 @@ export const fetchSingleProduct = createAsyncThunk(
     }
   }
 );
+
 // Slice for managing product state
 const productSlice = createSlice({
   name: "product",
