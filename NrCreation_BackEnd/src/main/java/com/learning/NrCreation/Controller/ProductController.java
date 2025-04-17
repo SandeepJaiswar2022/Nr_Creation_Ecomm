@@ -21,6 +21,7 @@ import java.util.List;
 public class ProductController {
     private final ProductService productService;
 
+    //Create single product------------------------------
     @PreAuthorize("hasAuthority('admin:create')")
     @PostMapping("add")
     public ResponseEntity<ApiResponse> addProduct(@RequestBody ProductRequest request)
@@ -37,6 +38,7 @@ public class ProductController {
         }
     }
 
+    //Create Multiple Product------------------------------
     @PostMapping("add/multiple")
     @PreAuthorize("hasAuthority('admin:create')")
     public ResponseEntity<ApiResponse> addMultipleProduct(@RequestBody List<ProductRequest> requests)
@@ -54,6 +56,37 @@ public class ProductController {
         } catch (Exception e) {
             return new ResponseEntity<>(new ApiResponse(e.getMessage(), null),
                     HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    //Delete a Product------------------------------
+    @PreAuthorize("hasAuthority('admin:delete')")
+    @DeleteMapping("delete/{productId}")
+    public ResponseEntity<ApiResponse> deleteProduct(@PathVariable Long productId)
+    {
+        try {
+            productService.deleteProduct(productId);
+            return new ResponseEntity<>(new ApiResponse("Product Deleted Successfully",null),
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ApiResponse(e.getMessage(), null),
+                    HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    //Update a particular product------------------------------
+    @PreAuthorize("hasAuthority('admin:update')")
+    @PutMapping("update/{productId}")
+    public ResponseEntity<ApiResponse> updateProduct(@PathVariable Long productId, @RequestBody ProductRequest request)
+    {
+        try {
+            Product updatedProduct =  productService.updateProduct(productId, request);
+            ProductDTO productDTO = productService.convertToDto(updatedProduct);
+            return new ResponseEntity<>(new ApiResponse("Product Updated Successfully",productDTO),
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ApiResponse(e.getMessage(), null),
+                    HttpStatus.BAD_REQUEST);
         }
     }
 }

@@ -198,7 +198,7 @@ const AdminDashboard = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className="bg-white p-6 rounded-lg cursor-pointer shadow-md hover:shadow-lg group hover:bg-[#871845] transition-shadow"
+                        className={`bg-white p-6 rounded-lg cursor-pointer shadow-md hover:shadow-lg group hover:bg-[#871845] duration-1000 transition-colors ${index === 1 ? "bg-[#871845]" : ""}`}
                     >
                         <Link to={action.link} className="block">
                             <action.icon className="w-8 h-8 group-hover:text-white text-[#871845] mb-4" />
