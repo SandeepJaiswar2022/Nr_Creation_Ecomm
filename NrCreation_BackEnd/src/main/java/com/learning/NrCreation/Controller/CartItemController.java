@@ -1,6 +1,7 @@
 package com.learning.NrCreation.Controller;
 
 import com.learning.NrCreation.Entity.Cart;
+import com.learning.NrCreation.Entity.CartItem;
 import com.learning.NrCreation.Entity.Customer;
 import com.learning.NrCreation.Entity.User;
 import com.learning.NrCreation.Exception.ResourceNotFoundException;
@@ -16,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -48,10 +50,9 @@ public class CartItemController {
             log.debug("customer by id user found ");
             Cart cart = cartService.initializeNewCart(customer.get());
             log.debug("customer cart found ");
-            cartItemService.addItemToCart(cart.getCartId(), productId, quantity);
+            CartItem cartItem= cartItemService.addItemToCart(cart.getCartId(), productId, quantity);
             return new ResponseEntity<>(new
-                    ApiResponse("Item Added Successfully", null), HttpStatus.OK);
-
+                    ApiResponse("Item Added Successfully", cartItem), HttpStatus.OK);
         } catch (ResourceNotFoundException e) {
             return new ResponseEntity<>(new ApiResponse(e.getMessage(), null)
                     ,HttpStatus.NOT_FOUND);
@@ -85,6 +86,20 @@ public class CartItemController {
         } catch (Exception e) {
             return new ResponseEntity<>(new ApiResponse(e.getMessage(), null)
                     ,HttpStatus.NOT_FOUND);
+        }
+    }
+
+    @GetMapping("/cart/{cartId}")
+    public ResponseEntity<ApiResponse> getCartItemsByCartId(@PathVariable Long cartId) {
+        try {
+            log.debug("Getting cart items by cartId {}", cartId);
+            List<CartItem> cartItems = cartItemService.getCartItemsByCartId(cartId);
+            return new ResponseEntity<>(new ApiResponse("Cart Items Retrieved Successfully", cartItems), HttpStatus.OK);
+        } catch (ResourceNotFoundException e) {
+            return new ResponseEntity<>(new ApiResponse(e.getMessage(), null), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            log.error("Error retrieving cart items for cart ID {}:", cartId, e);
+            return new ResponseEntity<>(new ApiResponse("Failed to retrieve cart items: " + e.getMessage(), null), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

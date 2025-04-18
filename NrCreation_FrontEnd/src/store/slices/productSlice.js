@@ -1,18 +1,19 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { API_BASE_URL } from "../api";
-
+// import { API_BASE_URL } from "../api";
+import api from "../api";
 const BASE_URL = "https://fakestoreapi.com/products"; // Example API
 
 // Async Thunk to fetch products
 export const fetchProducts = createAsyncThunk(
   "products/fetchAll",
-  async (_, { rejectWithValue }) => {
+  async ({ rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/public/product/get/all`);
-      // console.log(response.data);
-
+      // const response = await axios.get(`${API_BASE_URL}/public/product/get/all`);
+      console.log("get product");
+      const response = await api.get("/public/product/get/all");
+      console.log(response.data.data);
       return response.data;
     } catch (error) {
       toast.error("Failed to fetch products!");
@@ -25,7 +26,9 @@ export const fetchSingleProduct = createAsyncThunk(
   "products/fetchSingle",
   async (productId, { rejectWithValue }) => {
     try {
-      const response = await axios.get(`${API_BASE_URL}/public/product/get/${productId}`);
+      // const response = await axios.get(
+      //   `${API_BASE_URL}/public/product/get/${productId}`
+      const response = await api.get(`/public/product/get/${productId}`);
       return response.data;
     } catch (error) {
       toast.error("Failed to fetch product details!");

@@ -1,9 +1,11 @@
 package com.learning.NrCreation.Service.Cart;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 import com.learning.NrCreation.Repository.CartItemRepository;
 import com.learning.NrCreation.Service.Product.ProductService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -28,7 +30,7 @@ class CartItemServiceImpl implements CartItemService {
     //4. If Yes, then increase the quantity with the requested quantity
     //5. If No, then initiate a new CartItem entry.
 	@Override
-	public void addItemToCart(Long cartId, Long productId, int quantity)
+	public CartItem addItemToCart(Long cartId, Long productId, int quantity)
 			throws ResourceNotFoundException {
 		
 		Cart cart = cartService.getCartById(cartId);
@@ -52,8 +54,9 @@ class CartItemServiceImpl implements CartItemService {
 		}
 		cartItem.computeAndSetTotalPrice();
 		cart.addItem(cartItem);
-		cartItemRepo.save(cartItem);
+		CartItem savedCartItem = cartItemRepo.save(cartItem);
 		cartRepo.save(cart);
+		return  savedCartItem;
 	}
 
 	@Override
@@ -92,5 +95,10 @@ class CartItemServiceImpl implements CartItemService {
 				.stream()
 				.filter(item -> item.getProduct().getId().equals(productId))
 				.findFirst().orElseThrow(()-> new ResourceNotFoundException("Item not Found!"));
+	}
+
+	@Override
+	public List<CartItem> getCartItemsByCartId(Long cartId) {
+		return cartItemRepo.findByCart_CartId(cartId);
 	}
 }

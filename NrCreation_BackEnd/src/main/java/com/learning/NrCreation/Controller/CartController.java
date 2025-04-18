@@ -28,7 +28,6 @@ public class CartController {
     private final UserService userService;
     private final CustomerRepository customerRepo;
 
-
     @GetMapping("my-cart")
     @PreAuthorize("hasAnyAuthority('admin:read','user:read')")
     public ResponseEntity<ApiResponse> getMyCart(@RequestHeader("Authorization") String authHeader)

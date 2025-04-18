@@ -32,7 +32,10 @@ public class SecurityConfig {
 		http
 				.cors(cors->cors.configurationSource(corsConfigurationSource()))
 				.csrf(AbstractHttpConfigurer::disable)
-		         .authorizeHttpRequests(request -> request.requestMatchers("/api/nr-creation/v1/auth/**","/api/nr-creation/v1/public/**")
+		         .authorizeHttpRequests(request -> request.requestMatchers("/api/nr-creation/v1/auth/**",
+								 "/api/nr-creation/v1/public/**",
+								 "/error","/swagger-ui/**","/v3/api-docs"
+						 )
 		        		 .permitAll().anyRequest().authenticated())
 		         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 		         .authenticationProvider(authProvider)

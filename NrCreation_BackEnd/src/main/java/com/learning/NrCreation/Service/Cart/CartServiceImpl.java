@@ -34,7 +34,6 @@ public class CartServiceImpl implements CartService{
     @Override
     public CartDTO getCartDTOResponseById(Long cartId) {
         Cart cart = getCartById(cartId);
-
         Set<CartItemDTO> cartItems = cart.getItems().stream()
                 .map(item -> new CartItemDTO(
                                 item.getId(),
