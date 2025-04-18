@@ -19,4 +19,10 @@ public interface ProductService {
     List<String> addImagesToProduct(Long productId, List<MultipartFile> images) throws IOException;
 
     void deleteProductImage(Long productId, String url) throws IOException;
+
+    void deleteProduct(Long productId) throws IOException;
+
+    Product updateProduct(Long productId, ProductRequest request);
+
+
 }

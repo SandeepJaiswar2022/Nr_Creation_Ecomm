@@ -43,7 +43,7 @@ public class ImageController {
         }
         catch (Exception e)
         {
-            return new ResponseEntity<>(new ApiResponse(e.getMessage(),null), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(new ApiResponse(e.getMessage(),null), HttpStatus.BAD_REQUEST);
         }
     }
 

@@ -126,7 +126,7 @@ public class ProductServiceImpl implements ProductService{
         return product.getImageUrls();
     }
 
-    @Override
+
     public void deleteProductImage(Long productId, String url) throws IOException {
         Product product = getProductById(productId);
         if(product.getImageUrls().contains(url))
@@ -139,5 +139,30 @@ public class ProductServiceImpl implements ProductService{
         }
         cloudinaryService.deleteImage(url);
         productRepo.save(product);
+    }
+
+    @Override
+    public void deleteProduct(Long productId) throws IOException {
+        Product product = getProductById(productId);
+        for(String imageUrl : product.getImageUrls())
+        {
+            product.getImageUrls().remove(imageUrl);
+            cloudinaryService.deleteImage(imageUrl);
+        }
+        productRepo.delete(product);
+    }
+
+    @Override
+    public Product updateProduct(Long productId, ProductRequest request) {
+        Product product = getProductById(productId);
+        product.setName(request.getName());
+        product.setBrand(request.getBrand());
+        product.setPrice(request.getPrice());
+        product.setInventory(request.getInventory());
+        product.setSize(request.getSize());
+        product.setCategory(request.getCategory());
+        product.setDescription(request.getDescription());
+
+        return productRepo.save(product);
     }
 }
