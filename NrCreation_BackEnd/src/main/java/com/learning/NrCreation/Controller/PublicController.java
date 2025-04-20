@@ -1,8 +1,10 @@
 package com.learning.NrCreation.Controller;
 
+import com.learning.NrCreation.Entity.Category;
 import com.learning.NrCreation.Entity.Product;
 import com.learning.NrCreation.Response.ApiResponse;
 import com.learning.NrCreation.Response.ProductDTO;
+import com.learning.NrCreation.Service.Category.CategoryService;
 import com.learning.NrCreation.Service.Product.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,11 +23,31 @@ import java.util.List;
 public class PublicController {
 
     private final ProductService productService;
+    private final CategoryService categoryService;
 
     @GetMapping("/hello")
     public String hello()
     {
         return "Hello From NR Creation";
+    }
+
+    @GetMapping("category/get/all")
+    public ResponseEntity<ApiResponse> getAllCategories()
+    {
+        try {
+            List<Category> categories = categoryService.getAllCategories();
+            if(categories.isEmpty())
+            {
+                return new ResponseEntity<>(new ApiResponse("No Category Found!", new ArrayList<>()),
+                        HttpStatus.NOT_FOUND);
+            }
+            return new ResponseEntity<>(new ApiResponse
+                    ("Category Fetched Successfully!",categories),
+                    HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(new ApiResponse("Error : ", e.getMessage())
+                    ,HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @GetMapping("product/get/all")

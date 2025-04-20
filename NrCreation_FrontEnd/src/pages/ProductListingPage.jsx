@@ -31,7 +31,6 @@ const ProductListingPage = () => {
   const [showFilters, setShowFilters] = useState(false);
   const { products, loading, error } = useSelector((state) => state.product);
   const dispatch = useDispatch();
-  console.log("products : ", products);
 
   useEffect(() => {
     dispatch(fetchProducts());

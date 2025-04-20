@@ -19,26 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CategoryController {
 	private final CategoryService categoryService;
-	
-	@GetMapping("/get/all")
-	@PreAuthorize("hasAuthority('admin:read')")
-	public ResponseEntity<ApiResponse> getAllCategories()
-	{
-		try {
-			List<Category> categories = categoryService.getAllCategories();
-			if(categories.isEmpty())
-			{
-				return new ResponseEntity<>(new ApiResponse("No Category Found!", new ArrayList<>()),
-						HttpStatus.NOT_FOUND);
-			}
-			return new ResponseEntity<>(new ApiResponse
-					("Category Fetched Successfully!",categories),
-					HttpStatus.OK);
-		} catch (Exception e) {
-			return new ResponseEntity<>(new ApiResponse("Error : ", e.getMessage())
-					,HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
+
 	
 	@PostMapping("/add")
 	@PreAuthorize("hasAuthority('admin:create')")

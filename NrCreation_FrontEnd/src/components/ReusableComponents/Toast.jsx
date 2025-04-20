@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CheckCircle2, AlertCircle, Info, XCircle } from 'lucide-react'
 
-const Toast = ({ type = 'success', message, duration = 3000, onClose }) => {
+const Toast = ({ type = 'success', message, duration = 1000, onClose }) => {
     useEffect(() => {
         if (duration) {
             const timer = setTimeout(() => {

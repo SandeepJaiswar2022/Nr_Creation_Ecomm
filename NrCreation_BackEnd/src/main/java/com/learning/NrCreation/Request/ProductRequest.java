@@ -18,7 +18,7 @@ public class ProductRequest {
 
 	private Integer size;
 
-	private Category category;
+	private String category;
 	
 	private String description;
 }

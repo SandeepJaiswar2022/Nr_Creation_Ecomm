@@ -1,11 +1,13 @@
 package com.learning.NrCreation.Advice;
 
 
+import com.cloudinary.Api;
 import com.learning.NrCreation.Exception.AlreadyExistException;
 import com.learning.NrCreation.Exception.ResourceNotFoundException;
 import com.learning.NrCreation.Response.ApiResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
@@ -55,10 +58,6 @@ public class GlobalExceptionHandler {
 		return new ResponseEntity<>(new ApiResponse(ex.getMessage(), null), HttpStatus.NOT_FOUND);
 	}
 
-//	@ExceptionHandler(AccessDeniedException.class)
-//	public ResponseEntity<ApiResponse> handleAccessDeniedException(AccessDeniedException ex) {
-//		return new ResponseEntity<>(new ApiResponse("You do not have permission to access this resource.", null), HttpStatus.FORBIDDEN);
-//	}
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)
 	public ResponseEntity<?> handleInvalidJson(HttpMessageNotReadableException ex) {
@@ -68,5 +67,17 @@ public class GlobalExceptionHandler {
 		errorResponse.put("error", "Malformed JSON Request");
 
 		return new ResponseEntity<>(new ApiResponse("Malformed JSON Request", errorResponse), HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(DataAccessException.class)
+	public ResponseEntity<ApiResponse> handleDataAccess(DataAccessException ex) {
+		System.out.println("Database error! Please Try Later."+ "\n Time : " + LocalDateTime.now() + "\n ErrorMessage : " + ex.getMessage());
+		return new ResponseEntity<>(new ApiResponse("Database error! Please Try Later.",null),HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(SQLException.class)
+	public ResponseEntity<ApiResponse> handleSQL(SQLException ex) {
+		System.out.println("SQL error! Please Try Later."+ "\n Time : " + LocalDateTime.now() + "\n ErrorMessage : " + ex.getMessage());
+		return new ResponseEntity<>(new ApiResponse("SQL error! Please Try Later.",null),HttpStatus.BAD_REQUEST);
 	}
 }

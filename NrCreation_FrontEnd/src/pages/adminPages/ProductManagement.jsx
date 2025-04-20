@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -6,6 +6,7 @@ import { Textarea } from "@/components/ui/textarea"
 import {
     Select,
     SelectContent,
+    SelectGroup,
     SelectItem,
     SelectTrigger,
     SelectValue,
@@ -16,121 +17,148 @@ import {
     Trash2,
     Search,
     Filter,
-    Upload,
     X,
-    Package,
     ChevronDown
 } from "lucide-react"
+import { useDispatch, useSelector } from "react-redux"
+import { addProduct, deleteProduct, fetchAllCategories, fetchProducts, updateProduct } from "@/store/slices/productSlice"
+import { PageLoader } from "@/components/ReusableComponents"
 
 const ProductManagement = () => {
-    const [products, setProducts] = useState([
-        {
-            id: "PRD001",
-            name: "Silk Dupatta",
-            category: "Dupattas",
-            price: "₹999",
-            stock: 50,
-            status: "In Stock",
-            image: "/Images/lehnga1.jpeg"
-        },
-        {
-            id: "PRD002",
-            name: "Designer Lehenga Set",
-            category: "Lehengas",
-            price: "₹15,999",
-            stock: 25,
-            status: "In Stock",
-            image: "/Images/lehnga2.jpeg"
-        },
-        {
-            id: "PRD003",
-            name: "Bridal Saree",
-            category: "Sarees",
-            price: "₹8,499",
-            stock: 15,
-            status: "Low Stock",
-            image: "/Images/lehnga3.jpeg"
-        },
-        {
-            id: "PRD004",
-            name: "Casual Kurti Set",
-            category: "Kurtis",
-            price: "₹1,499",
-            stock: 0,
-            status: "Out of Stock",
-            image: "/Images/lehnga6.jpeg"
-        },
-        {
-            id: "PRD005",
-            name: "Designer Blouse",
-            category: "Blouses",
-            price: "₹2,999",
-            stock: 30,
-            status: "In Stock",
-            image: "/Images/lehnga5.jpeg"
-        },
-        {
-            id: "PRD006",
-            name: "Traditional Anarkali",
-            category: "Suits",
-            price: "₹4,999",
-            stock: 8,
-            status: "Low Stock",
-            image: "/Images/lehnga4.jpeg"
-        }
-    ])
-
     const [isAddingProduct, setIsAddingProduct] = useState(false)
     const [isEditingProduct, setIsEditingProduct] = useState(false)
     const [editingProduct, setEditingProduct] = useState(null)
     const [searchQuery, setSearchQuery] = useState("")
-    const [selectedCategory, setSelectedCategory] = useState("all")
-    const [selectedStatus, setSelectedStatus] = useState("all")
+    const [selectedCategory, setSelectedCategory] = useState("Categories");
+    const [selectedStatus, setSelectedStatus] = useState("Select Status")
     const [expandedProduct, setExpandedProduct] = useState(null)
 
-    const categories = ["all", "Dupattas", "Lehengas", "Sarees", "Kurtis", "Blouses", "Suits"]
+    // const categories = ["all", "Dupattas", "Lehengas", "Sarees", "Kurtis", "Blouses", "Suits"]
     const statuses = ["all", "In Stock", "Low Stock", "Out of Stock"]
 
+    const { products, loading, categories } = useSelector(store => store.product);
+
+    const [productForm, setProductForm] = useState({
+        name: "",
+        category: "",
+        price: "",
+        size: "",
+        inventory: "",
+        description: "",
+    });
+
+
+    const dispatch = useDispatch();
+    useEffect(() => {
+        dispatch(fetchProducts());
+        dispatch(fetchAllCategories());
+    }, [dispatch])
+
+
+    useEffect(() => {
+        if (isEditingProduct && editingProduct) {
+            setProductForm({
+                name: editingProduct?.name || "",
+                category: editingProduct?.category?.name || "",
+                price: editingProduct?.price?.toString() || "",
+                inventory: editingProduct?.inventory?.toString() || "",
+                description: editingProduct?.description || "",
+                size: editingProduct?.size || "",
+            });
+        } else {
+            setProductForm({
+                name: "",
+                category: "",
+                price: "",
+                size: "",
+                brand: "",
+                inventory: "",
+                description: "",
+            });
+        }
+    }, [isAddingProduct, isEditingProduct, editingProduct]);
+
+
+
+
+
     // Filter products based on search query, category, and status
-    const filteredProducts = products.filter(product => {
-        const searchLower = searchQuery.toLowerCase()
-        const matchesSearch = searchQuery === "" ||
-            product.id.toLowerCase().includes(searchLower) ||
-            product.name.toLowerCase().includes(searchLower) ||
-            product.category.toLowerCase().includes(searchLower) ||
-            product.price.toLowerCase().includes(searchLower)
+    // const filteredProducts = products.filter(product => {
+    //     const searchLower = searchQuery.toLowerCase()
+    //     const matchesSearch = searchQuery === "" ||
+    //         product.id.toLowerCase().includes(searchLower) ||
+    //         product.name.toLowerCase().includes(searchLower) ||
+    //         product.category.toLowerCase().includes(searchLower) ||
+    //         product.price.toLowerCase().includes(searchLower)
 
-        const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
-        const matchesStatus = selectedStatus === "all" || product.status === selectedStatus
+    //     const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
+    //     const matchesStatus = selectedStatus === "all" || product.status === selectedStatus
 
-        return matchesSearch && matchesCategory && matchesStatus
-    })
+    //     return matchesSearch && matchesCategory && matchesStatus
+    // })
 
+    //Dispatch Add Product
     const handleAddProduct = () => {
-        // Add product logic here
+        const productData = {
+            ...productForm,
+            price: parseFloat(productForm.price),
+            inventory: parseInt(productForm.inventory, 10),
+            brand: `Nr_Creation`,
+            size: parseInt(productForm.size, 10),
+        };
+        // console.log("🟢 Adding Product:", productData);
+        dispatch(addProduct(productData));
         setIsAddingProduct(false)
-    }
+    };
+
 
     const handleEditProduct = (product) => {
         setIsEditingProduct(true)
         setEditingProduct(product)
     }
 
+
+
     const handleDeleteProduct = (productId) => {
         // Delete product logic here
-        setProducts(products.filter(p => p.id !== productId))
+        // setProducts(products.filter(p => p.id !== productId))
+        dispatch(deleteProduct(productId));
+        console.log("Delete Product");
+
     }
 
+    // const handleUpdateProduct = () => {
+    //     // Update product logic here
+
+    // }
+
+    //dispatch Update Product
     const handleUpdateProduct = () => {
-        // Update product logic here
+        const productData = {
+            ...productForm,
+            price: parseFloat(productForm.price),
+            inventory: parseInt(productForm.inventory, 10),
+            size: parseInt(productForm.size, 10),
+            brand: `Nr_Creation`, //Setting Brand By Default
+            id: editingProduct.id, // include ID if needed for backend
+        };
+        // console.log("🟡 Updating Product:", productData);
+        dispatch(updateProduct(productData));
+
         setEditingProduct(null)
         setIsEditingProduct(false)
-    }
+    };
+
 
     const toggleProductExpansion = (productId) => {
         setExpandedProduct(expandedProduct === productId ? null : productId)
     }
 
+    if (loading) {
+        return (
+            <PageLoader message="Loading Products..." />
+        )
+    }
     return (
         <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4 mb-4 sm:mb-8">
@@ -156,19 +184,21 @@ const ProductManagement = () => {
                     />
                 </div>
                 <div className="flex flex-wrap gap-2">
-                    <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+                    <Select onValueChange={setSelectedCategory}>
                         <SelectTrigger className="w-full sm:w-[180px] text-sm sm:text-base">
-                            <SelectValue placeholder="Select category" />
+                            <SelectValue placeholder="Select Category" />
                         </SelectTrigger>
                         <SelectContent>
-                            {categories.map(category => (
-                                <SelectItem key={category} value={category}>
-                                    {category.charAt(0).toUpperCase() + category.slice(1)}
-                                </SelectItem>
-                            ))}
+                            <SelectGroup>
+                                {categories?.map(category => (
+                                    <SelectItem key={category?.id} value={category?.name}>
+                                        {category?.name}
+                                    </SelectItem>
+                                ))}
+                            </SelectGroup>
                         </SelectContent>
                     </Select>
-                    <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+                    <Select onValueChange={setSelectedStatus}>
                         <SelectTrigger className="w-full sm:w-[180px] text-sm sm:text-base">
                             <SelectValue placeholder="Select status" />
                         </SelectTrigger>
@@ -197,48 +227,48 @@ const ProductManagement = () => {
 
             {/* Products List - Mobile View */}
             <div className="block sm:hidden space-y-3">
-                {filteredProducts.map((product) => (
-                    <div key={product.id} className="bg-white rounded-lg shadow-md p-3">
+                {products.map((product) => (
+                    <div key={product?.id} className="bg-white rounded-lg shadow-md p-3">
                         <div className="flex items-center justify-between mb-3">
                             <div className="flex items-center gap-3">
                                 <div className="w-16 h-24 rounded-md overflow-hidden">
                                     <img
-                                        src={product.image}
-                                        alt={product.name}
+                                        src={product?.imageUrls?.[0]}
+                                        alt={product?.brand}
                                         className="w-full h-full object-cover"
                                     />
                                 </div>
                                 <div>
-                                    <div className="font-medium text-sm">{product.name}</div>
-                                    <div className="text-xs text-gray-500">{product.category}</div>
+                                    <div className="font-medium text-sm">{product?.name}</div>
+                                    <div className="text-xs text-gray-500">{product?.category?.name}</div>
                                 </div>
                             </div>
                             <button
-                                onClick={() => toggleProductExpansion(product.id)}
+                                onClick={() => toggleProductExpansion(product?.id)}
                                 className="p-1 hover:bg-gray-100 rounded-full"
                             >
-                                <ChevronDown className={`w-4 h-4 transform transition-transform ${expandedProduct === product.id ? 'rotate-180' : ''}`} />
+                                <ChevronDown className={`w-4 h-4 transform transition-transform ${expandedProduct === product?.id ? 'rotate-180' : ''}`} />
                             </button>
                         </div>
 
-                        {expandedProduct === product.id && (
+                        {expandedProduct === product?.id && (
                             <div className="space-y-3 pt-3 border-t">
                                 <div className="grid grid-cols-2 gap-2">
                                     <div>
                                         <div className="text-xs text-gray-500">Price</div>
-                                        <div className="text-sm font-medium">{product.price}</div>
+                                        <div className="text-sm font-medium">{product?.price}</div>
                                     </div>
                                     <div>
                                         <div className="text-xs text-gray-500">Stock</div>
-                                        <div className="text-sm font-medium">{product.stock}</div>
+                                        <div className="text-sm font-medium">{product?.inventory}</div>
                                     </div>
                                     <div>
-                                        <div className="text-xs text-gray-500">Status</div>
-                                        <div className="text-sm font-medium">{product.status}</div>
+                                        <div className="text-xs text-gray-500">Size</div>
+                                        <div className="text-sm font-medium">{product?.size}</div>
                                     </div>
                                     <div>
                                         <div className="text-xs text-gray-500">Category</div>
-                                        <div className="text-sm font-medium">{product.category}</div>
+                                        <div className="text-sm font-medium">{product?.category?.name}</div>
                                     </div>
                                 </div>
 
@@ -255,7 +285,7 @@ const ProductManagement = () => {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => handleDeleteProduct(product.id)}
+                                        onClick={() => handleDeleteProduct(product?.id)}
                                         className="flex-1 text-xs px-2 py-1 text-red-500"
                                     >
                                         <Trash2 className="w-3 h-3 mr-1" />
@@ -271,83 +301,92 @@ const ProductManagement = () => {
             {/* Products Table - Desktop View */}
             <div className="hidden sm:block bg-white rounded-lg shadow-md overflow-hidden">
                 <div className="overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
-                    <div className="min-w-[800px]">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="bg-gray-50 border-b">
-                                    <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">Image</th>
-                                    <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">Product ID</th>
-                                    <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">Name</th>
-                                    <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">Category</th>
-                                    <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">Price</th>
-                                    <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">Stock</th>
-                                    <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">Status</th>
-                                    <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredProducts.map((product) => (
-                                    <tr key={product.id} className="border-b hover:bg-gray-50 transition-colors">
-                                        <td className="py-3 sm:py-4 px-3 sm:px-6">
-                                            <div className="w-16 h-24 rounded-md overflow-hidden">
-                                                <img
-                                                    src={product.image}
-                                                    alt={product.name}
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            </div>
-                                        </td>
-                                        <td className="py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">{product.id}</td>
-                                        <td className="py-3 sm:py-4 px-3 sm:px-6 whitespace-nowrap">
-                                            <div className="font-medium text-sm sm:text-base">{product.name}</div>
-                                        </td>
-                                        <td className="py-3 sm:py-4 px-3 sm:px-6 whitespace-nowrap">
-                                            <span className="px-1.5 py-0.5 rounded-full text-xs bg-gray-100 text-gray-800">
-                                                {product.category}
-                                            </span>
-                                        </td>
-                                        <td className="py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">{product.price}</td>
-                                        <td className="py-3 sm:py-4 px-3 sm:px-6 whitespace-nowrap">
-                                            <span className={`px-1.5 py-0.5 rounded-full text-xs ${product.stock > 20 ? "bg-green-100 text-green-800" :
-                                                product.stock > 0 ? "bg-yellow-100 text-yellow-800" :
-                                                    "bg-red-100 text-red-800"
-                                                }`}>
-                                                {product.stock}
-                                            </span>
-                                        </td>
-                                        <td className="py-3 sm:py-4 px-3 sm:px-6 whitespace-nowrap">
+
+                    {products?.length === 0 ? (<div>
+                        <div className="p-10 text-xl font-medium text-center">
+                            No Product Found
+                        </div>
+                    </div>) : (
+                        <div className="min-w-[800px]">
+                            <table className="w-full">
+                                <thead>
+                                    <tr className="bg-gray-50 border-b">
+                                        <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">Image</th>
+                                        <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">Product ID</th>
+                                        <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">Name</th>
+                                        <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">Category</th>
+                                        <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">Price</th>
+                                        <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">Size</th>
+                                        <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">Stock</th>
+                                        {/* <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">Status</th> */}
+                                        <th className="text-left py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {(products.map((product) => (
+                                        <tr key={product?.id} className="border-b hover:bg-gray-50 transition-colors">
+                                            <td className="py-3 sm:py-4 px-3 sm:px-6">
+                                                <div className="w-16 h-24 rounded-md overflow-hidden">
+                                                    <img
+                                                        src={product?.imageUrls?.[0]}
+                                                        alt={product?.brand}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                </div>
+                                            </td>
+                                            <td className="py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">{product?.id}</td>
+                                            <td className="py-3 sm:py-4 px-3 sm:px-6 whitespace-nowrap">
+                                                <div className="font-medium text-sm sm:text-base">{product?.name}</div>
+                                            </td>
+                                            <td className="py-3 sm:py-4 px-3 sm:px-6 whitespace-nowrap">
+                                                <span className="px-1.5 py-0.5 rounded-full text-xs bg-gray-100 text-gray-800">
+                                                    {product?.category?.name}
+                                                </span>
+                                            </td>
+                                            <td className="py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">{product?.price}</td>
+                                            <td className="py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">{product?.size} {`Meters`}</td>
+                                            <td className="py-3 sm:py-4 px-3 sm:px-6 whitespace-nowrap">
+                                                <span className={`px-1.5 py-0.5 rounded-full text-xs ${product?.inventory > 20 ? "bg-green-100 text-green-800" :
+                                                    product?.inventory > 0 ? "bg-yellow-100 text-yellow-800" :
+                                                        "bg-red-100 text-red-800"
+                                                    }`}>
+                                                    {product?.inventory}
+                                                </span>
+                                            </td>
+                                            {/* <td className="py-3 sm:py-4 px-3 sm:px-6 whitespace-nowrap">
                                             <span className={`px-1.5 py-0.5 rounded-full text-xs ${product.status === "In Stock" ? "bg-green-100 text-green-800" :
                                                 product.status === "Low Stock" ? "bg-yellow-100 text-yellow-800" :
                                                     "bg-red-100 text-red-800"
                                                 }`}>
                                                 {product.status}
                                             </span>
-                                        </td>
-                                        <td className="py-3 sm:py-4 px-3 sm:px-6 whitespace-nowrap">
-                                            <div className="flex gap-1.5">
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleEditProduct(product)}
-                                                    className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5"
-                                                >
-                                                    Edit
-                                                </Button>
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    onClick={() => handleDeleteProduct(product.id)}
-                                                    className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5 text-red-500"
-                                                >
-                                                    Delete
-                                                </Button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                                        </td> */}
+                                            <td className="py-3 sm:py-4 px-3 sm:px-6 whitespace-nowrap">
+                                                <div className="flex gap-1.5">
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => handleEditProduct(product)}
+                                                        className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5"
+                                                    >
+                                                        Edit
+                                                    </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => handleDeleteProduct(product.id)}
+                                                        className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5 text-red-500"
+                                                    >
+                                                        Delete
+                                                    </Button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )))}
+                                </tbody>
+                            </table>
+                        </div>)}
+
                 </div>
             </div>
 
@@ -382,7 +421,8 @@ const ProductManagement = () => {
                                 <div>
                                     <label className="block text-sm font-medium mb-1">Product Name</label>
                                     <Input
-                                        defaultValue={editingProduct?.name}
+                                        value={productForm.name}
+                                        onChange={(e) => setProductForm({ ...productForm, name: e.target.value })}
                                         placeholder="Enter product name"
                                         className="text-sm sm:text-base"
                                     />
@@ -390,14 +430,17 @@ const ProductManagement = () => {
 
                                 <div>
                                     <label className="block text-sm font-medium mb-1">Category</label>
-                                    <Select defaultValue={editingProduct?.category}>
+                                    <Select
+                                        value={productForm?.category}
+                                        onValueChange={(value) => setProductForm({ ...productForm, category: value })}
+                                    >
                                         <SelectTrigger className="w-full text-sm sm:text-base">
                                             <SelectValue placeholder="Select category" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {categories.filter(cat => cat !== 'all').map(category => (
-                                                <SelectItem key={category} value={category}>
-                                                    {category}
+                                            {categories?.map((category) => (
+                                                <SelectItem key={category?.id} value={category?.name}>
+                                                    {category?.name}
                                                 </SelectItem>
                                             ))}
                                         </SelectContent>
@@ -406,41 +449,51 @@ const ProductManagement = () => {
 
                                 <div>
                                     <label className="block text-sm font-medium mb-1">Price</label>
+
                                     <Input
                                         type="number"
-                                        defaultValue={editingProduct?.price}
+                                        value={productForm?.price}
+                                        onChange={(e) => setProductForm({ ...productForm, price: e.target.value })}
                                         placeholder="Enter price"
                                         className="text-sm sm:text-base"
                                     />
+
                                 </div>
 
                                 <div>
-                                    <label className="block text-sm font-medium mb-1">Stock</label>
+                                    <label className="block text-sm font-medium mb-1">Size</label>
+
                                     <Input
                                         type="number"
-                                        defaultValue={editingProduct?.stock}
-                                        placeholder="Enter stock quantity"
+                                        value={productForm?.size}
+                                        onChange={(e) => setProductForm({ ...productForm, size: e.target.value })}
+                                        placeholder="Enter Size in Meters"
+                                        className="text-sm sm:text-base"
+                                    />
+
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-1">Inventory</label>
+                                    <Input
+                                        type="number"
+                                        value={productForm.inventory}
+                                        onChange={(e) => setProductForm({ ...productForm, inventory: e.target.value })}
+                                        placeholder="Enter Stock"
                                         className="text-sm sm:text-base"
                                     />
                                 </div>
 
                                 <div>
                                     <label className="block text-sm font-medium mb-1">Description</label>
+
                                     <Textarea
+                                        value={productForm.description}
+                                        onChange={(e) => setProductForm({ ...productForm, description: e.target.value })}
                                         placeholder="Enter product description"
                                         rows={4}
                                         className="text-sm sm:text-base"
                                     />
-                                </div>
-
-                                <div>
-                                    <label className="block text-sm font-medium mb-1">Product Image</label>
-                                    <div className="border border-[#871845] rounded-md p-3 sm:p-4 text-center">
-                                        <Upload className="w-6 h-6 sm:w-8 sm:h-8 mx-auto text-gray-400" />
-                                        <p className="mt-2 text-xs sm:text-sm text-gray-500">
-                                            Drag and drop an image here, or click to select
-                                        </p>
-                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -453,7 +506,7 @@ const ProductManagement = () => {
                                     setIsEditingProduct(false)
                                     setEditingProduct(null)
                                 }}
-                                className="text-sm sm:text-base px-3 sm:px-4 py-1.5 sm:py-2"
+                                className="text-sm hover:bg-red-200 sm:text-base px-3 sm:px-4 py-1.5 sm:py-2"
                             >
                                 Cancel
                             </Button>

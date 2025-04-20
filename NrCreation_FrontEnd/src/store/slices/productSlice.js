@@ -1,19 +1,21 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios from "axios";
-import { toast } from "react-toastify";
 // import { API_BASE_URL } from "../api";
 import api from "../api";
+import { toast } from "react-toastify";
 const BASE_URL = "https://fakestoreapi.com/products"; // Example API
 
-// Async Thunk to fetch products
+
+const token = localStorage.getItem("adminToken") || `eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdXNoaWxrdW1hcnJvaGlkYXMwQGdtYWlsLmNvbSIsImlhdCI6MTc0NTA2MTA5NCwiZXhwIjoxNzQ1MTQ3NDk0fQ.K3j8u3rL5plQts2IRP3J9cgTfSPLAiRrd08iOnNuqFs`;
+
+// Async Thunk to fetch All product
 export const fetchProducts = createAsyncThunk(
   "products/fetchAll",
-  async ({ rejectWithValue }) => {
+  async (_, { rejectWithValue }) => {
     try {
       // const response = await axios.get(`${API_BASE_URL}/public/product/get/all`);
-      console.log("get product");
+      console.log("Slice : Get All product");
       const response = await api.get("/public/product/get/all");
-      console.log(response.data.data);
+      // console.log("My Products : ", response.data.data);
       return response.data;
     } catch (error) {
       toast.error("Failed to fetch products!");
@@ -21,6 +23,25 @@ export const fetchProducts = createAsyncThunk(
     }
   }
 );
+
+
+// Async Thunk to fetch All product
+export const fetchAllCategories = createAsyncThunk(
+  "products/fetchAllCategories",
+  async (_, { rejectWithValue }) => {
+    try {
+      // const response = await axios.get(`${API_BASE_URL}/public/product/get/all`);
+      console.log("Slice : Get All Categories");
+      const response = await api.get("/public/category/get/all");
+      // console.log("My Products : ", response.data.data);
+      return response.data;
+    } catch (error) {
+      toast.error("Failed to fetch products!");
+      return rejectWithValue(error.response?.data || "Something went wrong");
+    }
+  }
+);
+
 // Async Thunk to fetch a single product
 export const fetchSingleProduct = createAsyncThunk(
   "products/fetchSingle",
@@ -31,11 +52,70 @@ export const fetchSingleProduct = createAsyncThunk(
       const response = await api.get(`/public/product/get/${productId}`);
       return response.data;
     } catch (error) {
-      toast.error("Failed to fetch product details!");
       return rejectWithValue(error.response?.data || "Something went wrong");
     }
   }
 );
+
+
+//Async Thunk to Update a Product
+export const updateProduct = createAsyncThunk(
+  "products/updateProduct",
+  async (productDataWithId, { rejectWithValue }) => {
+    try {
+
+      const { id, ...productData } = productDataWithId;
+      const response = await api.put(`/product/update/${id}`, productData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Something went wrong");
+    }
+  }
+);
+
+//Async Thunk to add Product
+export const addProduct = createAsyncThunk(
+  "products/addProduct",
+  async (productData, { rejectWithValue }) => {
+    try {
+
+      const response = await api.post(`/product/add`, productData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Something went wrong");
+    }
+  }
+);
+
+
+// Async Thunk to Delete a product
+export const deleteProduct = createAsyncThunk(
+  "products/deleteProduct",
+  async (productId, { rejectWithValue }) => {
+    try {
+
+      const response = await api.delete(`/product/delete/${productId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      return { productId, message: response.data?.message };
+    } catch (error) {
+      // console.log("My error on delete : " + error.response);
+
+      return rejectWithValue(error.response?.data || "Something went wrong");
+    }
+  }
+);
+
 
 // Slice for managing product state
 const productSlice = createSlice({
@@ -43,6 +123,7 @@ const productSlice = createSlice({
   initialState: {
     products: [],
     product: null,
+    categories: [],
     loading: false,
     error: null,
   },
@@ -56,12 +137,13 @@ const productSlice = createSlice({
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = action.payload.data;
+        state.products = action.payload.data || [];
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
+
       // Fetch single product
       .addCase(fetchSingleProduct.pending, (state) => {
         state.loading = true;
@@ -74,7 +156,77 @@ const productSlice = createSlice({
       .addCase(fetchSingleProduct.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+        toast.error(action.payload.message);
+      })
+
+      // Delete product
+      .addCase(deleteProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteProduct.fulfilled, (state, action) => {
+        state.loading = false;
+        const { productId, message } = action.payload;
+        console.log("Delete Success check");
+
+        state.products = state.products.filter(product => product.id != productId);
+        toast.success(message);
+      })
+      .addCase(deleteProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        toast.error(action.payload.message);
+      })
+
+      // Update Product
+      .addCase(updateProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateProduct.fulfilled, (state, action) => {
+        state.loading = false;
+        const targetId = action.payload.data.id;
+        const index = state.products.findIndex(item => item.id === targetId);
+
+        if (index !== -1) { state.products[index] = action.payload.data; }
+        toast.success(action.payload.message)
+        // state.categories = action.payload.data || [];
+      })
+      .addCase(updateProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        toast.error(action.payload.message)
+      })
+
+      // Add Product
+      .addCase(addProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(addProduct.fulfilled, (state, action) => {
+        state.loading = false;
+        state.products.push(action.payload.data);
+        toast.success(action.payload.message)
+      })
+      .addCase(addProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        toast.error(action.payload.message)
+      })
+
+      // Fetch All Categories
+      .addCase(fetchAllCategories.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAllCategories.fulfilled, (state, action) => {
+        state.loading = false;
+        state.categories = action.payload.data || [];
+      })
+      .addCase(fetchAllCategories.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      })
   },
 });
 export default productSlice.reducer;

@@ -36,25 +36,24 @@ public class ProductServiceImpl implements ProductService{
 
 
         Category category = categoryRepo
-                .findByName(request.getCategory().getName())
+                .findByName(request.getCategory())
                 .orElseGet(()->{
-                    Category newCategory =new Category(request.getCategory().getName());
+                    Category newCategory =new Category(request.getCategory());
                     return categoryRepo.save(newCategory);
                 });
+        request.setCategory(category.getName());
 
-        request.setCategory(category);
-
-        return productRepo.save(createProduct(request));
+        return productRepo.save(createProduct(request,category));
     }
 
-    private Product createProduct(ProductRequest request) {
+    private Product createProduct(ProductRequest request, Category category) {
         return new Product(
                 request.getName(),
                 request.getBrand(),
                 request.getPrice(),
                 request.getInventory(),
                 request.getSize(),
-                request.getCategory(),
+                category,
                 request.getDescription()
         );
     }
@@ -72,14 +71,14 @@ public class ProductServiceImpl implements ProductService{
         for(ProductRequest request : requests)
         {
             Category category = categoryRepo
-                    .findByName(request.getCategory().getName())
+                    .findByName(request.getCategory())
                     .orElseGet(()->{
-                        Category newCategory =new Category(request.getCategory().getName());
+                        Category newCategory =new Category(request.getCategory());
                         return categoryRepo.save(newCategory);
                     });
 
-            request.setCategory(category);
-            products.add(createProduct(request));
+            request.setCategory(category.getName());
+            products.add(createProduct(request,category));
         }
         return productRepo.saveAll(products);
     }
@@ -143,12 +142,13 @@ public class ProductServiceImpl implements ProductService{
 
     @Override
     public void deleteProduct(Long productId) throws IOException {
+//        System.out.println("\n\n 1. Product deleted id : " + productId);
         Product product = getProductById(productId);
         for(String imageUrl : product.getImageUrls())
         {
-            product.getImageUrls().remove(imageUrl);
             cloudinaryService.deleteImage(imageUrl);
         }
+//        System.out.println("\n\n 2. Product deleted id : " + productId);
         productRepo.delete(product);
     }
 
@@ -160,7 +160,12 @@ public class ProductServiceImpl implements ProductService{
         product.setPrice(request.getPrice());
         product.setInventory(request.getInventory());
         product.setSize(request.getSize());
-        product.setCategory(request.getCategory());
+        Category foundCategory = categoryRepo.findAll().stream()
+                .filter(category -> category.getName().equalsIgnoreCase(request.getCategory()))
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("Category Provided does not exist"));
+
+        product.setCategory(foundCategory);
         product.setDescription(request.getDescription());
 
         return productRepo.save(product);

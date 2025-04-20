@@ -23,6 +23,7 @@ public class ProductDTO {
 	private Integer inventory;
 
 	private Integer size;
+
 	private Category category;
 	
 	private String description;
