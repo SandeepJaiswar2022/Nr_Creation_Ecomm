@@ -12,7 +12,7 @@ import {
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { logout } from "@/store/slices/authSlice";
-
+import { selectUniqueItemsCount } from "@/store/slices/cartSlice";
 const Navbar = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
@@ -22,7 +22,9 @@ const Navbar = () => {
   const handleLogout = () => {
     dispatch(logout());
   };
+  const uniqueItemsCount = useSelector(selectUniqueItemsCount);
 
+  const { totalQuantity } = useSelector((state) => state.cart);
   return (
     <nav className="py-4 my-container mx-auto">
       <div className="flex items-center justify-between gap-4">
@@ -42,7 +44,6 @@ const Navbar = () => {
           >
             Dupattas
           </NavLink>
-
         </div>
 
         {/* Search Bar */}
@@ -67,7 +68,7 @@ const Navbar = () => {
           >
             <ShoppingCart className="h-5 w-5" />
             <span className="absolute -top-3 -right-2 bg-[#871845] text-primary-foreground rounded-full w-6 h-6 text-xs flex items-center justify-center">
-              <p>0</p>
+              <p>{uniqueItemsCount || 0}</p>
             </span>
           </Link>
           {isAuthenticated ? (
@@ -183,13 +184,15 @@ const Navbar = () => {
 const NavLink = ({ to, children, isActive }) => (
   <Link
     to={to}
-    className={`relative hover:text-[#871845] transition-colors ${isActive ? `text-[#871845]` : ""
-      }`}
+    className={`relative hover:text-[#871845] transition-colors ${
+      isActive ? `text-[#871845]` : ""
+    }`}
   >
     {children}
     <div
-      className={`absolute -bottom-1 left-0 rounded-full w-full h-[0.2rem] bg-[#871845] transform transition-transform duration-300 ${isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-        }`}
+      className={`absolute -bottom-1 left-0 rounded-full w-full h-[0.2rem] bg-[#871845] transform transition-transform duration-300 ${
+        isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+      }`}
     />
   </Link>
 );
@@ -198,13 +201,15 @@ const MobileNavLink = ({ to, children, isActive, onClick }) => (
   <Link
     to={to}
     onClick={onClick}
-    className={`block w-fit text-lg font-medium hover:text-[#871845] transition-colors relative ${isActive ? "text-[#871845]" : ""
-      }`}
+    className={`block w-fit text-lg font-medium hover:text-[#871845] transition-colors relative ${
+      isActive ? "text-[#871845]" : ""
+    }`}
   >
     {children}
     <div
-      className={`absolute -bottom-1 left-0 w-full h-[0.2rem] rounded-full bg-[#871845] transform transition-transform duration-300 ${isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-        }`}
+      className={`absolute -bottom-1 left-0 w-full h-[0.2rem] rounded-full bg-[#871845] transform transition-transform duration-300 ${
+        isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+      }`}
     />
   </Link>
 );

@@ -1,55 +1,62 @@
-import { BrowserRouter as Router, Routes, Route, Navigate, Outlet, Link } from 'react-router-dom'
-import RootLayout from './components/layout/RootLayout'
-import HomePage from './pages/HomePage'
-import ProductListingPage from './pages/ProductListingPage'
-import ProductDescription from './pages/ProductDescription'
-import CartPage from './pages/CartPage'
-import WishlistPage from './pages/WishlistPage'
-import CheckoutPage from './pages/CheckoutPage'
-import ProfilePage from './pages/ProfilePage'
-import AuthPage from './pages/AuthPage'
-import OrderTrackingPage from './pages/OrderTrackingPage'
-import AboutPage from './pages/AboutPage'
-import ContactPage from './pages/ContactPage'
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  Outlet,
+  Link,
+} from "react-router-dom";
+import RootLayout from "./components/layout/RootLayout";
+import HomePage from "./pages/HomePage";
+import ProductListingPage from "./pages/ProductListingPage";
+import ProductDescription from "./pages/ProductDescription";
+import CartPage from "./pages/CartPage";
+import WishlistPage from "./pages/WishlistPage";
+import CheckoutPage from "./pages/CheckoutPage";
+import ProfilePage from "./pages/ProfilePage";
+import AuthPage from "./pages/AuthPage";
+import OrderTrackingPage from "./pages/OrderTrackingPage";
+import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
 // import OrdersPage from './pages/OrdersPage'
-import AdminDashboard from './pages/adminPages/AdminDashboard'
-import ProductManagement from './pages/adminPages/ProductManagement'
-import OrderManagement from './pages/adminPages/OrderManagement'
-import UserManagement from './pages/adminPages/UserManagement'
-import Analytics from './pages/adminPages/Analytics'
-import PageNotFound from '@/components/ReusableComponents/PageNotFound'
-import { useState } from 'react'
-import { Menu, X } from 'lucide-react'
-import { ToastContainer } from 'react-toastify'
+import AdminDashboard from "./pages/adminPages/AdminDashboard";
+import ProductManagement from "./pages/adminPages/ProductManagement";
+import OrderManagement from "./pages/adminPages/OrderManagement";
+import UserManagement from "./pages/adminPages/UserManagement";
+import Analytics from "./pages/adminPages/Analytics";
+import PageNotFound from "@/components/ReusableComponents/PageNotFound";
+import { useState } from "react";
+import { Menu, X } from "lucide-react";
+import { ToastContainer } from "react-toastify";
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
   // Add your authentication logic here
-  const isAuthenticated = true // Replace with actual auth check
-  const isAdmin = true // Replace with actual admin check
+  const isAuthenticated = true; // Replace with actual auth check
+  const isAdmin = true; // Replace with actual admin check
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" />
+    return <Navigate to="/login" />;
   }
 
   if (!isAdmin) {
-    return <Navigate to="/" />
+    return <Navigate to="/" />;
   }
 
-  return children
-}
+  return children;
+};
 
 // Admin Layout Component
 const AdminLayout = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navLinks = [
     { to: "/admin", label: "Dashboard" },
     { to: "/admin/products", label: "Products" },
     { to: "/admin/orders", label: "Orders" },
     { to: "/admin/users", label: "Users" },
-    { to: "/admin/analytics", label: "Analytics" }
-  ]
+    { to: "/admin/analytics", label: "Analytics" },
+  ];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -112,8 +119,8 @@ const AdminLayout = () => {
         <Outlet />
       </main>
     </div>
-  )
-}
+  );
+};
 
 const App = () => {
   return (
@@ -128,7 +135,7 @@ const App = () => {
           <Route path="/" element={<RootLayout />}>
             <Route index element={<HomePage />} />
             <Route path="category/dupattas" element={<ProductListingPage />} />
-            <Route path="product/:id" element={<ProductDescription />} />
+            <Route path="/product/:id" element={<ProductDescription />} />
             <Route path="cart" element={<CartPage />} />
             <Route path="wishlist" element={<WishlistPage />} />
             <Route path="checkout" element={<CheckoutPage />} />
@@ -161,7 +168,7 @@ const App = () => {
       </Router>
       <ToastContainer position="top-right" autoClose={1000} />
     </>
-  )
-}
+  );
+};
 
-export default App
+export default App;

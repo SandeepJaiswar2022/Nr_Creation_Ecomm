@@ -136,19 +136,30 @@ const ProductListingPage = () => {
 
           {/* Product Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-16">
-            {products.map((product, index) => (
-              <Link to={`/product/${product.id}`} key={product.id}>
-                <motion.div
-                  key={product.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ y: -5 }}
-                >
-                  {product && <ProductCard product={product} />}
-                </motion.div>
-              </Link>
-            ))}
+            {products && products.length > 0 ? (
+              products.map((product, index) =>
+                product.id ? (
+                  <Link to={`/product/${product.id}`} key={product.id}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      whileHover={{ y: -5 }}
+                    >
+                      <ProductCard product={product} />
+                    </motion.div>
+                  </Link>
+                ) : (
+                  <div key={index} className="text-red-500">
+                    Product ID missing
+                  </div>
+                )
+              )
+            ) : (
+              <div className="text-center text-gray-500">
+                No products available.
+              </div>
+            )}
           </div>
         </div>
       </div>

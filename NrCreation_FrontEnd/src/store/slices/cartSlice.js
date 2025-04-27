@@ -2,17 +2,45 @@ import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
 import api from "../api";
 
+// Async Thunks
+export const fetchCartItems = createAsyncThunk(
+  "cart/fetchCartItems",
+  async (_, { rejectWithValue }) => {
+    try {
+      const cartIdResponse = await api.get("/cart/my-cart");
+      const cartId = cartIdResponse.data?.data?.cartId;
+
+      if (!cartId) {
+        return [];
+      }
+
+      const cartItemsResponse = await api.get(`/cart-item/cart/${cartId}`);
+      console.log("cart item in slice : ", cartIdResponse.data.data);
+      const items = cartItemsResponse.data.data || [];
+      console.log("Cart Items12: ", items);
+
+      return items.map((item) => ({
+        id: item.id,
+        productId: item.product.id,
+        quantity: item.quantity,
+        unitprice: item.unitPrice,
+        totalprice: item.totalPrice,
+        cartId: cartId,
+      }));
+    } catch (error) {
+      return rejectWithValue("Failed to fetch cart items");
+    }
+  }
+);
+
 export const addToCartAsync = createAsyncThunk(
   "cart/addToCartAsync",
   async ({ productId, quantity }, { rejectWithValue }) => {
     try {
       const response = await api.post(`/cart-item/add`, null, {
-        params: {
-          productId,
-          quantity,
-        },
+        params: { productId, quantity },
       });
-      toast.success(`${productId || "Product"} added to cart!`);
+      toast.success("Product added to cart!");
       return response.data;
     } catch (error) {
       toast.error("Failed to add product to cart!");
@@ -21,14 +49,7 @@ export const addToCartAsync = createAsyncThunk(
   }
 );
 
-const initialState = {
-  cartItems: [],
-  totalQuantity: 0,
-  totalPrice: 0,
-  loading: false,
-  error: null,
-};
-
+// Helper Functions
 const calculateTotals = (items) => {
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce(
@@ -38,30 +59,22 @@ const calculateTotals = (items) => {
   return { totalQuantity, totalPrice };
 };
 
+// Initial State
+const initialState = {
+  cartItems: [],
+  totalQuantity: 0,
+  totalPrice: 0,
+  loading: false,
+  error: null,
+};
+
+// Slice
 const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
     setCartItems: (state, action) => {
       state.cartItems = action.payload;
-      const totals = calculateTotals(state.cartItems);
-      state.totalQuantity = totals.totalQuantity;
-      state.totalPrice = totals.totalPrice;
-    },
-    addToCart: (state, action) => {
-      const product = action.payload;
-      const existingItem = state.cartItems.find(
-        (item) => item.productId === product.productId
-      );
-
-      if (existingItem) {
-        existingItem.quantity += product.quantity;
-        toast.success(`${product.title || "Product"} quantity increased!`);
-      } else {
-        state.cartItems.push(product);
-        toast.success(`${product.title || "Product"} added to cart!`);
-      }
-
       const totals = calculateTotals(state.cartItems);
       state.totalQuantity = totals.totalQuantity;
       state.totalPrice = totals.totalPrice;
@@ -76,12 +89,12 @@ const cartSlice = createSlice({
         state.cartItems = state.cartItems.filter(
           (item) => item.id !== productId
         );
-        toast.info(`${itemToRemove.title} removed from cart!`);
-      }
+        toast.info("Item removed from cart!");
 
-      const totals = calculateTotals(state.cartItems);
-      state.totalQuantity = totals.totalQuantity;
-      state.totalPrice = totals.totalPrice;
+        const totals = calculateTotals(state.cartItems);
+        state.totalQuantity = totals.totalQuantity;
+        state.totalPrice = totals.totalPrice;
+      }
     },
     updateQuantity: (state, action) => {
       const { productId, quantity } = action.payload;
@@ -92,10 +105,11 @@ const cartSlice = createSlice({
           state.cartItems = state.cartItems.filter(
             (item) => item.id !== productId
           );
-          toast.info(`${item.title} removed from cart!`);
+          toast.info("Item removed from cart!");
         } else {
           item.quantity = quantity;
-          toast.success(`${item.title} quantity updated!`);
+          item.totalprice = item.unitprice * quantity;
+          toast.success("Quantity updated!");
         }
 
         const totals = calculateTotals(state.cartItems);
@@ -112,8 +126,27 @@ const cartSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // Fetch Cart Items
+      .addCase(fetchCartItems.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchCartItems.fulfilled, (state, action) => {
+        state.loading = false;
+        state.cartItems = action.payload;
+        const totals = calculateTotals(action.payload);
+        state.totalQuantity = totals.totalQuantity;
+        state.totalPrice = totals.totalPrice;
+      })
+      .addCase(fetchCartItems.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        state.cartItems = [];
+      })
+      // Add to Cart
       .addCase(addToCartAsync.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(addToCartAsync.fulfilled, (state, action) => {
         state.loading = false;
@@ -124,6 +157,8 @@ const cartSlice = createSlice({
 
         if (existingItem) {
           existingItem.quantity += product.quantity;
+          existingItem.totalprice =
+            existingItem.unitprice * existingItem.quantity;
         } else {
           state.cartItems.push(product);
         }
@@ -139,12 +174,14 @@ const cartSlice = createSlice({
   },
 });
 
-export const {
-  setCartItems,
-  addToCart,
-  removeFromCart,
-  updateQuantity,
-  clearCart,
-} = cartSlice.actions;
+// Selectors
+export const selectUniqueItemsCount = (state) => state.cart.cartItems.length;
+export const selectCartTotal = (state) => state.cart.totalPrice;
+export const selectCartLoading = (state) => state.cart.loading;
+export const selectCartError = (state) => state.cart.error;
+
+// Actions
+export const { setCartItems, removeFromCart, updateQuantity, clearCart } =
+  cartSlice.actions;
 
 export default cartSlice.reducer;

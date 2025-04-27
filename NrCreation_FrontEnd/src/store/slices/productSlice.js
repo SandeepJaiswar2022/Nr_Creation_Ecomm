@@ -4,8 +4,9 @@ import api from "../api";
 import { toast } from "react-toastify";
 const BASE_URL = "https://fakestoreapi.com/products"; // Example API
 
-
-const token = localStorage.getItem("adminToken") || `eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdXNoaWxrdW1hcnJvaGlkYXMwQGdtYWlsLmNvbSIsImlhdCI6MTc0NTA2MTA5NCwiZXhwIjoxNzQ1MTQ3NDk0fQ.K3j8u3rL5plQts2IRP3J9cgTfSPLAiRrd08iOnNuqFs`;
+const token =
+  localStorage.getItem("adminToken") ||
+  `eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdXNoaWxrdW1hcnJvaGlkYXMwQGdtYWlsLmNvbSIsImlhdCI6MTc0NTA2MTA5NCwiZXhwIjoxNzQ1MTQ3NDk0fQ.K3j8u3rL5plQts2IRP3J9cgTfSPLAiRrd08iOnNuqFs`;
 
 // Async Thunk to fetch All product
 export const fetchProducts = createAsyncThunk(
@@ -23,7 +24,6 @@ export const fetchProducts = createAsyncThunk(
     }
   }
 );
-
 
 // Async Thunk to fetch All product
 export const fetchAllCategories = createAsyncThunk(
@@ -57,13 +57,11 @@ export const fetchSingleProduct = createAsyncThunk(
   }
 );
 
-
 //Async Thunk to Update a Product
 export const updateProduct = createAsyncThunk(
   "products/updateProduct",
   async (productDataWithId, { rejectWithValue }) => {
     try {
-
       const { id, ...productData } = productDataWithId;
       const response = await api.put(`/product/update/${id}`, productData, {
         headers: {
@@ -82,7 +80,6 @@ export const addProduct = createAsyncThunk(
   "products/addProduct",
   async (productData, { rejectWithValue }) => {
     try {
-
       const response = await api.post(`/product/add`, productData, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -95,13 +92,11 @@ export const addProduct = createAsyncThunk(
   }
 );
 
-
 // Async Thunk to Delete a product
 export const deleteProduct = createAsyncThunk(
   "products/deleteProduct",
   async (productId, { rejectWithValue }) => {
     try {
-
       const response = await api.delete(`/product/delete/${productId}`, {
         headers: {
           Authorization: `Bearer ${token}`,
@@ -115,7 +110,6 @@ export const deleteProduct = createAsyncThunk(
     }
   }
 );
-
 
 // Slice for managing product state
 const productSlice = createSlice({
@@ -137,7 +131,11 @@ const productSlice = createSlice({
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
-        state.products = action.payload.data || [];
+        // Ensure we're storing the data array properly
+        state.products = Array.isArray(action.payload.data)
+          ? action.payload.data
+          : [];
+        console.log("Products loaded:", state.products); // Debug log
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
@@ -169,7 +167,9 @@ const productSlice = createSlice({
         const { productId, message } = action.payload;
         console.log("Delete Success check");
 
-        state.products = state.products.filter(product => product.id != productId);
+        state.products = state.products.filter(
+          (product) => product.id != productId
+        );
         toast.success(message);
       })
       .addCase(deleteProduct.rejected, (state, action) => {
@@ -186,16 +186,18 @@ const productSlice = createSlice({
       .addCase(updateProduct.fulfilled, (state, action) => {
         state.loading = false;
         const targetId = action.payload.data.id;
-        const index = state.products.findIndex(item => item.id === targetId);
+        const index = state.products.findIndex((item) => item.id === targetId);
 
-        if (index !== -1) { state.products[index] = action.payload.data; }
-        toast.success(action.payload.message)
+        if (index !== -1) {
+          state.products[index] = action.payload.data;
+        }
+        toast.success(action.payload.message);
         // state.categories = action.payload.data || [];
       })
       .addCase(updateProduct.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-        toast.error(action.payload.message)
+        toast.error(action.payload.message);
       })
 
       // Add Product
@@ -206,12 +208,12 @@ const productSlice = createSlice({
       .addCase(addProduct.fulfilled, (state, action) => {
         state.loading = false;
         state.products.push(action.payload.data);
-        toast.success(action.payload.message)
+        toast.success(action.payload.message);
       })
       .addCase(addProduct.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-        toast.error(action.payload.message)
+        toast.error(action.payload.message);
       })
 
       // Fetch All Categories
@@ -226,7 +228,15 @@ const productSlice = createSlice({
       .addCase(fetchAllCategories.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      })
+      });
   },
 });
+
+// Add these selectors at the bottom of the file
+export const selectAllProducts = (state) => state.product.products;
+export const selectProductById = (state, productId) =>
+  state.product.products.find((product) => product.id === productId);
+export const selectProductsLoading = (state) => state.product.loading;
+export const selectProductsError = (state) => state.product.error;
+
 export default productSlice.reducer;

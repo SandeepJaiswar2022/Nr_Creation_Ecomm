@@ -30,7 +30,6 @@ const ProductDescription = () => {
   const [startIndex, setStartIndex] = useState(0);
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState("reviews");
-
   const dispatch = useDispatch();
   const handleAddToCart = async () => {
     if (!product) {
@@ -48,13 +47,13 @@ const ProductDescription = () => {
   };
   // const product = [...featuredProducts, ...womensProducts, ...mensProducts].find(product => product.id === id);
 
-  const { product, loading } = useSelector((state) => state.product);
+  const { product, loading, error } = useSelector((state) => state.product);
 
-  // useEffect(() => {
-  //   if (id) {
-  //     dispatch(fetchSingleProduct(id));
-  //   }
-  // }, [dispatch, id]);
+  useEffect(() => {
+    if (id) {
+      dispatch(fetchSingleProduct(id));
+    }
+  }, [dispatch, id]);
 
   useEffect(() => {
     if (product) {
@@ -72,7 +71,7 @@ const ProductDescription = () => {
     return <PageLoader />;
   }
 
-  if (!product) {
+  if (error || !product) {
     return (
       <div className="container mx-auto px-4 py-8">
         <EmptyState
@@ -157,10 +156,11 @@ const ProductDescription = () => {
             {/* Thumbnail List */}
             <div className="relative flex flex-col">
               <button
-                className={`absolute -top-7 left-1/2 -translate-x-1/2 p-1 rounded-full bg-[#871845] text-white shadow-md z-10 ${startIndex === 0
-                  ? "opacity-50 cursor-not-allowed"
-                  : "hover:bg-gray-[#871845]"
-                  }`}
+                className={`absolute -top-7 left-1/2 -translate-x-1/2 p-1 rounded-full bg-[#871845] text-white shadow-md z-10 ${
+                  startIndex === 0
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-gray-[#871845]"
+                }`}
                 onClick={prevThumbnails}
                 disabled={startIndex === 0}
               >
@@ -171,10 +171,11 @@ const ProductDescription = () => {
                 {images.map((img, index) => (
                   <motion.div
                     key={startIndex + index}
-                    className={`w-20 max-sm:w-16 h-28 max-sm:h-24 cursor-pointer border-2 ${selectedImage === startIndex + index
-                      ? "border-[#871845]"
-                      : "border-transparent"
-                      }`}
+                    className={`w-20 max-sm:w-16 h-28 max-sm:h-24 cursor-pointer border-2 ${
+                      selectedImage === startIndex + index
+                        ? "border-[#871845]"
+                        : "border-transparent"
+                    }`}
                     whileHover={{ scale: 1.05 }}
                     onClick={() => setSelectedImage(img)}
                   >
@@ -188,10 +189,11 @@ const ProductDescription = () => {
               </div>
 
               <button
-                className={`absolute -bottom-2 left-1/2 -translate-x-1/2 p-1 rounded-full bg-[#871845] shadow-md text-white z-10 ${startIndex >= images.length - 4
-                  ? "opacity-50 cursor-not-allowed"
-                  : "hover:bg-[#871845]"
-                  }`}
+                className={`absolute -bottom-2 left-1/2 -translate-x-1/2 p-1 rounded-full bg-[#871845] shadow-md text-white z-10 ${
+                  startIndex >= images.length - 4
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-[#871845]"
+                }`}
                 onClick={nextThumbnails}
                 disabled={startIndex >= images.length - 4}
               >
@@ -270,10 +272,11 @@ const ProductDescription = () => {
                 {colors.map((color) => (
                   <motion.div
                     key={color.name}
-                    className={`w-8 h-8 rounded cursor-pointer ${selectedColor === color.name
-                      ? "ring-2 ring-offset-2 ring-[#871845]"
-                      : ""
-                      }`}
+                    className={`w-8 h-8 rounded cursor-pointer ${
+                      selectedColor === color.name
+                        ? "ring-2 ring-offset-2 ring-[#871845]"
+                        : ""
+                    }`}
                     style={{ backgroundColor: color.value }}
                     onClick={() => setSelectedColor(color.name)}
                     whileHover={{ scale: 1.1 }}
@@ -313,10 +316,11 @@ const ProductDescription = () => {
                         {sizes.map((size) => (
                           <button
                             key={size}
-                            className={`w-full px-4 py-2 text-left hover:bg-gray-100 ${selectedSize === size
-                              ? "text-[#871845] font-medium"
-                              : ""
-                              }`}
+                            className={`w-full px-4 py-2 text-left hover:bg-gray-100 ${
+                              selectedSize === size
+                                ? "text-[#871845] font-medium"
+                                : ""
+                            }`}
                             onClick={() => {
                               setSelectedSize(size);
                               setOpenSection(null);
