@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
 import api from "../api";
+import { loadCartFromStorage, saveCartToStorage } from "@/utils/cartPersist";
 
 // Async Thunks
 export const fetchCartItems = createAsyncThunk(
@@ -61,7 +62,7 @@ const calculateTotals = (items) => {
 
 // Initial State
 const initialState = {
-  cartItems: [],
+  cartItems: loadCartFromStorage()?.cartItems || [],
   totalQuantity: 0,
   totalPrice: 0,
   loading: false,
@@ -134,6 +135,8 @@ const cartSlice = createSlice({
       .addCase(fetchCartItems.fulfilled, (state, action) => {
         state.loading = false;
         state.cartItems = action.payload;
+        // Save to localStorage when cart is updated
+        saveCartToStorage({ cartItems: action.payload });
         const totals = calculateTotals(action.payload);
         state.totalQuantity = totals.totalQuantity;
         state.totalPrice = totals.totalPrice;

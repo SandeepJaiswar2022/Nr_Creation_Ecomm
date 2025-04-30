@@ -1,18 +1,72 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CreditCard, MapPin, Truck } from "lucide-react";
-import { useSelector } from "react-redux";
-import { selectCartTotal } from "@/store/slices/cartSlice";
+import { useSelector, useDispatch } from "react-redux";
+import { selectCartTotal, fetchCartItems } from "@/store/slices/cartSlice";
+import { Link } from "react-router-dom";
 
 const CheckoutPage = () => {
   const [step, setStep] = useState("shipping");
   const [shippingMethod, setShippingMethod] = useState("standard");
   const cartItems = useSelector((state) => state.cart.cartItems);
   const totalPrice = useSelector(selectCartTotal);
-  const tax = totalPrice * 0.05;
-  const shipping = shippingMethod === "standard" ? 99 : 199;
+  const cartLoading = useSelector((state) => state.cart.loading);
+  const dispatch = useDispatch();
+
+  // Calculate order totals
+  const calculateTotals = () => {
+    const subtotal = cartItems.reduce((sum, item) => sum + item.totalprice, 0);
+    const tax = subtotal * 0.05;
+    const shipping =
+      shippingMethod === "dtdc"
+        ? 99
+        : shippingMethod === "fasteg"
+        ? 199
+        : shippingMethod === "worldwide"
+        ? 299
+        : 99; // default to lowest price
+    const total = subtotal + shipping + tax;
+
+    return {
+      subtotal,
+      tax,
+      shipping,
+      total,
+    };
+  };
+
+  // Use useMemo to cache calculations
+  const orderTotals = useMemo(() => calculateTotals(), [calculateTotals]);
+
+  useEffect(() => {
+    // Always fetch cart data on mount
+    dispatch(fetchCartItems());
+  }, [dispatch]); // Remove cartItems.length dependency
+
+  if (cartLoading) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+        <div className="text-center">Loading cart...</div>
+      </div>
+    );
+  }
+
+  if (!cartItems.length) {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <h1 className="text-3xl font-bold mb-8">Checkout</h1>
+        <div className="text-center">
+          <p>Your cart is empty</p>
+          <Button asChild className="mt-4">
+            <Link to="/products">Continue Shopping</Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -81,27 +135,39 @@ const CheckoutPage = () => {
             <div className="space-y-4">
               <div
                 className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer ${
-                  shippingMethod === "standard" ? "border-[#871845]" : ""
+                  shippingMethod === "dtdc" ? "border-[#871845]" : ""
                 }`}
-                onClick={() => setShippingMethod("standard")}
+                onClick={() => setShippingMethod("dtdc")}
               >
                 <div>
-                  <p className="font-medium">Standard Delivery</p>
-                  <p className="text-sm text-gray-500">3-5 business days</p>
+                  <p className="font-medium">Tirupati DTDC</p>
+                  <p className="text-sm text-gray-500">5-8 business days</p>
                 </div>
                 <p className="font-medium">₹99</p>
               </div>
               <div
                 className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer ${
-                  shippingMethod === "express" ? "border-[#871845]" : ""
+                  shippingMethod === "fasteg" ? "border-[#871845]" : ""
                 }`}
-                onClick={() => setShippingMethod("express")}
+                onClick={() => setShippingMethod("fasteg")}
               >
                 <div>
-                  <p className="font-medium">Express Delivery</p>
-                  <p className="text-sm text-gray-500">1-2 business days</p>
+                  <p className="font-medium">Fasteg</p>
+                  <p className="text-sm text-gray-500">3-5 business days</p>
                 </div>
                 <p className="font-medium">₹199</p>
+              </div>
+              <div
+                className={`flex items-center justify-between p-4 border rounded-lg cursor-pointer ${
+                  shippingMethod === "worldwide" ? "border-[#871845]" : ""
+                }`}
+                onClick={() => setShippingMethod("worldwide")}
+              >
+                <div>
+                  <p className="font-medium">Worldwide</p>
+                  <p className="text-sm text-gray-500">1-2 business days</p>
+                </div>
+                <p className="font-medium">₹299</p>
               </div>
             </div>
           </motion.div>
@@ -138,21 +204,21 @@ const CheckoutPage = () => {
             <div className="border-t pt-4 space-y-2">
               <div className="flex justify-between">
                 <span className="text-gray-500">Subtotal</span>
-                <span>₹{totalPrice}</span>
+                <span>₹{orderTotals.subtotal}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Shipping</span>
-                <span>₹{shipping}</span>
+                <span>₹{orderTotals.shipping}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-500">Tax</span>
-                <span>₹{tax.toFixed(2)}</span>
+                <span>₹{orderTotals.tax.toFixed(2)}</span>
               </div>
               <div className="border-t pt-2 mt-2">
                 <div className="flex justify-between font-semibold">
                   <span>Total</span>
                   <span className="text-[#871845]">
-                    ₹{(totalPrice + shipping + tax).toFixed(2)}
+                    ₹{orderTotals.total.toFixed(2)}
                   </span>
                 </div>
               </div>
