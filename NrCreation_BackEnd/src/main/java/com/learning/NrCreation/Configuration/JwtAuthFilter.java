@@ -1,6 +1,7 @@
 package com.learning.NrCreation.Configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.learning.NrCreation.Response.ApiResponse;
 import com.learning.NrCreation.Service.Auth.JwtService;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
@@ -66,16 +67,17 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             String tokenExpiredDate = dateFormatter.format(e.getClaims().getExpiration());
 
             Map<String, Object> errorDetails = new HashMap<>();
-            errorDetails.put("errorMessage", "JWT token has been expired");
             errorDetails.put("validityDuration", "24 hours");
             errorDetails.put("tokenCreated", tokenCreatedDate);
             errorDetails.put("tokenExpired", tokenExpiredDate);
+
+            ApiResponse responseJwtFailed = new ApiResponse("Jason Web token has been expired, Login Again", errorDetails);
 
             // Write JSON response
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setContentType("application/json");
             ObjectMapper objectMapper = new ObjectMapper();
-            response.getWriter().write(objectMapper.writeValueAsString(errorDetails));
+            response.getWriter().write(objectMapper.writeValueAsString(responseJwtFailed));
             response.getWriter().flush();
             return;
 		}

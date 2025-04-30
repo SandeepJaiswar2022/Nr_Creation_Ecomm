@@ -2,6 +2,8 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 // import { API_BASE_URL } from "../api";
 import api from "../api";
 import { toast } from "react-toastify";
+import { normalizeError } from "@/utils/normalizeError";
+import { act } from "react";
 const BASE_URL = "https://fakestoreapi.com/products"; // Example API
 
 const token =
@@ -16,11 +18,10 @@ export const fetchProducts = createAsyncThunk(
       // const response = await axios.get(`${API_BASE_URL}/public/product/get/all`);
       console.log("Slice : Get All product");
       const response = await api.get("/public/product/get/all");
-      // console.log("My Products : ", response.data.data);
       return response.data;
     } catch (error) {
-      toast.error("Failed to fetch products!");
-      return rejectWithValue(error.response?.data || "Something went wrong");
+      const message = normalizeError(error);
+      return rejectWithValue(message);
     }
   }
 );
@@ -36,8 +37,8 @@ export const fetchAllCategories = createAsyncThunk(
       // console.log("My Products : ", response.data.data);
       return response.data;
     } catch (error) {
-      toast.error("Failed to fetch products!");
-      return rejectWithValue(error.response?.data || "Something went wrong");
+      const message = normalizeError(error);
+      return rejectWithValue(message);
     }
   }
 );
@@ -52,7 +53,8 @@ export const fetchSingleProduct = createAsyncThunk(
       const response = await api.get(`/public/product/get/${productId}`);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Something went wrong");
+      const message = normalizeError(error);
+      return rejectWithValue(message);
     }
   }
 );
@@ -70,7 +72,8 @@ export const updateProduct = createAsyncThunk(
       });
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Something went wrong");
+      const message = normalizeError(error);
+      return rejectWithValue(message);
     }
   }
 );
@@ -87,7 +90,8 @@ export const addProduct = createAsyncThunk(
       });
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response?.data || "Something went wrong");
+      const message = normalizeError(error);
+      return rejectWithValue(message);
     }
   }
 );
@@ -104,9 +108,8 @@ export const deleteProduct = createAsyncThunk(
       });
       return { productId, message: response.data?.message };
     } catch (error) {
-      // console.log("My error on delete : " + error.response);
-
-      return rejectWithValue(error.response?.data || "Something went wrong");
+      const message = normalizeError(error);
+      return rejectWithValue(message);
     }
   }
 );
@@ -131,15 +134,13 @@ const productSlice = createSlice({
       })
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
-        // Ensure we're storing the data array properly
-        state.products = Array.isArray(action.payload.data)
-          ? action.payload.data
-          : [];
-        console.log("Products loaded:", state.products); // Debug log
+        state.products = action.payload?.data || [];
+        toast.success(action.payload?.message);
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       })
 
       // Fetch single product
@@ -149,12 +150,13 @@ const productSlice = createSlice({
       })
       .addCase(fetchSingleProduct.fulfilled, (state, action) => {
         state.loading = false;
-        state.product = action.payload.data;
+        state.product = action.payload?.data;
+        toast.success(action.payload?.message);
       })
       .addCase(fetchSingleProduct.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-        toast.error(action.payload.message);
+        toast.error(action.payload);
       })
 
       // Delete product
@@ -165,17 +167,13 @@ const productSlice = createSlice({
       .addCase(deleteProduct.fulfilled, (state, action) => {
         state.loading = false;
         const { productId, message } = action.payload;
-        console.log("Delete Success check");
-
-        state.products = state.products.filter(
-          (product) => product.id != productId
-        );
+        state.products = state.products.filter(product => product.id != productId);
         toast.success(message);
       })
       .addCase(deleteProduct.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-        toast.error(action.payload.message);
+        toast.error(action.payload);
       })
 
       // Update Product
@@ -185,19 +183,16 @@ const productSlice = createSlice({
       })
       .addCase(updateProduct.fulfilled, (state, action) => {
         state.loading = false;
-        const targetId = action.payload.data.id;
-        const index = state.products.findIndex((item) => item.id === targetId);
+        const targetId = action.payload?.data?.id;
+        const index = state.products.findIndex(item => item?.id === targetId);
 
-        if (index !== -1) {
-          state.products[index] = action.payload.data;
-        }
-        toast.success(action.payload.message);
-        // state.categories = action.payload.data || [];
+        if (index !== -1) { state.products[index] = action.payload?.data; }
+        toast.success(action.payload?.message)
       })
       .addCase(updateProduct.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-        toast.error(action.payload.message);
+        toast.error(action.payload);
       })
 
       // Add Product
@@ -207,13 +202,13 @@ const productSlice = createSlice({
       })
       .addCase(addProduct.fulfilled, (state, action) => {
         state.loading = false;
-        state.products.push(action.payload.data);
-        toast.success(action.payload.message);
+        state.products.push(action.payload?.data);
+        toast.success(action.payload?.message)
       })
       .addCase(addProduct.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-        toast.error(action.payload.message);
+        toast.error(action.payload);
       })
 
       // Fetch All Categories
@@ -223,12 +218,14 @@ const productSlice = createSlice({
       })
       .addCase(fetchAllCategories.fulfilled, (state, action) => {
         state.loading = false;
-        state.categories = action.payload.data || [];
+        state.categories = action.payload?.data || [];
+        toast.success(action.payload?.message);
       })
       .addCase(fetchAllCategories.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
-      });
+        // toast.error(action.payload);
+      })
   },
 });
 

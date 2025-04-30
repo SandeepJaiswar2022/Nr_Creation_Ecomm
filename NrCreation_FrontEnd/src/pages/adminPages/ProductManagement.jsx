@@ -49,6 +49,7 @@ const ProductManagement = () => {
 
 
     const dispatch = useDispatch();
+
     useEffect(() => {
         dispatch(fetchProducts());
         dispatch(fetchAllCategories());
