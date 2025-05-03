@@ -28,23 +28,9 @@ import PageNotFound from "@/components/ReusableComponents/PageNotFound";
 import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { ToastContainer } from "react-toastify";
+import { ProtectedRoute } from "./routes";
 
-// Protected Route Component
-const ProtectedRoute = ({ children }) => {
-  // Add your authentication logic here
-  const isAuthenticated = true; // Replace with actual auth check
-  const isAdmin = true; // Replace with actual admin check
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" />;
-  }
-
-  if (!isAdmin) {
-    return <Navigate to="/" />;
-  }
-
-  return children;
-};
 
 // Admin Layout Component
 const AdminLayout = () => {
@@ -143,6 +129,7 @@ const App = () => {
             <Route path="track-order" element={<OrderTrackingPage />} />
             <Route path="about" element={<AboutPage />} />
             <Route path="contact" element={<ContactPage />} />
+
             {/* <Route path="orders" element={<OrdersPage />} /> */}
 
             {/* Catch all route - must be last */}

@@ -71,7 +71,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
             errorDetails.put("tokenCreated", tokenCreatedDate);
             errorDetails.put("tokenExpired", tokenExpiredDate);
 
-            ApiResponse responseJwtFailed = new ApiResponse("Jason Web token has been expired, Login Again", errorDetails);
+            ApiResponse responseJwtFailed = new ApiResponse("JSON Web token has been expired, Login Again", errorDetails);
 
             // Write JSON response
             response.setStatus(HttpStatus.UNAUTHORIZED.value());

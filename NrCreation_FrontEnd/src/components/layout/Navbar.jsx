@@ -18,7 +18,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
   const { user, isAuthenticated } = useSelector((state) => state.auth);
-  console.log("user : ", user);
+  // console.log("user : ", user);
   const handleLogout = () => {
     dispatch(logout());
   };
@@ -82,7 +82,7 @@ const Navbar = () => {
                 <User className="h-5 w-5" />
               </Link>
               <div className="hidden lg:flex items-center space-x-2">
-                <span className="text-sm font-medium">Hi, {user}</span>
+                <span className="text-sm font-medium">Hi, {user?.firstName}</span>
                 <Button
                   variant="ghost"
                   size="sm"
@@ -95,11 +95,9 @@ const Navbar = () => {
               </div>
             </div>
           ) : (
-            <Button className="hidden bg-[#871845] text-white hover:bg-[#611031] lg:flex">
-              <NavLink to="/auth" isActive={location.pathname === "/auth"}>
-                Login
-              </NavLink>
-            </Button>
+            <Link to="/auth" className="hidden px-3 py-1.5 rounded-lg bg-[#871845] text-white hover:bg-[#611031] lg:flex">
+              Login
+            </Link>
           )}
         </div>
 
@@ -184,15 +182,13 @@ const Navbar = () => {
 const NavLink = ({ to, children, isActive }) => (
   <Link
     to={to}
-    className={`relative hover:text-[#871845] transition-colors ${
-      isActive ? `text-[#871845]` : ""
-    }`}
+    className={`relative hover:text-[#871845] transition-colors ${isActive ? `text-[#871845]` : ""
+      }`}
   >
     {children}
     <div
-      className={`absolute -bottom-1 left-0 rounded-full w-full h-[0.2rem] bg-[#871845] transform transition-transform duration-300 ${
-        isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-      }`}
+      className={`absolute -bottom-1 left-0 rounded-full w-full h-[0.2rem] bg-[#871845] transform transition-transform duration-300 ${isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+        }`}
     />
   </Link>
 );
@@ -201,15 +197,13 @@ const MobileNavLink = ({ to, children, isActive, onClick }) => (
   <Link
     to={to}
     onClick={onClick}
-    className={`block w-fit text-lg font-medium hover:text-[#871845] transition-colors relative ${
-      isActive ? "text-[#871845]" : ""
-    }`}
+    className={`block w-fit text-lg font-medium hover:text-[#871845] transition-colors relative ${isActive ? "text-[#871845]" : ""
+      }`}
   >
     {children}
     <div
-      className={`absolute -bottom-1 left-0 w-full h-[0.2rem] rounded-full bg-[#871845] transform transition-transform duration-300 ${
-        isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-      }`}
+      className={`absolute -bottom-1 left-0 w-full h-[0.2rem] rounded-full bg-[#871845] transform transition-transform duration-300 ${isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
+        }`}
     />
   </Link>
 );

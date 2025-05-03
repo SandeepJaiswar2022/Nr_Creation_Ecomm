@@ -1,17 +1,16 @@
 package com.learning.NrCreation.Advice;
 
 
-import com.cloudinary.Api;
 import com.learning.NrCreation.Exception.AlreadyExistException;
 import com.learning.NrCreation.Exception.ResourceNotFoundException;
 import com.learning.NrCreation.Response.ApiResponse;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -79,5 +78,10 @@ public class GlobalExceptionHandler {
 	public ResponseEntity<ApiResponse> handleSQL(SQLException ex) {
 		System.out.println("SQL error! Please Try Later."+ "\n Time : " + LocalDateTime.now() + "\n ErrorMessage : " + ex.getMessage());
 		return new ResponseEntity<>(new ApiResponse("SQL error! Please Try Later.",null),HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(MalformedJwtException.class)
+	public ResponseEntity<ApiResponse> handleSQL(MalformedJwtException ex) {
+		return new ResponseEntity<>(new ApiResponse(ex.getMessage(),null),HttpStatus.BAD_REQUEST);
 	}
 }

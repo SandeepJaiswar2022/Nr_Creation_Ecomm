@@ -1,42 +1,36 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import api from "@/store/api";
-
-// Async thunk to fetch customer details
-export const fetchUserDetails = createAsyncThunk(
-  "auth/fetchUserDetails",
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await api.get("/get-user-profile");
-      console.log("response : ", response.data);
-
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(
-        error.response?.data || { message: "Failed to fetch User details" }
-      );
-    }
-  }
-);
+import axios from "axios";
+import { toast } from "react-toastify";
 
 // Async thunks for login and register
 export const loginUser = createAsyncThunk(
   "auth/login",
-  async (credentials, { dispatch, rejectWithValue }) => {
+  async (credentials, { rejectWithValue }) => {
     try {
-      //   console.log("credentials : ", credentials);
+      console.log("credentials : ", credentials);
 
       const response = await api.post("/auth/login", credentials);
-      // Store token in localStorage
-      //   console.log("response : ", response.data.data.token);
-      const userDetails = await dispatch(fetchUserDetails());
-      // console.log("userDetails : ", userDetails);
-      if (response.data.data.token && userDetails) {
-        localStorage.setItem("token", response.data.data.token);
-      }
-      // After successful login, fetch User details
-      return { ...response.data, userDetails };
+
+      //After Successfull login res => {msg : `success`,data : token}
+      const token = response.data?.data?.token;
+      const successMessage = response.data?.message;
+      console.log(`My token : `, token);
+
+
+      //fetching user profile after setting token
+      const profileResponse = await api.get('/get-user-profile', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      //Fullfilled then sending Token and user profile to the state
+      return { message: successMessage, token: token, userProfile: profileResponse.data?.data };
+
     } catch (error) {
+      console.log(`Reject with value : `, error);
       return rejectWithValue(
+
+
         error.response?.data || { message: "Login failed" }
       );
     }
@@ -63,13 +57,11 @@ export const registerUser = createAsyncThunk(
   }
 );
 
-// Get initial state from localStorage
 const getInitialState = () => {
-  const token = localStorage.getItem("token");
   return {
     user: null,
-    token,
-    isAuthenticated: !!token,
+    token: null,
+    isAuthenticated: false,
     loading: false,
     error: null,
   };
@@ -85,11 +77,14 @@ const authSlice = createSlice({
       state.user = null;
       state.token = null;
       state.isAuthenticated = false;
-      localStorage.removeItem("token");
+    },
+    setToken: (state, action) => {
+      state.token = action.payload;
+      state.isAuthenticated = true;
     },
     clearError: (state) => {
       state.error = null;
-    },
+    }
   },
   extraReducers: (builder) => {
     builder
@@ -101,8 +96,9 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
         state.isAuthenticated = true;
-        state.token = action.payload.token;
-        state.user = action.payload.userDetails.payload.data.firstName;
+        state.token = action.payload.jwtToken;
+        state.user = action.payload.userProfile;
+        toast.success(action.payload.message)
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
@@ -123,22 +119,8 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.payload?.message || "Registration failed";
       })
-      // Customer details cases
-      .addCase(fetchUserDetails.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchUserDetails.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload;
-      })
-      .addCase(fetchUserDetails.rejected, (state, action) => {
-        state.loading = false;
-        state.error =
-          action.payload?.message || "Failed to fetch customer details";
-      });
   },
 });
 
-export const { logout, clearError } = authSlice.actions;
+export const { logout, clearError, setToken } = authSlice.actions;
 export default authSlice.reducer;

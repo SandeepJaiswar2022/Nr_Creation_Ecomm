@@ -132,7 +132,7 @@ const CartPage = () => {
   console.log("Cart Items1:", cartItems);
   // Fetch cart data using the new thunk
   useEffect(() => {
-    dispatch(fetchProducts());
+    // dispatch(fetchProducts());
     dispatch(fetchCartItems());
   }, [dispatch]);
 
