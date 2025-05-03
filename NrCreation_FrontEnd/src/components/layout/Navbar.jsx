@@ -11,16 +11,16 @@ import {
 } from "@/components/ui/sheet";
 import { useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { logout } from "@/store/slices/authSlice";
 import { selectUniqueItemsCount } from "@/store/slices/cartSlice";
+import { logoutUser } from "@/store/slices/Auth/authSlice";
 const Navbar = () => {
   const location = useLocation();
   const [isOpen, setIsOpen] = useState(false);
   const dispatch = useDispatch();
-  const { user, isAuthenticated } = useSelector((state) => state.auth);
+  const { user, accessToken } = useSelector((state) => state.auth);
   // console.log("user : ", user);
   const handleLogout = () => {
-    dispatch(logout());
+    dispatch(logoutUser());
   };
   const uniqueItemsCount = useSelector(selectUniqueItemsCount);
 
@@ -71,7 +71,7 @@ const Navbar = () => {
               <p>{uniqueItemsCount || 0}</p>
             </span>
           </Link>
-          {isAuthenticated ? (
+          {accessToken ? (
             <div className="flex items-center space-x-4">
               <Link
                 to="/profile"
@@ -83,7 +83,7 @@ const Navbar = () => {
               </Link>
               <div className="hidden lg:flex items-center space-x-2">
                 <span className="text-sm font-medium">Hi, {user?.firstName}</span>
-                <Button
+                <Button 
                   variant="ghost"
                   size="sm"
                   className="text-red-500 hover:text-red-600 hover:bg-red-50"
@@ -122,16 +122,9 @@ const Navbar = () => {
                 isActive={location.pathname === "/category/men"}
                 onClick={() => setIsOpen(false)}
               >
-                Men
+                Dupattas
               </MobileNavLink>
-              <MobileNavLink
-                to="category/women"
-                isActive={location.pathname === "/category/women"}
-                onClick={() => setIsOpen(false)}
-              >
-                Women
-              </MobileNavLink>
-              {isAuthenticated ? (
+              {accessToken ? (
                 <>
                   <MobileNavLink
                     to="/profile"

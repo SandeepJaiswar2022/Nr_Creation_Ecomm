@@ -2,6 +2,7 @@ package com.learning.NrCreation.Advice;
 
 
 import com.learning.NrCreation.Exception.AlreadyExistException;
+import com.learning.NrCreation.Exception.InvalidInputException;
 import com.learning.NrCreation.Exception.ResourceNotFoundException;
 import com.learning.NrCreation.Response.ApiResponse;
 import io.jsonwebtoken.MalformedJwtException;
@@ -52,6 +53,11 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(new ApiResponse(ex.getMessage(), null), HttpStatus.CONFLICT);
     }
 
+	@ExceptionHandler(InvalidInputException.class)
+	public ResponseEntity<ApiResponse> handleInvalidInputException(InvalidInputException ex) {
+		return new ResponseEntity<>(new ApiResponse(ex.getMessage(), null), HttpStatus.BAD_REQUEST);
+	}
+
 	@ExceptionHandler(ResourceNotFoundException.class)
 	public ResponseEntity<ApiResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
 		return new ResponseEntity<>(new ApiResponse(ex.getMessage(), null), HttpStatus.NOT_FOUND);
@@ -81,7 +87,15 @@ public class GlobalExceptionHandler {
 	}
 
 	@ExceptionHandler(MalformedJwtException.class)
-	public ResponseEntity<ApiResponse> handleSQL(MalformedJwtException ex) {
+	public ResponseEntity<ApiResponse> handleMalformedJwtException(MalformedJwtException ex) {
 		return new ResponseEntity<>(new ApiResponse(ex.getMessage(),null),HttpStatus.BAD_REQUEST);
 	}
+
+//	@ExceptionHandler(Exception.class)
+//	public ResponseEntity<ApiResponse> handleAllExceptions(Exception ex) {
+//		ApiResponse response = new ApiResponse("An error occurred please after some time!", ex.getMessage());
+//		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+//	}
+
+
 }

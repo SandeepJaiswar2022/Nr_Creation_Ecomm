@@ -25,132 +25,87 @@ import OrderManagement from "./pages/adminPages/OrderManagement";
 import UserManagement from "./pages/adminPages/UserManagement";
 import Analytics from "./pages/adminPages/Analytics";
 import PageNotFound from "@/components/ReusableComponents/PageNotFound";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { ToastContainer } from "react-toastify";
 import { ProtectedRoute } from "./routes";
+import AdminLayout from "./components/layout/AdminLayout";
+import { useDispatch, useSelector } from "react-redux";
+import { clearAuthState, logoutUser, setAccessToken, setUser } from "./store/slices/Auth/authSlice";
+import api from "./store/api";
 
-
-
-// Admin Layout Component
-const AdminLayout = () => {
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-  const navLinks = [
-    { to: "/admin", label: "Dashboard" },
-    { to: "/admin/products", label: "Products" },
-    { to: "/admin/orders", label: "Orders" },
-    { to: "/admin/users", label: "Users" },
-    { to: "/admin/analytics", label: "Analytics" },
-  ];
-
-  return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Admin Navigation */}
-      <nav className="bg-white shadow-sm">
-        <div className="my-container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <Link to="/admin" className="flex items-center">
-              <h1 className="text-xl font-bold text-[#871845]">Admin Panel</h1>
-            </Link>
-
-            {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-4">
-              {navLinks.map((link) => (
-                <Link
-                  key={link.to}
-                  to={link.to}
-                  className="text-gray-600 hover:text-[#871845] transition-colors"
-                >
-                  {link.label}
-                </Link>
-              ))}
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              className="md:hidden p-2 rounded-md hover:bg-gray-100"
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            >
-              {isMobileMenuOpen ? (
-                <X className="w-6 h-6" />
-              ) : (
-                <Menu className="w-6 h-6" />
-              )}
-            </button>
-          </div>
-
-          {/* Mobile Navigation */}
-          {isMobileMenuOpen && (
-            <div className="md:hidden py-4 border-t">
-              <div className="flex flex-col space-y-2">
-                {navLinks.map((link) => (
-                  <Link
-                    key={link.to}
-                    to={link.to}
-                    className="text-gray-600 hover:text-[#871845] transition-colors px-2 py-1 rounded-md hover:bg-gray-50"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </nav>
-
-      {/* Admin Content */}
-      <main className="my-container mx-auto px-4 py-8">
-        <Outlet />
-      </main>
-    </div>
-  );
-};
 
 const App = () => {
+  const dispatch = useDispatch();
+  const { accessToken } = useSelector((state) => state.auth);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const tryRefreshToken = async () => {
+      try {
+        // console.log(`My access token in app : `, accessToken);
+
+        if (!accessToken) {
+          // console.log(`Token is not there then refresh it : `, accessToken);
+          const res = await api.post("/auth/refresh-token", {}, { withCredentials: true });
+          dispatch(setAccessToken(res.data.data?.accessToken));
+          dispatch(setUser(res.data.data?.user));
+        }
+      } catch (err) {
+        dispatch(clearAuthState())
+        console.error("Auto-refresh failed:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    tryRefreshToken();
+  }, [dispatch]);
+
+  if (loading) return <div className="p-4 text-center">Loading...</div>;
+
   return (
     <>
       <Router>
         <Routes>
-          {/* Auth routes */}
+          {/* Public Auth routes */}
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/forgot-password" element={<AuthPage />} />
 
-          {/* Main layout routes */}
+          {/* Public routes */}
           <Route path="/" element={<RootLayout />}>
             <Route index element={<HomePage />} />
             <Route path="category/dupattas" element={<ProductListingPage />} />
-            <Route path="/product/:id" element={<ProductDescription />} />
-            <Route path="cart" element={<CartPage />} />
-            <Route path="wishlist" element={<WishlistPage />} />
-            <Route path="checkout" element={<CheckoutPage />} />
-            <Route path="profile" element={<ProfilePage />} />
-            <Route path="track-order" element={<OrderTrackingPage />} />
+            <Route path="product/:id" element={<ProductDescription />} />
             <Route path="about" element={<AboutPage />} />
             <Route path="contact" element={<ContactPage />} />
-
-            {/* <Route path="orders" element={<OrdersPage />} /> */}
-
-            {/* Catch all route - must be last */}
-            <Route path="*" element={<PageNotFound />} />
           </Route>
+
+          {/* user-only routes */}
+          <Route element={<ProtectedRoute allowedRoles={["USER", "ADMIN"]} />}>
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/wishlist" element={<WishlistPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/track-order" element={<OrderTrackingPage />} />
+            {/* <Route path="orders" element={<OrdersPage />} /> */}
+          </Route>
+
 
           {/* Admin Routes */}
-          <Route
-            path="/admin"
-            element={
-              <ProtectedRoute>
-                <AdminLayout />
-              </ProtectedRoute>
-            }
-          >
-            <Route index element={<AdminDashboard />} />
-            <Route path="products" element={<ProductManagement />} />
-            <Route path="orders" element={<OrderManagement />} />
-            <Route path="users" element={<UserManagement />} />
-            <Route path="analytics" element={<Analytics />} />
+          <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboard />} />
+              <Route path="products" element={<ProductManagement />} />
+              <Route path="orders" element={<OrderManagement />} />
+              <Route path="users" element={<UserManagement />} />
+              <Route path="analytics" element={<Analytics />} />
+            </Route>
           </Route>
+
+          {/* Catch other route if not above */}
+          <Route path="*" element={<PageNotFound />} />
+
         </Routes>
       </Router>
       <ToastContainer position="top-right" autoClose={1000} />

@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link, useNavigate } from "react-router-dom";
 import LoadingSpinner from "@/components/ReusableComponents/LoadingSpinner";
 import { useDispatch, useSelector } from "react-redux";
-import { loginUser, registerUser, clearError } from "@/store/slices/authSlice";
+import { loginUser, registerUser } from "@/store/slices/Auth/authSlice";
 import { Eye, EyeOff } from "lucide-react";
 
 const AuthPage = () => {
@@ -22,11 +22,15 @@ const AuthPage = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { loading, error, isAuthenticated } = useSelector((state) => state.auth);
+  const { loading, error, accessToken } = useSelector((state) => state.auth);
 
-  if (isAuthenticated) {
-    navigate(`/`)
-  }
+
+  useEffect(() => {
+    if (accessToken) {
+      navigate("/");
+    }
+  }, [accessToken])
+
 
 
   const handleChange = (e) => {
@@ -38,7 +42,6 @@ const AuthPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(clearError());
 
     if (!isLogin && formData.password !== formData.confirmPassword) {
       return;
