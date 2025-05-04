@@ -1,38 +1,41 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
 import api from "../api";
-import { loadCartFromStorage, saveCartToStorage } from "@/utils/cartPersist";
+import { normalizeError } from "@/utils/normalizeError";
 
 // Async Thunks
 export const fetchCartItems = createAsyncThunk(
   "cart/fetchCartItems",
   async (_, { rejectWithValue }) => {
     try {
-      const cartIdResponse = await api.get("/cart/my-cart");
-      const cartId = cartIdResponse.data?.data?.cartId;
+      const cartResponse = await api.get("/cart/my-cart");
 
-      if (!cartId) {
-        return [];
-      }
 
-      const cartItemsResponse = await api.get(`/cart-item/cart/${cartId}`);
-      console.log("cart item in slice : ", cartIdResponse.data.data);
-      const items = cartItemsResponse.data.data || [];
-      console.log("Cart Items12: ", items);
-
-      return items.map((item) => ({
-        id: item.id,
-        productId: item.product.id,
-        quantity: item.quantity,
-        unitprice: item.unitPrice,
-        totalprice: item.totalPrice,
-        cartId: cartId,
-      }));
+      return cartResponse.data
     } catch (error) {
-      return rejectWithValue("Failed to fetch cart items");
+      const message = normalizeError(error);
+      return rejectWithValue(message);
     }
   }
 );
+
+
+export const updateQuantity = createAsyncThunk(
+  "cart/updateQuantity",
+  async ({ cartItemId, quantity }, { rejectWithValue }) => {
+    try {
+      const response = await api.put(`/cart-item/update`, null, {
+        params: { cartItemId, quantity },
+      });
+
+      return { message: response.data?.message, cartItemId, quantity };
+    } catch (error) {
+      const message = normalizeError(error);
+      return rejectWithValue(message);
+    }
+  }
+);
+
 
 export const addToCartAsync = createAsyncThunk(
   "cart/addToCartAsync",
@@ -44,17 +47,18 @@ export const addToCartAsync = createAsyncThunk(
       toast.success("Product added to cart!");
       return response.data;
     } catch (error) {
-      toast.error("Failed to add product to cart!");
-      return rejectWithValue(error.response?.data || "Something went wrong");
+      const message = normalizeError(error);
+      return rejectWithValue(message);
     }
   }
 );
 
 // Helper Functions
 const calculateTotals = (items) => {
+
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
   const totalPrice = items.reduce(
-    (sum, item) => sum + item.unitprice * item.quantity,
+    (sum, item) => sum + item.totalPrice,
     0
   );
   return { totalQuantity, totalPrice };
@@ -62,10 +66,10 @@ const calculateTotals = (items) => {
 
 // Initial State
 const initialState = {
-  cartItems: loadCartFromStorage()?.cartItems || [],
+  cartItems: [],
   totalQuantity: 0,
-  totalPrice: 0,
-  loading: false,
+  cartTotalAmount: 0,
+  cartLoading: false,
   error: null,
 };
 
@@ -78,7 +82,7 @@ const cartSlice = createSlice({
       state.cartItems = action.payload;
       const totals = calculateTotals(state.cartItems);
       state.totalQuantity = totals.totalQuantity;
-      state.totalPrice = totals.totalPrice;
+      state.cartTotalAmount = totals.totalPrice;
     },
     removeFromCart: (state, action) => {
       const productId = action.payload;
@@ -94,34 +98,14 @@ const cartSlice = createSlice({
 
         const totals = calculateTotals(state.cartItems);
         state.totalQuantity = totals.totalQuantity;
-        state.totalPrice = totals.totalPrice;
+        state.cartTotalAmount = totals.totalPrice;
       }
     },
-    updateQuantity: (state, action) => {
-      const { productId, quantity } = action.payload;
-      const item = state.cartItems.find((item) => item.id === productId);
 
-      if (item) {
-        if (quantity <= 0) {
-          state.cartItems = state.cartItems.filter(
-            (item) => item.id !== productId
-          );
-          toast.info("Item removed from cart!");
-        } else {
-          item.quantity = quantity;
-          item.totalprice = item.unitprice * quantity;
-          toast.success("Quantity updated!");
-        }
-
-        const totals = calculateTotals(state.cartItems);
-        state.totalQuantity = totals.totalQuantity;
-        state.totalPrice = totals.totalPrice;
-      }
-    },
     clearCart: (state) => {
       state.cartItems = [];
       state.totalQuantity = 0;
-      state.totalPrice = 0;
+      state.cartTotalAmount = 0;
       toast.info("Cart cleared!");
     },
   },
@@ -129,22 +113,23 @@ const cartSlice = createSlice({
     builder
       // Fetch Cart Items
       .addCase(fetchCartItems.pending, (state) => {
-        state.loading = true;
+        state.loading = `FetchingCart`;
         state.error = null;
       })
       .addCase(fetchCartItems.fulfilled, (state, action) => {
         state.loading = false;
-        state.cartItems = action.payload;
-        // Save to localStorage when cart is updated
-        saveCartToStorage({ cartItems: action.payload });
-        const totals = calculateTotals(action.payload);
+        state.cartItems = action.payload?.data?.items || [];
+
+        const totals = calculateTotals(action.payload?.data?.items || []);
         state.totalQuantity = totals.totalQuantity;
-        state.totalPrice = totals.totalPrice;
+        state.cartTotalAmount = totals.totalPrice;
+        toast.success(action.payload?.message)
       })
       .addCase(fetchCartItems.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
         state.cartItems = [];
+        toast.error(action.payload);
       })
       // Add to Cart
       .addCase(addToCartAsync.pending, (state) => {
@@ -168,11 +153,38 @@ const cartSlice = createSlice({
 
         const totals = calculateTotals(state.cartItems);
         state.totalQuantity = totals.totalQuantity;
-        state.totalPrice = totals.totalPrice;
+        state.cartTotalAmount = totals.totalPrice;
       })
       .addCase(addToCartAsync.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
+      })
+      //Update quantity
+      .addCase(updateQuantity.pending, (state) => {
+        state.loading = `updatingQuantity`;
+        state.error = null;
+      })
+      .addCase(updateQuantity.fulfilled, (state, action) => {
+        state.loading = false;
+        const { cartItemId, quantity, message } = action.payload || {};
+        //find the index of the cartItem of the state and then update the quantity to that object
+        const itemIndex = state.cartItems.findIndex(item => item.itemId === cartItemId);
+        if (itemIndex !== -1) {
+          const item = state.cartItems[itemIndex];
+          item.quantity = quantity;
+          item.totalPrice = item.unitPrice * quantity;
+        }
+
+        const totals = calculateTotals(state.cartItems);
+        state.totalQuantity = totals.totalQuantity;
+        state.cartTotalAmount = totals.totalPrice;
+        toast.success(message);
+      })
+      .addCase(updateQuantity.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        toast.error(action.payload);
       });
   },
 });
@@ -184,7 +196,7 @@ export const selectCartLoading = (state) => state.cart.loading;
 export const selectCartError = (state) => state.cart.error;
 
 // Actions
-export const { setCartItems, removeFromCart, updateQuantity, clearCart } =
+export const { setCartItems, removeFromCart, clearCart } =
   cartSlice.actions;
 
 export default cartSlice.reducer;

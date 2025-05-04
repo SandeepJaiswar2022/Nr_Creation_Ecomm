@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("${api.prefix}/image")
@@ -26,7 +28,10 @@ public class ImageController {
     public ResponseEntity<ApiResponse> addProductImage(@PathVariable Long productId,@RequestParam List<MultipartFile> images) {
         try {
             List<String> imageUrls = productService.addImagesToProduct(productId,images);
-            return new ResponseEntity<>(new ApiResponse("Product Images Added!",imageUrls), HttpStatus.OK);
+            Map<String,Object> response = new HashMap<>();
+            response.put("imageUrls",imageUrls);
+            response.put("productId",productId);
+            return new ResponseEntity<>(new ApiResponse("Product Images Added!",response), HttpStatus.OK);
         }
         catch (Exception e)
         {

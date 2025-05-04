@@ -39,7 +39,8 @@ public class CartServiceImpl implements CartService{
                                 item.getId(),
                                 item.getQuantity(),
                                 item.getUnitPrice(),
-                        productService.convertToDto(item.getProduct()).getId(),
+                                item.getProduct().getId(),
+                                item.getProduct().getImageUrls().get(0),
                                 item.getTotalPrice()
                         )
                 ).collect(Collectors.toSet());
@@ -82,6 +83,6 @@ public class CartServiceImpl implements CartService{
 
     @Override
     public Cart getCartByCustomerId(Long userId) {
-        return cartRepo.findByCustomer_CustomerId(userId);
+        return cartRepo.findByCustomer_CustomerId(userId).orElseThrow(()-> new ResourceNotFoundException("No Cart Item Found, Cart is Empty!"));
     }
 }

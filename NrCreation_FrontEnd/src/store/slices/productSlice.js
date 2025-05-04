@@ -62,7 +62,7 @@ export const fetchSingleProduct = createAsyncThunk(
 //Async Thunk to Update a Product
 export const updateProduct = createAsyncThunk(
   "products/updateProduct",
-  async (productDataWithId, { rejectWithValue }) => {
+  async ({productDataWithId}, { rejectWithValue }) => {
     try {
       const { id, ...productData } = productDataWithId;
       const response = await api.put(`/product/update/${id}`, productData, {

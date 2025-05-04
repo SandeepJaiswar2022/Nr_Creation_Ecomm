@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Filter } from "lucide-react";
+import { Filter, SlidersHorizontal } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -26,9 +26,8 @@ import { fetchProducts } from "@/store/slices/productSlice";
 
 const ProductListingPage = () => {
   const { category } = useParams();
-  const [isLoading, setIsLoading] = useState(true);
-  // const [products, setProducts] = useState([])
   const [showFilters, setShowFilters] = useState(false);
+  const [priceRange, setPriceRange] = useState([0, 5000]);
   const { products, loading, error } = useSelector((state) => state.product);
   const dispatch = useDispatch();
 
@@ -47,9 +46,8 @@ const ProductListingPage = () => {
           {Array.from({ length: 8 }).map((_, index) => (
             <div key={index} className="space-y-4">
               <SkeletonLoader className="h-64" />
-              <h1></h1> {/* Image */}
-              <SkeletonLoader className="h-6 w-3/4" /> {/* Title */}
-              <SkeletonLoader className="h-6 w-1/4" /> {/* Price */}
+              <SkeletonLoader className="h-6 w-3/4" />
+              <SkeletonLoader className="h-6 w-1/4" />
             </div>
           ))}
         </div>
@@ -57,20 +55,8 @@ const ProductListingPage = () => {
     );
   }
 
-  // if (products.length === 0) {
-  //     return (
-  //         <div className="container mx-auto px-4 py-8">
-  //             <EmptyState
-  //                 title="No Products Found"
-  //                 description="Try adjusting your filters or check back later"
-  //                 icon={Filter}
-  //             />
-  //         </div>
-  //     )
-  // }
-
   return (
-    <div className="container py-10  mx-auto px-4">
+    <div className="container py-10 mx-auto px-4">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -85,105 +71,102 @@ const ProductListingPage = () => {
         </p>
       </motion.div>
 
-      {/* Filters and Products Layout */}
-      <div className="flex flex-col lg:flex-row gap-8">
-        {/* Filters Section */}
-        <div className="w-full lg:w-64 flex-shrink-0">
-          {/* Filter Toggle - Show on md and below */}
-          <div className="lg:hidden">
-            <Sheet open={showFilters} onOpenChange={setShowFilters}>
-              <SheetTrigger asChild>
-                <Button variant="outline" className="w-full">
-                  <Filter className="mr-2 h-4 w-4" />
-                  Filters
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-                <SheetHeader>
-                  <SheetTitle>Filters</SheetTitle>
-                </SheetHeader>
-                <div className="mt-8 space-y-6">
-                  <FilterContent />
-                </div>
-              </SheetContent>
-            </Sheet>
-          </div>
-
-          {/* Desktop Filters */}
-          <div className="hidden lg:block sticky top-24">
-            <div className="space-y-6 p-4 border rounded-lg bg-card">
-              <FilterContent />
+      {/* Filters and Sort Bar */}
+      <div className="flex items-center justify-between mb-6 sticky top-0 bg-white z-20 py-4 border-b">
+        <Sheet open={showFilters} onOpenChange={setShowFilters}>
+          <SheetTrigger asChild>
+            <Button variant="outline" className="flex items-center gap-2 hover:text-[#871845] hover:border-[#871845]">
+              <SlidersHorizontal className="h-4 w-4 bg-red-200" />
+              Filters
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-[20rem] px-4 flex flex-col">
+            <div className="flex-1 overflow-y-auto mt-10">
+              <FilterContent priceRange={priceRange} setPriceRange={setPriceRange} />
             </div>
-          </div>
-        </div>
+            <div className="mt-auto border-t ">
+              <Button className="w-full bg-[#871845] hover:bg-[#671234]">
+                Apply Filters
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
 
-        {/* Products Section */}
-        <div className="flex-1">
-          {/* Sort */}
-          <div className="flex justify-end mb-6">
-            <Select defaultValue="featured">
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="featured">Featured</SelectItem>
-                <SelectItem value="newest">Newest</SelectItem>
-                <SelectItem value="price-asc">Price: Low to High</SelectItem>
-                <SelectItem value="price-desc">Price: High to Low</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+        <Select defaultValue="featured">
+          <SelectTrigger className="w-[180px] border-[#871845] text-[#871845]">
+            <SelectValue placeholder="Sort by" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="featured">Featured</SelectItem>
+            <SelectItem value="newest">Newest</SelectItem>
+            <SelectItem value="price-asc">Price: Low to High</SelectItem>
+            <SelectItem value="price-desc">Price: High to Low</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
-          {/* Product Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-16">
-            {products && products.length > 0 ? (
-              products.map((product, index) =>
-                product.id ? (
-                  <Link to={`/product/${product.id}`} key={product.id}>
-                    <motion.div
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: index * 0.1 }}
-                      whileHover={{ y: -5 }}
-                    >
-                      <ProductCard product={product} />
-                    </motion.div>
-                  </Link>
-                ) : (
-                  <div key={index} className="text-red-500">
-                    Product ID missing
-                  </div>
-                )
-              )
+      {/* Product Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+        {products && products.length > 0 ? (
+          products.map((product, index) =>
+            product.id ? (
+              <Link to={`/product/${product?.id}`} key={product?.id}>
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  whileHover={{ y: -5 }}
+                >
+                  <ProductCard product={product} />
+                </motion.div>
+              </Link>
             ) : (
-              <div className="text-center text-gray-500">
-                No products available.
+              <div key={index} className="text-red-500">
+                Product ID missing
               </div>
-            )}
+            )
+          )
+        ) : (
+          <div className="text-center text-gray-500">
+            No products available.
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
 };
 
 // Filter Content Component
-const FilterContent = () => (
-  <>
+const FilterContent = ({ priceRange, setPriceRange }) => (
+  <div className="space-y-8 px-2">
+    <SheetHeader>
+      <SheetTitle>Filters</SheetTitle>
+    </SheetHeader>
+
     <div>
       <h3 className="font-semibold mb-4">Price Range</h3>
-      <Slider defaultValue={[0, 1000]} max={1000} step={1} className="mb-2" />
-      <div className="flex justify-between text-sm text-muted-foreground">
-        <span>$0</span>
-        <span>$1000</span>
+      <Slider
+        defaultValue={priceRange}
+        max={5000}
+        step={100}
+        className="mb-2"
+        onValueChange={setPriceRange}
+      />
+      <div className="flex justify-between text-sm text-[#871845]">
+        <span>₹{priceRange[0]}</span>
+        <span>₹{priceRange[1]}</span>
       </div>
     </div>
 
     <div>
       <h3 className="font-semibold mb-4">Categories</h3>
       <div className="space-y-2">
-        {["All", "New Arrivals", "Trending", "Sale"].map((item) => (
-          <Button key={item} variant="ghost" className="w-full justify-start">
+        {["All", "Bridal", "Silk", "Cotton", "Designer"].map((item) => (
+          <Button
+            key={item}
+            variant="ghost"
+            className="w-full justify-start hover:text-[#871845] hover:bg-pink-50"
+          >
             {item}
           </Button>
         ))}
@@ -191,16 +174,36 @@ const FilterContent = () => (
     </div>
 
     <div>
-      <h3 className="font-semibold mb-4">Size</h3>
+      <h3 className="font-semibold mb-4">Colors</h3>
       <div className="grid grid-cols-3 gap-2">
-        {["XS", "S", "M", "L", "XL", "XXL"].map((size) => (
-          <Button key={size} variant="outline" size="sm">
-            {size}
+        {["Red", "Blue", "Green", "Pink", "Purple", "Yellow", "Orange", "Black", "White"].map((color) => (
+          <Button
+            key={color}
+            variant="outline"
+            size="sm"
+            className="hover:text-[#871845] hover:border-[#871845]"
+          >
+            {color}
           </Button>
         ))}
       </div>
     </div>
-  </>
+
+    <div>
+      <h3 className="font-semibold mb-4">Material</h3>
+      <div className="space-y-2">
+        {["Silk", "Cotton", "Chiffon", "Net", "Georgette", "Crepe", "Chanderi", "Banarasi"].map((material) => (
+          <Button
+            key={material}
+            variant="ghost"
+            className="w-full justify-start hover:text-[#871845] hover:bg-pink-50"
+          >
+            {material}
+          </Button>
+        ))}
+      </div>
+    </div>
+  </div>
 );
 
 export default ProductListingPage;

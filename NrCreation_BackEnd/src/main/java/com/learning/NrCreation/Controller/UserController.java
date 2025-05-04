@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserController {
     private final UserServiceImpl userServiceImpl;
+
     @PreAuthorize("hasAnyAuthority('admin:read','user:read')")
     @GetMapping
     public ResponseEntity<ApiResponse> getUserProfile(@RequestHeader("Authorization") String authHeader) {

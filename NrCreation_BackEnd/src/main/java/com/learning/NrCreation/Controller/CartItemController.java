@@ -76,17 +76,18 @@ public class CartItemController {
     //Handle Exception if the quantity to update is greater than the Stock(Inventory)
     //Handle Exception if the quantity = 0.
     @PutMapping("/update")
-    public ResponseEntity<ApiResponse> updateItemQuantity(@RequestParam Long cartId, @RequestParam
+    public ResponseEntity<ApiResponse> updateItemQuantity(@RequestHeader("Authorization") String authHeader, @RequestParam
     Long cartItemId, @RequestParam Integer quantity)
     {
-        try {
-            cartItemService.updateItemQuantity(cartId, cartItemId, quantity);
-            return new ResponseEntity<>(new ApiResponse("Quantity Updated Successfulyy", null)
-                    ,HttpStatus.OK);
-        } catch (Exception e) {
-            return new ResponseEntity<>(new ApiResponse(e.getMessage(), null)
-                    ,HttpStatus.NOT_FOUND);
+        User user = userService.findUserByJwtToken(authHeader);
+        Optional<Customer> customer = customerRepo.findByEmail(user.getEmail());
+        if (customer.isEmpty()) {
+            throw new ResourceNotFoundException("Customer not found with email: " + user.getEmail());
         }
+
+        Cart cart = cartService.getCartByCustomerId(customer.get().getCustomerId());
+        cartItemService.updateItemQuantity(cart.getCartId(), cartItemId, quantity);
+        return new ResponseEntity<>(new ApiResponse("Quantity Updated Successfully", null), HttpStatus.OK);
     }
 
     @GetMapping("/cart/{cartId}")

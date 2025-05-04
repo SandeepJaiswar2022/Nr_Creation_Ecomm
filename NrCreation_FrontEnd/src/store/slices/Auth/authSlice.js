@@ -24,12 +24,14 @@ export const registerUser = createAsyncThunk(
   async (userData, { rejectWithValue }) => {
     try {
       console.log("User data to register : ", userData);
-      
+
       const res = await api.post('/auth/register', userData);
       const { accessToken, user } = res.data.data;
       return { accessToken, user, message: res.data?.message };
     } catch (error) {
       const message = normalizeError(error);
+      console.log("response on validation failed : ", error.response?.data);
+
       return rejectWithValue(message);
     }
   }

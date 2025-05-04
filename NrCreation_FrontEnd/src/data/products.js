@@ -35,13 +35,13 @@ export const featuredProducts = [
         price: "6,999",
         imageUrls: ["/Images/Duppta3.jpeg"]
     },
-    // {
-    //     id: "dupatta-4",
-    //     productName: "Red Banarasi Dupatta",
-    //     rating: 5,
-    //     price: "7,499",
-    //     image: "/Images/Duppta4.jpeg"
-    // }
+    {
+        id: "dupatta-4",
+        productName: "Red Banarasi Dupatta",
+        rating: 5,
+        price: "7,499",
+        imageUrls: ["/Images/lehnga3.jpeg"]
+    }
 ]
 
 export const womensProducts = [

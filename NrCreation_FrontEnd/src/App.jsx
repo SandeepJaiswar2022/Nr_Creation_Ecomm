@@ -10,7 +10,6 @@ import RootLayout from "./components/layout/RootLayout";
 import HomePage from "./pages/HomePage";
 import ProductListingPage from "./pages/ProductListingPage";
 import ProductDescription from "./pages/ProductDescription";
-import CartPage from "./pages/CartPage";
 import WishlistPage from "./pages/WishlistPage";
 import CheckoutPage from "./pages/CheckoutPage";
 import ProfilePage from "./pages/ProfilePage";
@@ -33,6 +32,8 @@ import AdminLayout from "./components/layout/AdminLayout";
 import { useDispatch, useSelector } from "react-redux";
 import { clearAuthState, logoutUser, setAccessToken, setUser } from "./store/slices/Auth/authSlice";
 import api from "./store/api";
+import { PageLoader } from "./components/ReusableComponents";
+import NewCartPage from "./pages/NewCartPage";
 
 
 const App = () => {
@@ -62,7 +63,11 @@ const App = () => {
     tryRefreshToken();
   }, [dispatch]);
 
-  if (loading) return <div className="p-4 text-center">Loading...</div>;
+  if (loading) {
+    return (
+      <PageLoader />
+    )
+  }
 
   return (
     <>
@@ -83,7 +88,8 @@ const App = () => {
 
           {/* user-only routes */}
           <Route element={<ProtectedRoute allowedRoles={["USER", "ADMIN"]} />}>
-            <Route path="/cart" element={<CartPage />} />
+            {/* <Route path="/cart" element={<CartPage />} /> */}
+            <Route path="/cart" element={<NewCartPage />} />
             <Route path="/wishlist" element={<WishlistPage />} />
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/profile" element={<ProfilePage />} />

@@ -55,11 +55,13 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(InvalidInputException.class)
 	public ResponseEntity<ApiResponse> handleInvalidInputException(InvalidInputException ex) {
+		System.out.println("InvalidInputException\n\n");
 		return new ResponseEntity<>(new ApiResponse(ex.getMessage(), null), HttpStatus.BAD_REQUEST);
 	}
 
 	@ExceptionHandler(ResourceNotFoundException.class)
 	public ResponseEntity<ApiResponse> handleResourceNotFoundException(ResourceNotFoundException ex) {
+		System.out.println("InvalidInputException in resource not found\n\n");
 		return new ResponseEntity<>(new ApiResponse(ex.getMessage(), null), HttpStatus.NOT_FOUND);
 	}
 

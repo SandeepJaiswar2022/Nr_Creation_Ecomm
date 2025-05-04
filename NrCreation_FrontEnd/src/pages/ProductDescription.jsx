@@ -156,11 +156,10 @@ const ProductDescription = () => {
             {/* Thumbnail List */}
             <div className="relative flex flex-col">
               <button
-                className={`absolute -top-7 left-1/2 -translate-x-1/2 p-1 rounded-full bg-[#871845] text-white shadow-md z-10 ${
-                  startIndex === 0
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-gray-[#871845]"
-                }`}
+                className={`absolute -top-7 left-1/2 -translate-x-1/2 p-1 rounded-full bg-[#871845] text-white shadow-md z-10 ${startIndex === 0
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-gray-[#871845]"
+                  }`}
                 onClick={prevThumbnails}
                 disabled={startIndex === 0}
               >
@@ -171,11 +170,10 @@ const ProductDescription = () => {
                 {images.map((img, index) => (
                   <motion.div
                     key={startIndex + index}
-                    className={`w-20 max-sm:w-16 h-28 max-sm:h-24 cursor-pointer border-2 ${
-                      selectedImage === startIndex + index
-                        ? "border-[#871845]"
-                        : "border-transparent"
-                    }`}
+                    className={`w-20 max-sm:w-16 h-28 max-sm:h-24 cursor-pointer border-2 ${selectedImage === startIndex + index
+                      ? "border-[#871845]"
+                      : "border-transparent"
+                      }`}
                     whileHover={{ scale: 1.05 }}
                     onClick={() => setSelectedImage(img)}
                   >
@@ -189,11 +187,10 @@ const ProductDescription = () => {
               </div>
 
               <button
-                className={`absolute -bottom-2 left-1/2 -translate-x-1/2 p-1 rounded-full bg-[#871845] shadow-md text-white z-10 ${
-                  startIndex >= images.length - 4
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-[#871845]"
-                }`}
+                className={`absolute -bottom-2 left-1/2 -translate-x-1/2 p-1 rounded-full bg-[#871845] shadow-md text-white z-10 ${startIndex >= images.length - 4
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-[#871845]"
+                  }`}
                 onClick={nextThumbnails}
                 disabled={startIndex >= images.length - 4}
               >
@@ -272,11 +269,10 @@ const ProductDescription = () => {
                 {colors.map((color) => (
                   <motion.div
                     key={color.name}
-                    className={`w-8 h-8 rounded cursor-pointer ${
-                      selectedColor === color.name
-                        ? "ring-2 ring-offset-2 ring-[#871845]"
-                        : ""
-                    }`}
+                    className={`w-8 h-8 rounded cursor-pointer ${selectedColor === color.name
+                      ? "ring-2 ring-offset-2 ring-[#871845]"
+                      : ""
+                      }`}
                     style={{ backgroundColor: color.value }}
                     onClick={() => setSelectedColor(color.name)}
                     whileHover={{ scale: 1.1 }}
@@ -316,11 +312,10 @@ const ProductDescription = () => {
                         {sizes.map((size) => (
                           <button
                             key={size}
-                            className={`w-full px-4 py-2 text-left hover:bg-gray-100 ${
-                              selectedSize === size
-                                ? "text-[#871845] font-medium"
-                                : ""
-                            }`}
+                            className={`w-full px-4 py-2 text-left hover:bg-gray-100 ${selectedSize === size
+                              ? "text-[#871845] font-medium"
+                              : ""
+                              }`}
                             onClick={() => {
                               setSelectedSize(size);
                               setOpenSection(null);
@@ -532,8 +527,8 @@ const ProductDescription = () => {
             <div className="h-[0.2rem] w-[25px] bg-gray-400 rounded-full"></div>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredProducts.slice(0, 4).map((product) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-6">
+          {featuredProducts.map((product) => (
             <Link to={`/product/${product.id}`} key={product.id}>
               <ProductCard key={product.id} product={product} />
             </Link>

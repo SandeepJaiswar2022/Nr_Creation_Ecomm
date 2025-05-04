@@ -78,11 +78,12 @@ public class CartController {
         }
     }
 
-    @GetMapping("/total-price/{cartId}")
     @PreAuthorize("hasAnyAuthority('admin:read','user:read')")
+    @GetMapping("/total-price/{cartId}")
     public ResponseEntity<ApiResponse> getTotalPriceOfCart(@PathVariable Long cartId)
     {
         try {
+            System.out.println("Get Total Price of Cart\n\n\n");
             BigDecimal totalPrice =  cartService.getTotalPrice(cartId);
             return new ResponseEntity<>(new ApiResponse("Total Price", totalPrice)
                     ,HttpStatus.OK);

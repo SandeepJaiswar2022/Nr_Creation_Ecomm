@@ -114,7 +114,7 @@ public class ProductServiceImpl implements ProductService{
     @Override
     public List<String> addImagesToProduct(Long productId, List<MultipartFile> images) throws IOException {
         Product product = getProductById(productId);
-        List<String> imageUrls = new ArrayList<>();
+        List<String> imageUrls = product.getImageUrls();
         for (MultipartFile image : images) {
             String imageUrl = cloudinaryService.uploadImage(image);
             imageUrls.add(imageUrl);

@@ -3,6 +3,7 @@ package com.learning.NrCreation.Service.Cart;
 import java.math.BigDecimal;
 import java.util.List;
 
+import com.learning.NrCreation.Exception.InvalidInputException;
 import com.learning.NrCreation.Repository.CartItemRepository;
 import com.learning.NrCreation.Service.Product.ProductService;
 import jakarta.transaction.Transactional;
@@ -74,10 +75,18 @@ class CartItemServiceImpl implements CartItemService {
 		
 		 CartItem cartItem = cart.getItems()
 		            .stream()
-		            .filter(item -> item.getProduct().getId().equals(cartItemId))
+		            .filter(item -> item.getId().equals(cartItemId))
 		            .findFirst()
-		            .orElseThrow(() -> new ResourceNotFoundException("CartItem with Id " + cartItemId + " not found in cart " + cartId));
+		            .orElseThrow(() -> new ResourceNotFoundException("CartItem not found in this Cart"));
 
+		    if(quantity > cartItem.getProduct().getInventory())
+			{
+				throw new InvalidInputException("Quantity exceeds inventory!");
+			}
+			else if(quantity <= 0)
+			{
+				throw new InvalidInputException("Quantity must be greater than zero!");
+			}
 		    cartItem.setQuantity(quantity);
 		    cartItem.setUnitPrice(cartItem.getProduct().getPrice());
 		    cartItem.computeAndSetTotalPrice();
