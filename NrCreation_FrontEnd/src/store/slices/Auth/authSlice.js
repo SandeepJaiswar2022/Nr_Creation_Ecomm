@@ -1,4 +1,4 @@
-import api from "@/store/api";
+import api from "@/utils/api";
 import { normalizeError } from "@/utils/normalizeError";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";

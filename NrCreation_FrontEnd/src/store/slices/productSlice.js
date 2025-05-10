@@ -1,8 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-// import { API_BASE_URL } from "../api";
-import api from "../api";
 import { toast } from "react-toastify";
 import { normalizeError } from "@/utils/normalizeError";
+import api from "@/utils/api";
 
 
 // Async Thunk to fetch All product

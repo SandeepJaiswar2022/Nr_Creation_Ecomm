@@ -1,10 +1,7 @@
 import {
   BrowserRouter as Router,
   Routes,
-  Route,
-  Navigate,
-  Outlet,
-  Link,
+  Route
 } from "react-router-dom";
 import RootLayout from "./components/layout/RootLayout";
 import HomePage from "./pages/HomePage";
@@ -26,15 +23,14 @@ import UserManagement from "./pages/adminPages/UserManagement";
 import Analytics from "./pages/adminPages/Analytics";
 import PageNotFound from "@/components/ReusableComponents/PageNotFound";
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
 import { ToastContainer } from "react-toastify";
 import { ProtectedRoute } from "./routes";
 import AdminLayout from "./components/layout/AdminLayout";
 import { useDispatch, useSelector } from "react-redux";
 import { clearAuthState, logoutUser, setAccessToken, setUser } from "./store/slices/Auth/authSlice";
-import api from "./store/api";
 import { PageLoader } from "./components/ReusableComponents";
 import NewCartPage from "./pages/NewCartPage";
+import api from "./utils/api";
 
 
 const App = () => {

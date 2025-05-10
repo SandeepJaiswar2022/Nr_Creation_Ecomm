@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
-import api from "../api";
 import { normalizeError } from "@/utils/normalizeError";
+import api from "@/utils/api";
 
 // Async Thunks
 export const fetchCartItems = createAsyncThunk(

@@ -1,6 +1,6 @@
 import axios from "axios";
-import { store } from "./store";
-import { clearAuthState, logoutUser, setAccessToken } from "./slices/Auth/authSlice";
+import { store } from "@/store/store";
+import { clearAuthState, setAccessToken } from "@/store/slices/Auth/authSlice";
 
 export const API_BASE_URL = "http://localhost:8080/api/nr-creation/v1"; // Changed to http
 

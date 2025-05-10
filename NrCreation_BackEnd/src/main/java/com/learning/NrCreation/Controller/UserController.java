@@ -1,31 +1,51 @@
 package com.learning.NrCreation.Controller;
 
 import com.learning.NrCreation.Entity.User;
+import com.learning.NrCreation.Request.RegisterRequest;
+import com.learning.NrCreation.Request.RoleUpdateRequest;
 import com.learning.NrCreation.Response.ApiResponse;
 import com.learning.NrCreation.Response.UserDTO;
 import com.learning.NrCreation.Service.User.UserServiceImpl;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
+@Validated
 @RestController
 @PreAuthorize("hasAnyRole('ADMIN','USER')")
-@RequestMapping("${api.prefix}/get-user-profile")
+@RequestMapping("${api.prefix}/user")
 @RequiredArgsConstructor
 public class UserController {
-    private final UserServiceImpl userServiceImpl;
+    private final UserServiceImpl userService;
 
     @PreAuthorize("hasAnyAuthority('admin:read','user:read')")
-    @GetMapping
+    @GetMapping("/get-user-profile")
     public ResponseEntity<ApiResponse> getUserProfile(@RequestHeader("Authorization") String authHeader) {
         System.out.println(authHeader);
-        User user = userServiceImpl.findUserByJwtToken(authHeader);
-        UserDTO userDTO = userServiceImpl.convertToDtoResponse(user);
+        User user = userService.findUserByJwtToken(authHeader);
+        UserDTO userDTO = userService.convertToDtoResponse(user);
         return new ResponseEntity<>(new ApiResponse("User Fetched!",userDTO), HttpStatus.OK);
     }
+
+    @PreAuthorize("hasAnyAuthority('admin:read')")
+    @GetMapping("/get-all")
+    public ResponseEntity<ApiResponse> getAllUsers() {
+        List<User> users = userService.getAllUsers();
+        List<UserDTO> userDTOs = userService.convertToDtoList(users);
+        return new ResponseEntity<>(new ApiResponse("Users Fetched Successfully!",userDTOs), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAnyAuthority('admin:read')")
+    @PutMapping("/update-role")
+    public ResponseEntity<ApiResponse> updateUserRole(@Valid @RequestBody RoleUpdateRequest request) {
+        userService.changeUserRole(request.getUserEmail(),request.getRole());
+        return new ResponseEntity<>(new ApiResponse("Role Changed Successfully!",null), HttpStatus.OK);
+    }
+
 }

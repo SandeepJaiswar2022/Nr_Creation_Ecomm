@@ -1,6 +1,9 @@
-import { Menu, X } from "lucide-react";
+import { logoutUser } from "@/store/slices/Auth/authSlice";
+import { LogOut, Menu, X } from "lucide-react";
 import { useState } from "react";
+import { useDispatch } from "react-redux";
 import { Link, Outlet } from "react-router-dom";
+import { Button } from "../ui/button";
 
 const AdminLayout = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -12,8 +15,13 @@ const AdminLayout = () => {
     { to: "/admin/users", label: "Users" },
     { to: "/admin/analytics", label: "Analytics" },
   ];
+  const dispatch = useDispatch();
+  const handleLogout = () => {
+    dispatch(logoutUser());
+  };
 
   return (
+
     <div className="min-h-screen bg-gray-50">
       {/* Admin Navigation */}
       <nav className="bg-white shadow-sm">
@@ -24,7 +32,7 @@ const AdminLayout = () => {
             </Link>
 
             {/* Desktop Navigation */}
-            <div className="hidden md:flex items-center space-x-4">
+            <div className="md:flex items-center space-x-4">
               {navLinks.map((link) => (
                 <Link
                   key={link.to}
@@ -34,6 +42,15 @@ const AdminLayout = () => {
                   {link.label}
                 </Link>
               ))}
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-white hover:text-white bg-red-600 hover:bg-red-700"
+                onClick={handleLogout}
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Logout
+              </Button>
             </div>
 
             {/* Mobile Menu Button */}
@@ -63,6 +80,15 @@ const AdminLayout = () => {
                     {link.label}
                   </Link>
                 ))}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="h-4 w-4 mr-2" />
+                  Logout
+                </Button>
               </div>
             </div>
           )}

@@ -34,21 +34,21 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public void changeUserRole(String email, String role) {
 		
-		if(!role.equals("ADMIN") && !role.equals("USER") && !role.equals("MANAGER"))
+		if(!role.equals("ADMIN") && !role.equals("USER"))
 		{
-			throw new InvalidInputException("Role should be from set [ADMIN, USER, MANAGER]");
+			throw new InvalidInputException("Role should be from set [ADMIN, USER]");
 		}
 		
 		Optional<User> user = userRepo.findByEmail(email);
 		
 		if(user.isPresent())
 		{
-			userRepo.updateUserRole(email, role);
+			 userRepo.updateUserRole(email, role);
 		}
 		else {
 			throw new ResourceNotFoundException("User not found with email : "+email);
 		}
-		
+
 	}
 
 	@Override

@@ -1,16 +1,12 @@
 package com.learning.NrCreation.Controller;
 
 
-import com.cloudinary.Api;
-import com.learning.NrCreation.Entity.Product;
 import com.learning.NrCreation.Exception.InvalidInputException;
 import com.learning.NrCreation.Request.LoginRequest;
 import com.learning.NrCreation.Request.RegisterRequest;
 import com.learning.NrCreation.Response.ApiResponse;
 import com.learning.NrCreation.Response.AuthResponse;
-import com.learning.NrCreation.Response.ProductDTO;
 import com.learning.NrCreation.Service.Auth.AuthService;
-import com.learning.NrCreation.Service.Product.ProductService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,14 +16,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Validated
