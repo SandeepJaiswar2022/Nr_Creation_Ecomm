@@ -87,15 +87,6 @@ const HomePage = () => {
   const [direction, setDirection] = useState(0);
   const dispatch = useDispatch();
 
-  useEffect(() => {
-    dispatch(fetchCartItems());
-    const timer = setInterval(() => {
-      setDirection(1);
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 5000);
-
-    return () => clearInterval(timer);
-  }, []);
 
   const slideVariants = {
     enter: (direction) => ({

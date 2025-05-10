@@ -18,11 +18,20 @@ import {
     Search,
     Filter,
     X,
-    ChevronDown
+    ChevronDown,
+    Image
 } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
 import { addProduct, deleteProduct, fetchAllCategories, fetchProducts, updateProduct } from "@/store/slices/productSlice"
 import { PageLoader } from "@/components/ReusableComponents"
+import PopupOnDelete from "@/components/ReusableComponents/PopupOnDelete"
+import { useNavigate } from "react-router-dom"
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 const ProductManagement = () => {
     const [isAddingProduct, setIsAddingProduct] = useState(false)
@@ -32,6 +41,11 @@ const ProductManagement = () => {
     const [selectedCategory, setSelectedCategory] = useState("Categories");
     const [selectedStatus, setSelectedStatus] = useState("Select Status")
     const [expandedProduct, setExpandedProduct] = useState(null)
+    const [deleteConfirmation, setDeleteConfirmation] = useState({
+        isOpen: false,
+        productId: null,
+        productName: ""
+    })
 
     // const categories = ["all", "Dupattas", "Lehengas", "Sarees", "Kurtis", "Blouses", "Suits"]
     const statuses = ["all", "In Stock", "Low Stock", "Out of Stock"]
@@ -49,6 +63,7 @@ const ProductManagement = () => {
 
 
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     useEffect(() => {
         dispatch(fetchProducts());
@@ -120,12 +135,21 @@ const ProductManagement = () => {
 
 
 
-    const handleDeleteProduct = (productId) => {
-        // Delete product logic here
-        // setProducts(products.filter(p => p.id !== productId))
-        dispatch(deleteProduct(productId));
-        console.log("Delete Product");
+    const handleDeleteProduct = (productId, productName) => {
+        setDeleteConfirmation({
+            isOpen: true,
+            productId,
+            productName
+        })
+    }
 
+    const handleConfirmDelete = () => {
+        dispatch(deleteProduct(deleteConfirmation.productId));
+        setDeleteConfirmation({
+            isOpen: false,
+            productId: null,
+            productName: ""
+        })
     }
 
     // const handleUpdateProduct = () => {
@@ -199,7 +223,7 @@ const ProductManagement = () => {
                             </SelectGroup>
                         </SelectContent>
                     </Select>
-                    <Select onValueChange={setSelectedStatus}>
+                    <Select onValueChange={setSelectedStatus} >
                         <SelectTrigger className="w-full sm:w-[180px] text-sm sm:text-base">
                             <SelectValue placeholder="Select status" />
                         </SelectTrigger>
@@ -286,11 +310,31 @@ const ProductManagement = () => {
                                     <Button
                                         variant="outline"
                                         size="sm"
-                                        onClick={() => handleDeleteProduct(product?.id)}
+                                        onClick={() => handleDeleteProduct(product?.id, product?.name)}
                                         className="flex-1 text-xs px-2 py-1 text-red-500"
                                     >
                                         <Trash2 className="w-3 h-3 mr-1" />
                                         Delete
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => navigate(`/admin/products/images/${product?.id}`)}
+                                        className="flex-1 text-xs px-2 py-1"
+                                    >
+                                        <TooltipProvider delayDuration={0}>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <div className="flex items-center">
+                                                        <Image className="w-3 h-3 mr-1" />
+                                                        <span>Images</span>
+                                                    </div>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>Add/Delete Images</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        </TooltipProvider>
                                     </Button>
                                 </div>
                             </div>
@@ -375,10 +419,29 @@ const ProductManagement = () => {
                                                     <Button
                                                         variant="outline"
                                                         size="sm"
-                                                        onClick={() => handleDeleteProduct(product.id)}
+                                                        onClick={() => handleDeleteProduct(product.id, product.name)}
                                                         className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5 text-red-500"
                                                     >
                                                         Delete
+                                                    </Button>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => navigate(`/admin/products/images/${product.id}`)}
+                                                        className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5"
+                                                    >
+                                                        <TooltipProvider delayDuration={0}>
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <div className="flex items-center">
+                                                                        <Image className="w-3 h-3 sm:w-4 sm:h-4" />
+                                                                    </div>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    <p>Add/Delete Images</p>
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        </TooltipProvider>
                                                     </Button>
                                                 </div>
                                             </td>
@@ -521,6 +584,20 @@ const ProductManagement = () => {
                     </motion.div>
                 </div>
             )}
+
+            {/* Delete Confirmation Popup */}
+            <PopupOnDelete
+                isOpen={deleteConfirmation.isOpen}
+                onClose={() => setDeleteConfirmation({
+                    isOpen: false,
+                    productId: null,
+                    productName: ""
+                })}
+                onConfirm={handleConfirmDelete}
+                title="Delete Product"
+                description={`Are you sure you want to delete "${deleteConfirmation.productName}"? This action cannot be undone.`}
+                loading={loading}
+            />
         </div>
     )
 }

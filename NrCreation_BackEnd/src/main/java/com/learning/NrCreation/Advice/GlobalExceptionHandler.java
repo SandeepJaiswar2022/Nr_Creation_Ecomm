@@ -15,6 +15,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.sql.SQLException;
 import java.time.LocalDateTime;
@@ -64,6 +65,14 @@ public class GlobalExceptionHandler {
 		System.out.println("InvalidInputException in resource not found\n\n");
 		return new ResponseEntity<>(new ApiResponse(ex.getMessage(), null), HttpStatus.NOT_FOUND);
 	}
+
+	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
+	public ResponseEntity<ApiResponse> handleArgumentMismatched(MethodArgumentTypeMismatchException ex) {
+//		System.out.println("Invalid Argument for this API!\n\n");
+		return new ResponseEntity<>(new ApiResponse("Invalid Argument for this API!", null), HttpStatus.BAD_REQUEST);
+	}
+
+
 
 
 	@ExceptionHandler(HttpMessageNotReadableException.class)

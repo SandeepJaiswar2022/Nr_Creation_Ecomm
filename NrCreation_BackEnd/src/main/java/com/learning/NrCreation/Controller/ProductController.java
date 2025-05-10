@@ -6,6 +6,7 @@ import com.learning.NrCreation.Response.ApiResponse;
 import com.learning.NrCreation.Response.ProductDTO;
 import com.learning.NrCreation.Service.Product.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -68,7 +69,13 @@ public class ProductController {
             productService.deleteProduct(productId);
             return new ResponseEntity<>(new ApiResponse("Product Deleted Successfully",null),
                     HttpStatus.OK);
-        } catch (Exception e) {
+        }
+        catch (DataIntegrityViolationException ex) {
+            return ResponseEntity.badRequest().body(
+                    new ApiResponse("Cannot delete product as it is associated with one or more cart items.", null)
+            );
+        }
+            catch (Exception e) {
             return new ResponseEntity<>(new ApiResponse(e.getMessage(), null),
                     HttpStatus.BAD_REQUEST);
         }

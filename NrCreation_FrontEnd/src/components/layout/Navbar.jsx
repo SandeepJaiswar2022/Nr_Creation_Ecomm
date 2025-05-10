@@ -83,7 +83,7 @@ const Navbar = () => {
               </Link>
               <div className="hidden lg:flex items-center space-x-2">
                 <span className="text-sm font-medium">Hi, {user?.firstName}</span>
-                <Button 
+                <Button
                   variant="ghost"
                   size="sm"
                   className="text-red-500 hover:text-red-600 hover:bg-red-50"
@@ -109,6 +109,7 @@ const Navbar = () => {
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+            <SheetTitle className="sr-only">Navigation Drawer</SheetTitle>
             <div className="mt-8 space-y-4">
               <MobileNavLink
                 to="/"

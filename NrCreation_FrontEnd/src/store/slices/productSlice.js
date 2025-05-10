@@ -3,12 +3,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import api from "../api";
 import { toast } from "react-toastify";
 import { normalizeError } from "@/utils/normalizeError";
-import { act } from "react";
-const BASE_URL = "https://fakestoreapi.com/products"; // Example API
 
-const token =
-  localStorage.getItem("adminToken") ||
-  `eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdXNoaWxrdW1hcnJvaGlkYXMwQGdtYWlsLmNvbSIsImlhdCI6MTc0NTA2MTA5NCwiZXhwIjoxNzQ1MTQ3NDk0fQ.K3j8u3rL5plQts2IRP3J9cgTfSPLAiRrd08iOnNuqFs`;
 
 // Async Thunk to fetch All product
 export const fetchProducts = createAsyncThunk(
@@ -59,17 +54,15 @@ export const fetchSingleProduct = createAsyncThunk(
   }
 );
 
+// Cannot destructure property 'id' of 'productDataWithId' as it is undefined.
+
 //Async Thunk to Update a Product
 export const updateProduct = createAsyncThunk(
   "products/updateProduct",
-  async ({productDataWithId}, { rejectWithValue }) => {
+  async (productDataWithId, { rejectWithValue }) => {
     try {
       const { id, ...productData } = productDataWithId;
-      const response = await api.put(`/product/update/${id}`, productData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.put(`/product/update/${id}`, productData);
       return response.data;
     } catch (error) {
       const message = normalizeError(error);
@@ -83,11 +76,7 @@ export const addProduct = createAsyncThunk(
   "products/addProduct",
   async (productData, { rejectWithValue }) => {
     try {
-      const response = await api.post(`/product/add`, productData, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.post(`/product/add`, productData);
       return response.data;
     } catch (error) {
       const message = normalizeError(error);
@@ -101,11 +90,7 @@ export const deleteProduct = createAsyncThunk(
   "products/deleteProduct",
   async (productId, { rejectWithValue }) => {
     try {
-      const response = await api.delete(`/product/delete/${productId}`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.delete(`/product/delete/${productId}`);
       return { productId, message: response.data?.message };
     } catch (error) {
       const message = normalizeError(error);
@@ -114,12 +99,66 @@ export const deleteProduct = createAsyncThunk(
   }
 );
 
+// Async Thunk to Delete a product
+export const deleteAnImageFromProduct = createAsyncThunk(
+  "products/deleteAnImageFromProduct",
+  async ({ deletedImageUrl, productId }, { rejectWithValue }) => {
+    try {
+      const response = await api.delete(`/image/delete/${productId}`,
+        {
+          params: { url: deletedImageUrl }
+        }
+      );
+      return { deletedImageUrl, message: response.data?.message };
+    } catch (error) {
+      const message = normalizeError(error);
+      return rejectWithValue(message);
+    }
+  }
+);
+
+
+// Async Thunk to Delete a product
+export const uploadProductImages = createAsyncThunk(
+  "product/uploadImages",
+  async ({ productId, images }, { rejectWithValue }) => {
+    try {
+      const formData = new FormData();
+      images.forEach((image) => {
+        formData.append("images", image);
+      });
+
+      console.log("My data images : ", images);
+      console.log("productid : ", productId);
+
+
+      const response = await api.post(
+        `/image/add/${productId}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      return response.data;
+    } catch (error) {
+      const message = normalizeError(error);
+      return rejectWithValue(message);
+    }
+  }
+);
+
+
+
 // Slice for managing product state
 const productSlice = createSlice({
   name: "product",
   initialState: {
     products: [],
     product: null,
+    productImages: [],
     categories: [],
     loading: false,
     error: null,
@@ -151,6 +190,7 @@ const productSlice = createSlice({
       .addCase(fetchSingleProduct.fulfilled, (state, action) => {
         state.loading = false;
         state.product = action.payload?.data;
+        state.productImages = action.payload?.data?.imageUrls;
         toast.success(action.payload?.message);
       })
       .addCase(fetchSingleProduct.rejected, (state, action) => {
@@ -171,6 +211,23 @@ const productSlice = createSlice({
         toast.success(message);
       })
       .addCase(deleteProduct.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        toast.error(action.payload);
+      })
+
+      // Delete product
+      .addCase(deleteAnImageFromProduct.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteAnImageFromProduct.fulfilled, (state, action) => {
+        state.loading = false;
+        const { deletedImageUrl, message } = action.payload;
+        state.productImages = state.productImages.filter(imageUrl => imageUrl != deletedImageUrl);
+        toast.success(message);
+      })
+      .addCase(deleteAnImageFromProduct.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
         toast.error(action.payload);
@@ -219,12 +276,31 @@ const productSlice = createSlice({
       .addCase(fetchAllCategories.fulfilled, (state, action) => {
         state.loading = false;
         state.categories = action.payload?.data || [];
-        toast.success(action.payload?.message);
+        // toast.success(action.payload?.message);
       })
       .addCase(fetchAllCategories.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
         // toast.error(action.payload);
+      })
+
+      // Upload the product Images
+      .addCase(uploadProductImages.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(uploadProductImages.fulfilled, (state, action) => {
+        state.loading = false;
+        console.log("Upload product : ", action.payload.data);
+        // console.log("productid : ", productId);
+
+        state.productImages = action.payload?.data?.imageUrls;
+        toast.success(action.payload?.message);
+      })
+      .addCase(uploadProductImages.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        toast.error(action.payload);
       })
   },
 });

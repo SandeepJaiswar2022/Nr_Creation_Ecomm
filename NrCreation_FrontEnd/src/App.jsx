@@ -20,6 +20,7 @@ import ContactPage from "./pages/ContactPage";
 // import OrdersPage from './pages/OrdersPage'
 import AdminDashboard from "./pages/adminPages/AdminDashboard";
 import ProductManagement from "./pages/adminPages/ProductManagement";
+import ProductImageAddUpdate from "./pages/adminPages/ProductImageAddUpdate";
 import OrderManagement from "./pages/adminPages/OrderManagement";
 import UserManagement from "./pages/adminPages/UserManagement";
 import Analytics from "./pages/adminPages/Analytics";
@@ -54,7 +55,7 @@ const App = () => {
         }
       } catch (err) {
         dispatch(clearAuthState())
-        console.error("Auto-refresh failed:", err);
+        // console.error("Auto-refresh failed:", err);
       } finally {
         setLoading(false);
       }
@@ -103,6 +104,7 @@ const App = () => {
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
               <Route path="products" element={<ProductManagement />} />
+              <Route path="products/images/:productId" element={<ProductImageAddUpdate />} />
               <Route path="orders" element={<OrderManagement />} />
               <Route path="users" element={<UserManagement />} />
               <Route path="analytics" element={<Analytics />} />
@@ -114,7 +116,7 @@ const App = () => {
 
         </Routes>
       </Router>
-      <ToastContainer position="top-right" autoClose={1000} />
+      <ToastContainer pauseOnHover={true} position="top-right" autoClose={2000} />
     </>
   );
 };

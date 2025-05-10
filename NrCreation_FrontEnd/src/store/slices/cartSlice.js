@@ -170,8 +170,13 @@ const cartSlice = createSlice({
         const { cartItemId, quantity, message } = action.payload || {};
         //find the index of the cartItem of the state and then update the quantity to that object
         const itemIndex = state.cartItems.findIndex(item => item.itemId === cartItemId);
+        let isDecreased = false;
         if (itemIndex !== -1) {
           const item = state.cartItems[itemIndex];
+          if (item.quantity > quantity) {
+            isDecreased = true;
+          }
+
           item.quantity = quantity;
           item.totalPrice = item.unitPrice * quantity;
         }
@@ -179,7 +184,10 @@ const cartSlice = createSlice({
         const totals = calculateTotals(state.cartItems);
         state.totalQuantity = totals.totalQuantity;
         state.cartTotalAmount = totals.totalPrice;
-        toast.success(message);
+        if (isDecreased)
+          toast.info(`Quantity Decreased Successfully!`);
+        else
+          toast.success(`Quantity Increased Successfully!`)
       })
       .addCase(updateQuantity.rejected, (state, action) => {
         state.loading = false;
