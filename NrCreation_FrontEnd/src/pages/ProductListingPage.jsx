@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
-import { Filter, SlidersHorizontal } from "lucide-react";
+import { Filter, SlidersHorizontal, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -18,6 +18,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { Input } from "@/components/ui/input";
 import ProductCard from "../components/ReusableComponents/ProductCard";
 import { mensProducts, womensProducts } from "../data/products";
 import { SkeletonLoader, EmptyState } from "@/components/ReusableComponents";
@@ -28,12 +29,93 @@ const ProductListingPage = () => {
   const { category } = useParams();
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState([0, 5000]);
-  const { products, loading, error } = useSelector((state) => state.product);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedFilters, setSelectedFilters] = useState({
+    priceLow: 0,
+    priceHigh: 100000,
+    category: "",
+    colors: "",
+    availability: "",
+    page: 1,
+    pageSize: 10,
+    sortOrFeaturedOrNewest: "featured"
+  });
+  const [tempFilters, setTempFilters] = useState(selectedFilters);
+  const { products, loading, error, totalPages } = useSelector((state) => state.product);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(fetchProducts());
-  }, [dispatch]);
+    dispatch(fetchProducts(selectedFilters));
+  }, [dispatch, selectedFilters.page, selectedFilters.pageSize, selectedFilters.sortOrFeaturedOrNewest]);
+
+  const handleFilterChange = (type, value) => {
+    setTempFilters(prev => ({
+      ...prev,
+      [type]: value
+    }));
+  };
+
+  const handleApplyFilters = () => {
+    setSelectedFilters(tempFilters);
+    dispatch(fetchProducts(tempFilters));
+    setShowFilters(false);
+  };
+
+  const handleSearch = () => {
+    if (searchTerm.trim()) {
+      console.log("Search Term:", searchTerm);
+      console.log("Filters with Search:", { ...selectedFilters, search: searchTerm });
+      setSearchTerm("");
+    }
+  };
+
+  const handleSortChange = (value) => {
+    let sortValue = value;
+    if (value === "price-asc") sortValue = "asc";
+    if (value === "price-desc") sortValue = "desc";
+
+    setSelectedFilters(prev => ({
+      ...prev,
+      sortOrFeaturedOrNewest: sortValue,
+      page: 1
+    }));
+  };
+
+  const handlePageChange = (newPage) => {
+    setSelectedFilters(prev => ({
+      ...prev,
+      page: newPage
+    }));
+  };
+
+  const handlePageSizeChange = (newSize) => {
+    setSelectedFilters(prev => ({
+      ...prev,
+      pageSize: newSize,
+      page: 1
+    }));
+  };
+
+  const clearFilters = () => {
+    const clearedFilters = {
+      priceLow: 0,
+      priceHigh: 1000000,
+      category: "",
+      colors: "",
+      availability: "",
+      page: 1,
+      pageSize: selectedFilters.pageSize,
+      sortOrFeaturedOrNewest: selectedFilters.sortOrFeaturedOrNewest
+    };
+    setTempFilters(clearedFilters);
+    setSelectedFilters(clearedFilters);
+    setPriceRange([0, 5000]);
+  };
+
+  const hasActiveFilters = () => {
+    return tempFilters.category || tempFilters.colors || tempFilters.availability ||
+      tempFilters.priceLow > 0 || tempFilters.priceHigh < 5000;
+  };
 
   if (loading) {
     return (
@@ -71,28 +153,54 @@ const ProductListingPage = () => {
         </p>
       </motion.div>
 
+      {/* Search Bar */}
+      {/* <div className="flex gap-2 mb-6">
+        <Input
+          placeholder="Search products..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="max-w-md"
+        />
+        <Button onClick={handleSearch} className="bg-[#871845] hover:bg-[#671234]">
+          <Search className="h-4 w-4" />
+        </Button>
+      </div> */}
+
       {/* Filters and Sort Bar */}
       <div className="flex items-center justify-between mb-6 sticky top-0 bg-white z-20 py-4 border-b">
         <Sheet open={showFilters} onOpenChange={setShowFilters}>
           <SheetTrigger asChild>
             <Button variant="outline" className="flex items-center gap-2 hover:text-[#871845] hover:border-[#871845]">
-              <SlidersHorizontal className="h-4 w-4 bg-red-200" />
+              <SlidersHorizontal className="h-4 w-4" />
               Filters
             </Button>
           </SheetTrigger>
           <SheetContent side="left" className="w-[20rem] px-4 flex flex-col">
             <div className="flex-1 overflow-y-auto mt-10">
-              <FilterContent priceRange={priceRange} setPriceRange={setPriceRange} />
+              <FilterContent
+                priceRange={priceRange}
+                setPriceRange={setPriceRange}
+                selectedFilters={tempFilters}
+                handleFilterChange={handleFilterChange}
+                clearFilters={clearFilters}
+              />
             </div>
-            <div className="mt-auto border-t ">
-              <Button className="w-full bg-[#871845] hover:bg-[#671234]">
+            <div className="mt-auto border-t pt-4">
+              <Button
+                className="w-full bg-[#871845] hover:bg-[#671234] disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleApplyFilters}
+                disabled={!hasActiveFilters()}
+              >
                 Apply Filters
               </Button>
             </div>
           </SheetContent>
         </Sheet>
 
-        <Select defaultValue="featured">
+        <Select
+          defaultValue="featured"
+          onValueChange={handleSortChange}
+        >
           <SelectTrigger className="w-[180px] border-[#871845] text-[#871845]">
             <SelectValue placeholder="Sort by" />
           </SelectTrigger>
@@ -132,78 +240,176 @@ const ProductListingPage = () => {
           </div>
         )}
       </div>
+
+      {/* Pagination */}
+      <div className="mt-10 flex flex-col gap-5 items-center justify-between">
+
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(selectedFilters.page - 1)}
+            disabled={selectedFilters.page === 1}
+            className="hover:text-[#871845] hover:border-[#871845]"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+
+          {Array.from({ length: totalPages }, (_, i) => i + 1).map((pageNum) => (
+            <Button
+              key={pageNum}
+              variant={selectedFilters.page === pageNum ? "default" : "outline"}
+              size="sm"
+              onClick={() => handlePageChange(pageNum)}
+              className={
+                selectedFilters.page === pageNum
+                  ? "bg-[#871845] text-white hover:bg-[#671234]"
+                  : "hover:text-[#871845] hover:border-[#871845]"
+              }
+            >
+              {pageNum}
+            </Button>
+          ))}
+
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => handlePageChange(selectedFilters.page + 1)}
+            disabled={selectedFilters.page === totalPages}
+            className="hover:text-[#871845] hover:border-[#871845]"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-gray-600">Show</span>
+          <Select
+            value={selectedFilters.pageSize.toString()}
+            onValueChange={(value) => handlePageSizeChange(Number(value))}
+          >
+            <SelectTrigger className="w-[80px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="10">10</SelectItem>
+              <SelectItem value="20">20</SelectItem>
+              <SelectItem value="30">30</SelectItem>
+              <SelectItem value="50">50</SelectItem>
+            </SelectContent>
+          </Select>
+          <span className="text-sm text-gray-600">per page</span>
+        </div>
+      </div>
     </div>
   );
 };
 
 // Filter Content Component
-const FilterContent = ({ priceRange, setPriceRange }) => (
-  <div className="space-y-8 px-2">
-    <SheetHeader>
-      <SheetTitle>Filters</SheetTitle>
-    </SheetHeader>
+const FilterContent = ({ priceRange, setPriceRange, selectedFilters, handleFilterChange, clearFilters }) => {
+  const handlePriceChange = (value) => {
+    setPriceRange(value);
+    handleFilterChange("priceLow", value[0]);
+    handleFilterChange("priceHigh", value[1]);
+  };
 
-    <div>
-      <h3 className="font-semibold mb-4">Price Range</h3>
-      <Slider
-        defaultValue={priceRange}
-        max={5000}
-        step={100}
-        className="mb-2"
-        onValueChange={setPriceRange}
-      />
-      <div className="flex justify-between text-sm text-[#871845]">
-        <span>₹{priceRange[0]}</span>
-        <span>₹{priceRange[1]}</span>
+  const hasActiveFilters = () => {
+    return selectedFilters.category || selectedFilters.colors || selectedFilters.availability ||
+      selectedFilters.priceLow > 0 || selectedFilters.priceHigh < 5000;
+  };
+
+  return (
+    <div className="space-y-8 px-2">
+      <SheetHeader>
+        <SheetTitle>Filters</SheetTitle>
+      </SheetHeader>
+
+      <div>
+        <h3 className="font-semibold mb-4">Price Range</h3>
+        <Slider
+          defaultValue={priceRange}
+          max={5000}
+          step={100}
+          className="mb-2 [&_[role=slider]]:h-4 [&_[role=slider]]:w-4 [&_[role=slider]]:bg-[#871845]"
+          onValueChange={handlePriceChange}
+        />
+        <div className="flex justify-between text-sm text-[#871845]">
+          <span>₹{priceRange[0]}</span>
+          <span>₹{priceRange[1]}</span>
+        </div>
       </div>
-    </div>
 
-    <div>
-      <h3 className="font-semibold mb-4">Categories</h3>
-      <div className="space-y-2">
-        {["All", "Bridal", "Silk", "Cotton", "Designer"].map((item) => (
+      <div>
+        <h3 className="font-semibold mb-4">Categories</h3>
+        <div className="space-y-2">
+          {["All", "Bridal", "Silk", "Cotton", "Designer"].map((item) => (
+            <Button
+              key={item}
+              variant={selectedFilters.category === item ? "default" : "ghost"}
+              className={`w-full justify-start ${selectedFilters.category === item
+                ? "bg-[#871845] text-white hover:bg-[#671234]"
+                : "hover:text-[#871845] hover:bg-pink-50"
+                }`}
+              onClick={() => handleFilterChange("category", item)}
+            >
+              {item}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h3 className="font-semibold mb-4">Colors</h3>
+        <div className="grid grid-cols-3 gap-2">
+          {["Red", "Blue", "Green", "Pink", "Purple", "Yellow", "Orange", "Black", "White"].map((color) => (
+            <Button
+              key={color}
+              variant={selectedFilters.colors === color ? "default" : "outline"}
+              size="sm"
+              className={`${selectedFilters.colors === color
+                ? "bg-[#871845] text-white hover:bg-[#671234]"
+                : "hover:text-[#871845] hover:border-[#871845]"
+                }`}
+              onClick={() => handleFilterChange("colors", color)}
+            >
+              {color}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h3 className="font-semibold mb-4">Availability</h3>
+        <div className="space-y-2">
+          {["In Stock", "Out of Stock"].map((status) => (
+            <Button
+              key={status}
+              variant={selectedFilters.availability === status ? "default" : "ghost"}
+              className={`w-full justify-start ${selectedFilters.availability === status
+                ? "bg-[#871845] text-white hover:bg-[#671234]"
+                : "hover:text-[#871845] hover:bg-pink-50"
+                }`}
+              onClick={() => handleFilterChange("availability", status)}
+            >
+              {status}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      <div className="mt-auto border-t pt-4">
+        {hasActiveFilters() && (
           <Button
-            key={item}
-            variant="ghost"
-            className="w-full justify-start hover:text-[#871845] hover:bg-pink-50"
+            className="w-full bg-red-600 hover:bg-red-700 mb-2"
+            onClick={clearFilters}
           >
-            {item}
+            Clear Filters
           </Button>
-        ))}
+        )}
       </div>
     </div>
-
-    <div>
-      <h3 className="font-semibold mb-4">Colors</h3>
-      <div className="grid grid-cols-3 gap-2">
-        {["Red", "Blue", "Green", "Pink", "Purple", "Yellow", "Orange", "Black", "White"].map((color) => (
-          <Button
-            key={color}
-            variant="outline"
-            size="sm"
-            className="hover:text-[#871845] hover:border-[#871845]"
-          >
-            {color}
-          </Button>
-        ))}
-      </div>
-    </div>
-
-    <div>
-      <h3 className="font-semibold mb-4">Material</h3>
-      <div className="space-y-2">
-        {["Silk", "Cotton", "Chiffon", "Net", "Georgette", "Crepe", "Chanderi", "Banarasi"].map((material) => (
-          <Button
-            key={material}
-            variant="ghost"
-            className="w-full justify-start hover:text-[#871845] hover:bg-pink-50"
-          >
-            {material}
-          </Button>
-        ))}
-      </div>
-    </div>
-  </div>
-);
+  );
+};
 
 export default ProductListingPage;

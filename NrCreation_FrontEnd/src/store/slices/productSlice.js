@@ -7,11 +7,23 @@ import api from "@/utils/api";
 // Async Thunk to fetch All product
 export const fetchProducts = createAsyncThunk(
   "products/fetchAll",
-  async (_, { rejectWithValue }) => {
+  async (selectedFilters, { rejectWithValue }) => {
     try {
       // const response = await axios.get(`${API_BASE_URL}/public/product/get/all`);
-      console.log("Slice : Get All product");
-      const response = await api.get("/public/product/get/all");
+      console.log("Slice : Get All product : ", selectedFilters);
+      const search = ""
+      const category = "dupattas"
+      const available = selectedFilters.avavailability === 'Out of Stock' ? false : true;
+      const low = selectedFilters.priceLow || 0;
+      const high = selectedFilters.priceHigh || 10000000;
+      const page = selectedFilters.page - 1 || 0;
+      const size = selectedFilters.pageSize || 10;
+      const sortDir = selectedFilters.sortOrFeaturedOrNewest || 'asc';
+
+
+      const response = await api.get(`/public/product/get-all`, {
+        params: { search, category, available, low, high, page, size, sortDir }
+      });
       return response.data;
     } catch (error) {
       const message = normalizeError(error);
@@ -157,6 +169,7 @@ const productSlice = createSlice({
   initialState: {
     products: [],
     product: null,
+    totalPages: 0,
     productImages: [],
     categories: [],
     loading: false,
@@ -173,7 +186,11 @@ const productSlice = createSlice({
       .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
         state.products = action.payload?.data || [];
-        toast.success(action.payload?.message);
+        state.totalPages = action.payload?.totalPages;
+        if (action.payload?.data?.length > 0)
+          toast.success(action.payload?.message);
+        else
+          toast.error("No products found with selected filters!")
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;

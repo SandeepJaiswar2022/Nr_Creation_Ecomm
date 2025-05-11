@@ -3,17 +3,20 @@ package com.learning.NrCreation.Controller;
 import com.learning.NrCreation.Entity.Category;
 import com.learning.NrCreation.Entity.Product;
 import com.learning.NrCreation.Response.ApiResponse;
+import com.learning.NrCreation.Response.PagedResponse;
 import com.learning.NrCreation.Response.ProductDTO;
 import com.learning.NrCreation.Service.Category.CategoryService;
 import com.learning.NrCreation.Service.Product.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,6 +87,42 @@ public class PublicController {
             return new ResponseEntity<>(new ApiResponse("No Image URLs found!",new ArrayList<>()), HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(new ApiResponse("Product Image URLs Fetched!",product.getImageUrls()), HttpStatus.OK);
+    }
+
+    @GetMapping("product/get-all")
+    public ResponseEntity<?> getAllTheProducts( @RequestParam(required = false) String search,
+                                                          @RequestParam(required = false) String category,
+                                                          @RequestParam(required = false) Boolean available,
+                                                @RequestParam(defaultValue = "0") BigDecimal low,
+                                                @RequestParam(defaultValue = "100000") BigDecimal high,
+                                                          @RequestParam(defaultValue = "0") int page,
+                                                          @RequestParam(defaultValue = "10") int size,
+                                                          @RequestParam(defaultValue = "asc") String sortDir)
+    {
+
+        System.out.println("\n\nSearch : "+search+"\nCategory : "+category+"\nAvailable : "+available+"\nPage : "+page+"\nSize : "+size+ "\nLow : "+low+"\nHigh : "+high);
+        int maxPageSize = 50;
+        if (size > maxPageSize) size = maxPageSize;
+
+        Sort.Direction direction;
+        try {
+            direction = Sort.Direction.fromString(sortDir);
+        } catch (IllegalArgumentException | NullPointerException e) {
+            direction = Sort.Direction.ASC;
+        }
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "price"));
+        Page<Product> productsPage = productService.getProductsBySearchFilterSort(search, category, available, low, high, pageable);
+
+        List<ProductDTO> productDTOs = productsPage.getContent()
+                .stream()
+                .map(productService::convertToDto)
+                .toList();
+
+        PagedResponse<ProductDTO> response = new PagedResponse<>(
+                "All Products Fetched", productDTOs, productsPage
+        );
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 }
