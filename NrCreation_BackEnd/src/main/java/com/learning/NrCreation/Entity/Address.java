@@ -13,14 +13,12 @@ import lombok.Setter;
 public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long addressId;
-
-    private String apartNo;
-    private String apartName;
-    private String streetName;
-    private String state;
+    private String address1;
+    private String address2;
     private String city;
-    private Integer pincode;
+    private String state;
+    private String pinCode;
+    private String country;
 
     @ManyToOne
     @JoinColumn(name = "customer_id")

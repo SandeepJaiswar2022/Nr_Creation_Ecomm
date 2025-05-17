@@ -36,7 +36,7 @@ public class AuthController {
 			@Valid @RequestBody RegisterRequest request,
 			HttpServletResponse response) {
 
-		Map<String,Object> registerResponse = authService.register(request);
+			Map<String,Object> registerResponse = authService.register(request);
 
 		// Send refresh token as HttpOnly cookie
 		ResponseCookie cookie = ResponseCookie.from("refreshToken", registerResponse.get("refreshToken").toString())

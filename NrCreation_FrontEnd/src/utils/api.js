@@ -1,6 +1,15 @@
 import axios from "axios";
+<<<<<<< Updated upstream:NrCreation_FrontEnd/src/utils/api.js
 import { store } from "@/store/store";
 import { clearAuthState, setAccessToken } from "@/store/slices/Auth/authSlice";
+=======
+import { store } from "./store";
+import {
+  clearAuthState,
+  logoutUser,
+  setAccessToken,
+} from "./slices/Auth/authSlice";
+>>>>>>> Stashed changes:NrCreation_FrontEnd/src/store/api.js
 
 export const API_BASE_URL = "http://localhost:8080/api/nr-creation/v1"; // Changed to http
 
@@ -17,7 +26,6 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
-
 
 // Response Interceptor – Handle 401 and refresh token flow
 api.interceptors.response.use(
@@ -52,7 +60,6 @@ api.interceptors.response.use(
   }
 );
 
-
-api.defaults.headers.post["Content-Type"] = "application/json"; // Fixed capitalization
+api.defaults.headers.post["Content-Type"] = "application/json";
 
 export default api;

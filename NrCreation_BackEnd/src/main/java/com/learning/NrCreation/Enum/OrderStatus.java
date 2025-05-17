@@ -2,8 +2,9 @@ package com.learning.NrCreation.Enum;
 
 public enum OrderStatus {
     PENDING,
-    PROCESSING,
+    CONFIRMED,
     SHIPPED,
     DELIVERED,
-    CANCELLED
+    CANCELLED,
+    PAYMENT_FAILED
 }

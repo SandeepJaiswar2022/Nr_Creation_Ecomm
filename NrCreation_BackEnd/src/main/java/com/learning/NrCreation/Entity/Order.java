@@ -28,9 +28,19 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
 
-@ManyToOne
-@JoinColumn(name = "customerId")
-private Customer customer;
+    // New field for Razorpay payment ID
+    private String razorpayPaymentId;
+    private String razorpayOrderId; // Razorpay order ID for tracking
+    private String shippingMethod; // e.g., "dtdc", "fasteg", "worldwide"
+
+    @ManyToOne
+    @JoinColumn(name = "shipping_address_id")
+    private Address shippingAddress;
+
+    @ManyToOne
+    @JoinColumn(name = "customerId")
+    private Customer customer;
+
     @OneToMany(mappedBy = "order")
     private List<Payment> payments;
 

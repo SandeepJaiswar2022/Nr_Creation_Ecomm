@@ -64,10 +64,7 @@ public class UserServiceImpl implements UserService {
 
 		Customer customer = customerOpt.get();
 
-		//UserDto has AddressDto, CartDTO, OrderDTO, ReviewDTO, PaymentDTO,
-		// Get all these DTOs and then set to the UserDTO,
 
- //Letter we will shift all these Conversion to respected Services (i.e., convertToCartDto in CartService)
 
 		//Converting to AddressDto
 		List<AddressDTO> addressDTOs = new ArrayList<>();
@@ -78,13 +75,11 @@ public class UserServiceImpl implements UserService {
 			for(Address address : customer.getAddresses())
 			{
 				AddressDTO addressDto = new AddressDTO();
-				addressDto.setAddressId(address.getAddressId());
-				addressDto.setApartNo(address.getApartNo());
-				addressDto.setApartName(address.getApartName());
+				addressDto.setAddress1(address.getAddress1());
+				addressDto.setAddress2(address.getAddress2());
 				addressDto.setCity(address.getCity());
 				addressDto.setState(address.getState());
-				addressDto.setStreetName(address.getStreetName());
-				addressDto.setPincode(address.getPincode());
+				addressDto.setPinCode(address.getPinCode());
 				addressDTOs.add(addressDto);
 			}
 		}
@@ -127,19 +122,21 @@ public class UserServiceImpl implements UserService {
 			{
 				OrderDTO orderDto = new OrderDTO();
 				orderDto.setOrderId(order.getOrderId());
-				orderDto.setUserId(order.getCustomer().getCustomerId());
+				orderDto.setCustomerId(order.getCustomer().getCustomerId());
 				orderDto.setOrderDate(order.getOrderDate());
 				orderDto.setOrderStatus(order.getOrderStatus().name());
-				orderDto.setTotalAmount(order.getOrderAmount());
-				List<OrderItemDTO> orderItemDTOs = new ArrayList<>();
+				orderDto.setOrderAmount(order.getOrderAmount());
+				Set<OrderItemDTO> orderItemDTOs = new HashSet<>();
 				for(OrderItem orderItem : order.getOrderItems())
 				{
-					OrderItemDTO orderItemDTO = new OrderItemDTO(orderItem.getProduct().getId()
-							,orderItem.getProduct().getName(),
-							orderItem.getQuantity(),orderItem.getPrice());
+					OrderItemDTO orderItemDTO = new OrderItemDTO();
+					orderItemDTO.setPrice(orderItem.getPrice());
+					orderItemDTO.setQuantity(orderItem.getQuantity());
+					orderItemDTO.setOriginalPrice(orderItem.getOriginalPrice());
+					orderItemDTO.setProductId(orderItem.getProductId());
 					orderItemDTOs.add(orderItemDTO);
 				}
-				orderDto.setItems(orderItemDTOs);
+				orderDto.setOrderItems(orderItemDTOs);
 				orderDTOs.add(orderDto);
 			}
 		}
@@ -166,11 +163,8 @@ public class UserServiceImpl implements UserService {
 		{
 			for(Payment payment : customer.getPayments())
 			{
-				PaymentDTO paymentDTO = new PaymentDTO(payment.getPaymentId(),
-						payment.getOrder().getOrderId(),
-						payment.getCustomer().getEmail(),
-						payment.getPaymentMode().name()
-						,payment.getDateOfPayment());
+				PaymentDTO paymentDTO = new PaymentDTO();
+				paymentDTO.setPaymentId(Long.valueOf(payment.getRazorpayPaymentId()));
 				paymentDTOs.add(paymentDTO);
 			}
 		}

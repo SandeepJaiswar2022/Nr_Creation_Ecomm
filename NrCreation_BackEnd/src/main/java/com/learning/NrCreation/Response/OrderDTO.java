@@ -1,23 +1,40 @@
 package com.learning.NrCreation.Response;
 
-import com.learning.NrCreation.Enum.OrderStatus;
+import com.learning.NrCreation.Entity.Address;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.http.ProblemDetail;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderDTO {
-	private Long orderId;
-    private Long userId;
+    private Long orderId;
     private LocalDate orderDate;
-    private BigDecimal totalAmount;
+    private BigDecimal orderAmount;
+    private Date shippingDate;
     private String orderStatus;
-    private List<OrderItemDTO> items;
+    private Long customerId;
+    private String razorpayOrderId; // For frontend to initiate payment
+    private Set<OrderItemDTO> orderItems;
+    private AddressDTO shippingAddress;
+    private String shippingMethod;
+    // Calculate total discount across all order items
+    public BigDecimal getTotalDiscountPrice() {
+        if (orderItems == null || orderItems.isEmpty()) {
+            return BigDecimal.ZERO;
+        }
+        return orderItems.stream()
+                .map(OrderItemDTO::getDiscount)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+
 }

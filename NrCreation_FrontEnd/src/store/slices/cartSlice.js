@@ -1,24 +1,31 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
 import { normalizeError } from "@/utils/normalizeError";
+<<<<<<< Updated upstream
 import api from "@/utils/api";
 
+=======
+let cartId = null;
+>>>>>>> Stashed changes
 // Async Thunks
 export const fetchCartItems = createAsyncThunk(
   "cart/fetchCartItems",
   async (_, { rejectWithValue }) => {
     try {
       const cartResponse = await api.get("/cart/my-cart");
-
-
-      return cartResponse.data
+      console.log(cartResponse.data);
+      if (cartResponse.data?.cartId) {
+        cartId = cartResponse.data.cartId;
+      } else {
+        cartId = null;
+      }
+      return cartResponse.data;
     } catch (error) {
       const message = normalizeError(error);
       return rejectWithValue(message);
     }
   }
 );
-
 
 export const updateQuantity = createAsyncThunk(
   "cart/updateQuantity",
@@ -36,7 +43,6 @@ export const updateQuantity = createAsyncThunk(
   }
 );
 
-
 export const addToCartAsync = createAsyncThunk(
   "cart/addToCartAsync",
   async ({ productId, quantity }, { rejectWithValue }) => {
@@ -53,14 +59,29 @@ export const addToCartAsync = createAsyncThunk(
   }
 );
 
+// Add this with other thunks
+export const deleteCartItem = createAsyncThunk(
+  "cart/deleteCartItem",
+  async ({ cartId, cartItemId }, { rejectWithValue }) => {
+    try {
+      console.log("cartId", cartId);
+      console.log("cartItemId", cartItemId);
+
+      const response = await api.delete(
+        `/cart-item/delete/${cartId}/${cartItemId}`
+      );
+      return { message: response.data?.message, cartItemId };
+    } catch (error) {
+      const message = normalizeError(error);
+      return rejectWithValue(message);
+    }
+  }
+);
+
 // Helper Functions
 const calculateTotals = (items) => {
-
   const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
-  const totalPrice = items.reduce(
-    (sum, item) => sum + item.totalPrice,
-    0
-  );
+  const totalPrice = items.reduce((sum, item) => sum + item.totalPrice, 0);
   return { totalQuantity, totalPrice };
 };
 
@@ -123,7 +144,7 @@ const cartSlice = createSlice({
         const totals = calculateTotals(action.payload?.data?.items || []);
         state.totalQuantity = totals.totalQuantity;
         state.cartTotalAmount = totals.totalPrice;
-        toast.success(action.payload?.message)
+        toast.success(action.payload?.message);
       })
       .addCase(fetchCartItems.rejected, (state, action) => {
         state.loading = false;
@@ -168,9 +189,17 @@ const cartSlice = createSlice({
       .addCase(updateQuantity.fulfilled, (state, action) => {
         state.loading = false;
         const { cartItemId, quantity, message } = action.payload || {};
+<<<<<<< Updated upstream
         //find the index of the cartItem of the state and then update the quantity to that object
         const itemIndex = state.cartItems.findIndex(item => item.itemId === cartItemId);
         let isDecreased = false;
+=======
+        //find the index of the cartItem of the
+        // state and then update the quantity to that object
+        const itemIndex = state.cartItems.findIndex(
+          (item) => item.itemId === cartItemId
+        );
+>>>>>>> Stashed changes
         if (itemIndex !== -1) {
           const item = state.cartItems[itemIndex];
           if (item.quantity > quantity) {
@@ -193,6 +222,28 @@ const cartSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
         toast.error(action.payload);
+      })
+      // Add these cases in extraReducers
+      .addCase(deleteCartItem.pending, (state) => {
+        state.loading = "deleting";
+        state.error = null;
+      })
+      .addCase(deleteCartItem.fulfilled, (state, action) => {
+        state.loading = false;
+        const { cartItemId, message } = action.payload;
+        state.cartItems = state.cartItems.filter(
+          (item) => item.itemId !== cartItemId
+        );
+
+        const totals = calculateTotals(state.cartItems);
+        state.totalQuantity = totals.totalQuantity;
+        state.cartTotalAmount = totals.totalPrice;
+        toast.success(message || "Item removed from cart");
+      })
+      .addCase(deleteCartItem.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        toast.error(action.payload);
       });
   },
 });
@@ -204,7 +255,6 @@ export const selectCartLoading = (state) => state.cart.loading;
 export const selectCartError = (state) => state.cart.error;
 
 // Actions
-export const { setCartItems, removeFromCart, clearCart } =
-  cartSlice.actions;
+export const { setCartItems, removeFromCart, clearCart } = cartSlice.actions;
 
 export default cartSlice.reducer;

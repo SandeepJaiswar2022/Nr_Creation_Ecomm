@@ -27,11 +27,24 @@ import { ToastContainer } from "react-toastify";
 import { ProtectedRoute } from "./routes";
 import AdminLayout from "./components/layout/AdminLayout";
 import { useDispatch, useSelector } from "react-redux";
+<<<<<<< Updated upstream
 import { clearAuthState, logoutUser, setAccessToken, setUser } from "./store/slices/Auth/authSlice";
 import { PageLoader } from "./components/ReusableComponents";
 import NewCartPage from "./pages/NewCartPage";
 import api from "./utils/api";
 
+=======
+import {
+  clearAuthState,
+  logoutUser,
+  setAccessToken,
+  setUser,
+} from "./store/slices/Auth/authSlice";
+import api from "./store/api";
+import { PageLoader } from "./components/ReusableComponents";
+import NewCartPage from "./pages/NewCartPage";
+import OrderSuccess from "./pages/OrderSuccess";
+>>>>>>> Stashed changes
 
 const App = () => {
   const dispatch = useDispatch();
@@ -45,13 +58,22 @@ const App = () => {
 
         if (!accessToken) {
           // console.log(`Token is not there then refresh it : `, accessToken);
-          const res = await api.post("/auth/refresh-token", {}, { withCredentials: true });
+          const res = await api.post(
+            "/auth/refresh-token",
+            {},
+            { withCredentials: true }
+          );
           dispatch(setAccessToken(res.data.data?.accessToken));
           dispatch(setUser(res.data.data?.user));
         }
       } catch (err) {
+<<<<<<< Updated upstream
         dispatch(clearAuthState())
         // console.error("Auto-refresh failed:", err);
+=======
+        dispatch(clearAuthState());
+        console.error("Auto-refresh failed:", err);
+>>>>>>> Stashed changes
       } finally {
         setLoading(false);
       }
@@ -61,9 +83,7 @@ const App = () => {
   }, [dispatch]);
 
   if (loading) {
-    return (
-      <PageLoader />
-    )
+    return <PageLoader />;
   }
 
   return (
@@ -91,9 +111,9 @@ const App = () => {
             <Route path="/checkout" element={<CheckoutPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/track-order" element={<OrderTrackingPage />} />
+            <Route path="/order-confirmation" element={<OrderSuccess />} />
             {/* <Route path="orders" element={<OrdersPage />} /> */}
           </Route>
-
 
           {/* Admin Routes */}
           <Route element={<ProtectedRoute allowedRoles={["ADMIN"]} />}>
@@ -109,7 +129,6 @@ const App = () => {
 
           {/* Catch other route if not above */}
           <Route path="*" element={<PageNotFound />} />
-
         </Routes>
       </Router>
       <ToastContainer pauseOnHover={true} position="top-right" autoClose={2000} />
