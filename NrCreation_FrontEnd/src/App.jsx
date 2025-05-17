@@ -1,7 +1,10 @@
 import {
   BrowserRouter as Router,
   Routes,
-  Route
+  Route,
+  Navigate,
+  Outlet,
+  Link,
 } from "react-router-dom";
 import RootLayout from "./components/layout/RootLayout";
 import HomePage from "./pages/HomePage";
@@ -17,23 +20,16 @@ import ContactPage from "./pages/ContactPage";
 // import OrdersPage from './pages/OrdersPage'
 import AdminDashboard from "./pages/adminPages/AdminDashboard";
 import ProductManagement from "./pages/adminPages/ProductManagement";
-import ProductImageAddUpdate from "./pages/adminPages/ProductImageAddUpdate";
 import OrderManagement from "./pages/adminPages/OrderManagement";
 import UserManagement from "./pages/adminPages/UserManagement";
 import Analytics from "./pages/adminPages/Analytics";
 import PageNotFound from "@/components/ReusableComponents/PageNotFound";
 import { useEffect, useState } from "react";
+import { Menu, X } from "lucide-react";
 import { ToastContainer } from "react-toastify";
 import { ProtectedRoute } from "./routes";
 import AdminLayout from "./components/layout/AdminLayout";
 import { useDispatch, useSelector } from "react-redux";
-<<<<<<< Updated upstream
-import { clearAuthState, logoutUser, setAccessToken, setUser } from "./store/slices/Auth/authSlice";
-import { PageLoader } from "./components/ReusableComponents";
-import NewCartPage from "./pages/NewCartPage";
-import api from "./utils/api";
-
-=======
 import {
   clearAuthState,
   logoutUser,
@@ -44,7 +40,6 @@ import api from "./store/api";
 import { PageLoader } from "./components/ReusableComponents";
 import NewCartPage from "./pages/NewCartPage";
 import OrderSuccess from "./pages/OrderSuccess";
->>>>>>> Stashed changes
 
 const App = () => {
   const dispatch = useDispatch();
@@ -67,13 +62,8 @@ const App = () => {
           dispatch(setUser(res.data.data?.user));
         }
       } catch (err) {
-<<<<<<< Updated upstream
-        dispatch(clearAuthState())
-        // console.error("Auto-refresh failed:", err);
-=======
         dispatch(clearAuthState());
         console.error("Auto-refresh failed:", err);
->>>>>>> Stashed changes
       } finally {
         setLoading(false);
       }
@@ -120,7 +110,6 @@ const App = () => {
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
               <Route path="products" element={<ProductManagement />} />
-              <Route path="products/images/:productId" element={<ProductImageAddUpdate />} />
               <Route path="orders" element={<OrderManagement />} />
               <Route path="users" element={<UserManagement />} />
               <Route path="analytics" element={<Analytics />} />
@@ -131,7 +120,7 @@ const App = () => {
           <Route path="*" element={<PageNotFound />} />
         </Routes>
       </Router>
-      <ToastContainer pauseOnHover={true} position="top-right" autoClose={2000} />
+      <ToastContainer position="top-right" autoClose={1000} />
     </>
   );
 };

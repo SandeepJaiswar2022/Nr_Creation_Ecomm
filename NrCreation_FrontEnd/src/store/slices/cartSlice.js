@@ -1,12 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { toast } from "react-toastify";
+import api from "../api";
 import { normalizeError } from "@/utils/normalizeError";
-<<<<<<< Updated upstream
-import api from "@/utils/api";
-
-=======
 let cartId = null;
->>>>>>> Stashed changes
 // Async Thunks
 export const fetchCartItems = createAsyncThunk(
   "cart/fetchCartItems",
@@ -189,23 +185,13 @@ const cartSlice = createSlice({
       .addCase(updateQuantity.fulfilled, (state, action) => {
         state.loading = false;
         const { cartItemId, quantity, message } = action.payload || {};
-<<<<<<< Updated upstream
-        //find the index of the cartItem of the state and then update the quantity to that object
-        const itemIndex = state.cartItems.findIndex(item => item.itemId === cartItemId);
-        let isDecreased = false;
-=======
         //find the index of the cartItem of the
         // state and then update the quantity to that object
         const itemIndex = state.cartItems.findIndex(
           (item) => item.itemId === cartItemId
         );
->>>>>>> Stashed changes
         if (itemIndex !== -1) {
           const item = state.cartItems[itemIndex];
-          if (item.quantity > quantity) {
-            isDecreased = true;
-          }
-
           item.quantity = quantity;
           item.totalPrice = item.unitPrice * quantity;
         }
@@ -213,10 +199,7 @@ const cartSlice = createSlice({
         const totals = calculateTotals(state.cartItems);
         state.totalQuantity = totals.totalQuantity;
         state.cartTotalAmount = totals.totalPrice;
-        if (isDecreased)
-          toast.info(`Quantity Decreased Successfully!`);
-        else
-          toast.success(`Quantity Increased Successfully!`)
+        toast.success(message);
       })
       .addCase(updateQuantity.rejected, (state, action) => {
         state.loading = false;
