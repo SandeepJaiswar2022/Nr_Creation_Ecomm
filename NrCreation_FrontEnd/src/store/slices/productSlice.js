@@ -11,7 +11,8 @@ export const fetchProducts = createAsyncThunk(
     try {
       // const response = await axios.get(`${API_BASE_URL}/public/product/get/all`);
       console.log("Slice : Get All product : ", selectedFilters);
-      const search = ""
+
+      const search = selectedFilters?.search || "";
       const category = "dupattas"
       const available = selectedFilters.avavailability === 'Out of Stock' ? false : true;
       const low = selectedFilters.priceLow || 0;

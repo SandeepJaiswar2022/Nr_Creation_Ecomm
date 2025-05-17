@@ -23,7 +23,7 @@ import {
 } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
 import { addProduct, deleteProduct, fetchAllCategories, fetchProducts, updateProduct } from "@/store/slices/productSlice"
-import { PageLoader } from "@/components/ReusableComponents"
+import { PageLoader, Pagination } from "@/components/ReusableComponents"
 import PopupOnDelete from "@/components/ReusableComponents/PopupOnDelete"
 import { useNavigate } from "react-router-dom"
 import {
@@ -47,10 +47,23 @@ const ProductManagement = () => {
         productName: ""
     })
 
-    // const categories = ["all", "Dupattas", "Lehengas", "Sarees", "Kurtis", "Blouses", "Suits"]
-    const statuses = ["all", "In Stock", "Low Stock", "Out of Stock"]
+    const [searchTerm, setSearchTerm] = useState("");
+    const [selectedFilters, setSelectedFilters] = useState({
+        priceLow: 0,
+        priceHigh: 100000,
+        search: "",
+        category: "",
+        colors: "",
+        availability: "",
+        page: 1,
+        pageSize: 10,
+        sortOrFeaturedOrNewest: "featured"
+    });
 
-    const { products, loading, categories } = useSelector(store => store.product);
+    // const categories = ["all", "Dupattas", "Lehengas", "Sarees", "Kurtis", "Blouses", "Suits"]
+    const statuses = ["All", "In Stock", "Low Stock", "Out of Stock",]
+
+    const { products, loading, categories, totalPages } = useSelector(store => store.product);
 
     const [productForm, setProductForm] = useState({
         name: "",
@@ -61,15 +74,67 @@ const ProductManagement = () => {
         description: "",
     });
 
+    const handleFilterChange = (type, value) => {
+        setTempFilters(prev => ({
+            ...prev,
+            [type]: value
+        }));
+    };
+
+    const handleApplyFilters = () => {
+        setSelectedFilters(tempFilters);
+        dispatch(fetchProducts(tempFilters));
+        setShowFilters(false);
+    };
+
+    const handleSearch = () => {
+        if (searchTerm.trim()) {
+            console.log("Search Term:", searchTerm);
+
+            setSelectedFilters(prev => ({
+                ...prev,
+                search: searchTerm,
+                page: 1
+            }));
+            // console.log("Filters with Search:", { ...selectedFilters, search: searchTerm });
+            setSearchTerm("");
+        }
+    };
+
+    const handleSortChange = (value) => {
+        let sortValue = value;
+        if (value === "price-asc") sortValue = "asc";
+        if (value === "price-desc") sortValue = "desc";
+
+        setSelectedFilters(prev => ({
+            ...prev,
+            sortOrFeaturedOrNewest: sortValue,
+            page: 1
+        }));
+    };
+
+    const handlePageChange = (newPage) => {
+        setSelectedFilters(prev => ({
+            ...prev,
+            page: newPage
+        }));
+    };
+
+    const handlePageSizeChange = (newSize) => {
+        setSelectedFilters(prev => ({
+            ...prev,
+            pageSize: newSize,
+            page: 1
+        }));
+    };
 
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
     useEffect(() => {
-        dispatch(fetchProducts());
-        dispatch(fetchAllCategories());
-    }, [dispatch])
-
+        dispatch(fetchProducts(selectedFilters));
+        dispatch(fetchAllCategories())
+    }, [dispatch, selectedFilters.search, selectedFilters.page, selectedFilters.pageSize, selectedFilters.sortOrFeaturedOrNewest]);
 
     useEffect(() => {
         if (isEditingProduct && editingProduct) {
@@ -94,24 +159,6 @@ const ProductManagement = () => {
         }
     }, [isAddingProduct, isEditingProduct, editingProduct]);
 
-
-
-
-
-    // Filter products based on search query, category, and status
-    // const filteredProducts = products.filter(product => {
-    //     const searchLower = searchQuery.toLowerCase()
-    //     const matchesSearch = searchQuery === "" ||
-    //         product.id.toLowerCase().includes(searchLower) ||
-    //         product.name.toLowerCase().includes(searchLower) ||
-    //         product.category.toLowerCase().includes(searchLower) ||
-    //         product.price.toLowerCase().includes(searchLower)
-
-    //     const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
-    //     const matchesStatus = selectedStatus === "all" || product.status === selectedStatus
-
-    //     return matchesSearch && matchesCategory && matchesStatus
-    // })
 
     //Dispatch Add Product
     const handleAddProduct = () => {
@@ -198,17 +245,20 @@ const ProductManagement = () => {
             </div>
 
             {/* Search and Filter */}
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4 sm:mb-6">
-                <div className="relative flex-1">
-                    <Search className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
+            <div className="grid grid-cols-1  lg:grid-cols-2   gap-2 mb-4 ">
+                {/* Search Bar */}
+                <div className="flex w-full gap-2">
                     <Input
                         placeholder="Search products..."
-                        className="pl-8 sm:pl-10 text-sm sm:text-base"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className=""
                     />
+                    <Button onClick={handleSearch} className="bg-[#871845] hover:bg-[#671234]">
+                        <Search className="h-4 w-4" />
+                    </Button>
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex w-full justify-end flex-wrap gap-2">
                     <Select onValueChange={setSelectedCategory}>
                         <SelectTrigger className="w-full sm:w-[180px] text-sm sm:text-base">
                             <SelectValue placeholder="Select Category" />
@@ -352,7 +402,7 @@ const ProductManagement = () => {
                             No Product Found
                         </div>
                     </div>) : (
-                        <div className="min-w-[800px]">
+                        <div className="min-w-[800px] space-y-5 py-2">
                             <table className="w-full">
                                 <thead>
                                     <tr className="bg-gray-50 border-b">
@@ -449,6 +499,7 @@ const ProductManagement = () => {
                                     )))}
                                 </tbody>
                             </table>
+                            <Pagination selectedFilters={selectedFilters} handlePageChange={handlePageChange} totalPages={totalPages} handlePageSizeChange={handlePageSizeChange} />
                         </div>)}
 
                 </div>

@@ -1,3 +1,5 @@
+import Pagination from './Pagination'
+
 // Loading States
 export { default as LoadingSpinner } from './LoadingSpinner'
 export { default as PageLoader } from './PageLoader'
@@ -9,6 +11,7 @@ export { default as EmptyState } from './EmptyState'
 export { default as ErrorBoundary } from './ErrorBoundary'
 export { default as Modal } from './Modal'
 export { default as Toast } from './Toast'
+export { Pagination }
 
 /*
 Component Descriptions:
