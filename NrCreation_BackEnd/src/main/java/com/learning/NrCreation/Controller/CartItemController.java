@@ -7,6 +7,7 @@ import com.learning.NrCreation.Entity.User;
 import com.learning.NrCreation.Exception.ResourceNotFoundException;
 import com.learning.NrCreation.Repository.CustomerRepository;
 import com.learning.NrCreation.Response.ApiResponse;
+import com.learning.NrCreation.Response.CartItemDTO;
 import com.learning.NrCreation.Service.Cart.CartItemService;
 import com.learning.NrCreation.Service.Cart.CartService;
 import com.learning.NrCreation.Service.User.UserService;
@@ -51,8 +52,9 @@ public class CartItemController {
             Cart cart = cartService.initializeNewCart(customer.get());
             log.debug("customer cart found ");
             CartItem cartItem= cartItemService.addItemToCart(cart.getCartId(), productId, quantity);
+            CartItemDTO cartItemDTO  = cartItemService.convertToCartItemDTO(cartItem);
             return new ResponseEntity<>(new
-                    ApiResponse("Item Added Successfully", cartItem), HttpStatus.OK);
+                    ApiResponse("Item Added Successfully", cartItemDTO), HttpStatus.OK);
         } catch (ResourceNotFoundException e) {
             return new ResponseEntity<>(new ApiResponse(e.getMessage(), null)
                     ,HttpStatus.NOT_FOUND);

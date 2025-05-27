@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.learning.NrCreation.Exception.InvalidInputException;
 import com.learning.NrCreation.Repository.CartItemRepository;
+import com.learning.NrCreation.Response.CartItemDTO;
 import com.learning.NrCreation.Service.Product.ProductService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -104,6 +105,19 @@ class CartItemServiceImpl implements CartItemService {
 				.stream()
 				.filter(item -> item.getProduct().getId().equals(productId))
 				.findFirst().orElseThrow(()-> new ResourceNotFoundException("Item not Found!"));
+	}
+
+	@Override
+	public CartItemDTO convertToCartItemDTO(CartItem cartItem) {
+
+		return new CartItemDTO(
+				cartItem.getId(),
+				cartItem.getQuantity(),
+				cartItem.getUnitPrice(),
+				cartItem.getProduct().getId(),
+				cartItem.getProduct().getImageUrls().get(0),
+				cartItem.getTotalPrice()
+		);
 	}
 
 	@Override

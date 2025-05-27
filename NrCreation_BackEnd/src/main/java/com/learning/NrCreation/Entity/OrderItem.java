@@ -20,7 +20,7 @@ public class OrderItem {
     private Long productId;
     private Integer quantity;
     private BigDecimal price; // Discounted price per unit
-    private BigDecimal originalPrice; // Original price per unit
+    private BigDecimal totalPrice;
 
     @ManyToOne
     @JoinColumn(name = "order_id")

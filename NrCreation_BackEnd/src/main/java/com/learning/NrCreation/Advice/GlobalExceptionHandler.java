@@ -5,6 +5,7 @@ import com.learning.NrCreation.Exception.AlreadyExistException;
 import com.learning.NrCreation.Exception.InvalidInputException;
 import com.learning.NrCreation.Exception.ResourceNotFoundException;
 import com.learning.NrCreation.Response.ApiResponse;
+import com.razorpay.RazorpayException;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
@@ -99,6 +100,11 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(MalformedJwtException.class)
 	public ResponseEntity<ApiResponse> handleMalformedJwtException(MalformedJwtException ex) {
+		return new ResponseEntity<>(new ApiResponse(ex.getMessage(),null),HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(RazorpayException.class)
+	public ResponseEntity<ApiResponse> handleRazorPayException(RazorpayException ex) {
 		return new ResponseEntity<>(new ApiResponse(ex.getMessage(),null),HttpStatus.BAD_REQUEST);
 	}
 

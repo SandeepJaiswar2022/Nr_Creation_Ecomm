@@ -8,6 +8,7 @@ import org.springframework.http.ProblemDetail;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -17,7 +18,7 @@ import java.util.Set;
 @NoArgsConstructor
 public class OrderDTO {
     private Long orderId;
-    private LocalDate orderDate;
+    private LocalDateTime orderDate;
     private BigDecimal orderAmount;
     private Date shippingDate;
     private String orderStatus;
@@ -32,7 +33,7 @@ public class OrderDTO {
             return BigDecimal.ZERO;
         }
         return orderItems.stream()
-                .map(OrderItemDTO::getDiscount)
+                .map(OrderItemDTO::getTotalPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 

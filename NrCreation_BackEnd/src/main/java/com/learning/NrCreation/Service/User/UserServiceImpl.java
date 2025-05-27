@@ -132,7 +132,7 @@ public class UserServiceImpl implements UserService {
 					OrderItemDTO orderItemDTO = new OrderItemDTO();
 					orderItemDTO.setPrice(orderItem.getPrice());
 					orderItemDTO.setQuantity(orderItem.getQuantity());
-					orderItemDTO.setOriginalPrice(orderItem.getOriginalPrice());
+					orderItemDTO.setTotalPrice(orderItem.getTotalPrice());
 					orderItemDTO.setProductId(orderItem.getProductId());
 					orderItemDTOs.add(orderItemDTO);
 				}

@@ -73,12 +73,14 @@ public class CartServiceImpl implements CartService{
 
     @Override
     public Cart initializeNewCart(Customer customer) {
-        return Optional.ofNullable(getCartByCustomerId(customer.getCustomerId()))
-                .orElseGet(()->{
+        System.out.println("M I initializing new Cart with customer: " + customer.getEmail());
+        return cartRepo.findByCustomer_CustomerId(customer.getCustomerId())
+                .orElseGet(() -> {
                     Cart cart = new Cart();
                     cart.setCustomer(customer);
                     return cartRepo.save(cart);
                 });
+
     }
 
     @Override
