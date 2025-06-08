@@ -9,6 +9,7 @@ import com.learning.NrCreation.Request.PaymentVerificationRequest;
 import com.learning.NrCreation.Response.ApiResponse;
 import com.learning.NrCreation.Response.OrderDTO;
 import com.learning.NrCreation.Service.Order.OrderService;
+import com.learning.NrCreation.Service.Razorpay.RazorpayService;
 import com.learning.NrCreation.Service.User.UserService;
 import com.razorpay.RazorpayException;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -28,6 +30,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OrderController {
     private final OrderService orderService;
+    private final RazorpayService razorpayService;
 
 
     @PostMapping("/place")
@@ -43,12 +46,16 @@ public class OrderController {
         return ResponseEntity.ok(orderService.getOrderById(orderId));
     }
 
-//    @PostMapping("/verify-payment")
-//    public ResponseEntity<String> verifyPayment(@RequestBody PaymentVerificationRequest request) throws RazorpayException {
-//        orderService.verifyPayment(request.getOrderId(),
-//                request.getRazorpayPaymentId(),
-//                request.getRazorpayOrderId(),
-//                request.getRazorpaySignature());
-//        return ResponseEntity.ok("Payment verified successfully");
-//    }
+    @PostMapping("/verify-payment")
+    public ResponseEntity<ApiResponse> verifyPayment(@RequestBody PaymentVerificationRequest request) {
+//        System.out.println("\n\nVerify payment request: " + request);
+        Boolean isPaymentVerified = razorpayService.verifyPayment(request);
+
+        Map<String,Object> response = new HashMap<>();
+        response.put("isPaymentVerified", isPaymentVerified);
+        String message = isPaymentVerified ? "Payment verified!" : "Payment not verified!";
+
+        return isPaymentVerified ? new ResponseEntity<>(new ApiResponse(message, response)
+                , HttpStatus.OK) : new ResponseEntity<>(new ApiResponse(message, response), HttpStatus.BAD_REQUEST) ;
+    }
 }

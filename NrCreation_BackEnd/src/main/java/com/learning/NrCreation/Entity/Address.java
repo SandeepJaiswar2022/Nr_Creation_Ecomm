@@ -1,6 +1,5 @@
 package com.learning.NrCreation.Entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -14,8 +13,9 @@ public class Address {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String address1;
-    private String address2;
+    private String fullName;
+    private String address;
+    private String phone;
     private String city;
     private String state;
     private String pinCode;

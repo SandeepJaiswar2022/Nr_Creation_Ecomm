@@ -36,10 +36,10 @@ import {
   setAccessToken,
   setUser,
 } from "./store/slices/Auth/authSlice";
-import api from "./store/api";
 import { PageLoader } from "./components/ReusableComponents";
 import NewCartPage from "./pages/NewCartPage";
 import OrderSuccess from "./pages/OrderSuccess";
+import api from "./utils/api";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -95,14 +95,15 @@ const App = () => {
 
           {/* user-only routes */}
           <Route element={<ProtectedRoute allowedRoles={["USER", "ADMIN"]} />}>
-            {/* <Route path="/cart" element={<CartPage />} /> */}
-            <Route path="/cart" element={<NewCartPage />} />
-            <Route path="/wishlist" element={<WishlistPage />} />
-            <Route path="/checkout" element={<CheckoutPage />} />
-            <Route path="/profile" element={<ProfilePage />} />
-            <Route path="/track-order" element={<OrderTrackingPage />} />
-            <Route path="/order-confirmation" element={<OrderSuccess />} />
-            {/* <Route path="orders" element={<OrdersPage />} /> */}
+            <Route path="/" element={<RootLayout />}>
+              <Route path="/cart" element={<NewCartPage />} />
+              <Route path="/wishlist" element={<WishlistPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
+              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/track-order" element={<OrderTrackingPage />} />
+              <Route path="/order-confirmation" element={<OrderSuccess />} />
+              {/* <Route path="orders" element={<OrdersPage />} /> */}
+            </Route>
           </Route>
 
           {/* Admin Routes */}

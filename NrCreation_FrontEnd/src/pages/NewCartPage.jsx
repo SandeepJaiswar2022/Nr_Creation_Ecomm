@@ -13,13 +13,13 @@ import { SkeletonLoader } from "@/components/ReusableComponents";
 import { Link } from "react-router-dom";
 const NewCartPage = () => {
   const dispatch = useDispatch();
-  const { cartItems, cartTotalAmount, cartLoading } = useSelector(
+  const { cartId, cartItems, cartTotalAmount, cartLoading } = useSelector(
     (state) => state.cart
   );
 
-  useEffect(() => {
-    dispatch(fetchCartItems());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(fetchCartItems());
+  // }, [dispatch]);
 
   const handleQuantityChange = (cartItemId, newQuantity) => {
     console.log("Quantity changed:", { cartItemId, quantity: newQuantity });
@@ -28,14 +28,13 @@ const NewCartPage = () => {
 
   const handleDelete = async (cartItemId) => {
     try {
-      // Get cartId from first item (assuming all items have same cartId)
-      const cartId = cartItems[0]?.cartId;
+
+      console.log("Deleting item with Cart ID : ", cartId, " and Item ID : ", cartItemId);
 
       if (!cartId) {
         toast.error("Cart ID not found");
         return;
       }
-      console.log("cartId for delete : ", cartId, "   :", cartItemId);
       await dispatch(deleteCartItem({ cartId, cartItemId })).unwrap();
     } catch (error) {
       console.error("Failed to delete item:", error);
@@ -118,7 +117,7 @@ const NewCartPage = () => {
                               Product #{item?.productId}
                             </h3>
                             <p className="text-muted-foreground text-sm">
-                              Unit Price: ₹{item?.unitPrice.toFixed(2)}
+                              Unit Price: ₹{item?.unitPrice?.toFixed(2)}
                             </p>
                           </div>
 
@@ -232,14 +231,15 @@ const NewCartPage = () => {
               <p className="text-muted-foreground mb-6">
                 Add items to your cart to see them here
               </p>
-              <Button className="bg-[#871845] hover:bg-[#671234]">
+              <Link onClick={() => console.log("Continue Shopping Clicked")
+              } to={`/category/dupattas`} className="bg-[#871845] text-white p-2 rounded-sm hover:bg-[#671234]">
                 Continue Shopping
-              </Button>
+              </Link>
             </motion.div>
           )}
         </motion.div>
       </div>
-    </div>
+    </div >
   );
 };
 

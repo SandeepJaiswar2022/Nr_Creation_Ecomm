@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import ProductCard from "@/components/ReusableComponents/ProductCard";
 import { featuredProducts } from "@/data/products";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ReviewSection from "@/components/ReusableComponents/ReviewSection";
 import { useDispatch, useSelector } from "react-redux";
@@ -31,6 +31,9 @@ const ProductDescription = () => {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState("reviews");
   const dispatch = useDispatch();
+
+  const navigate = useNavigate();
+
   const handleAddToCart = async () => {
     if (!product) {
       console.error("No product available to add to cart");
@@ -42,9 +45,15 @@ const ProductDescription = () => {
       quantity,
     };
 
-    // Dispatch the thunk
-    dispatch(addToCartAsync(cartItem));
+    try {
+      const response = await dispatch(addToCartAsync(cartItem)).unwrap();
+      // console.log("Cart item added:", response);
+      navigate("/cart"); // Redirect on success
+    } catch (err) {
+      console.error("Failed to add to cart:", err);
+    }
   };
+
   // const product = [...featuredProducts, ...womensProducts, ...mensProducts].find(product => product.id === id);
 
   const { product, loading, error } = useSelector((state) => state.product);
@@ -57,14 +66,14 @@ const ProductDescription = () => {
 
   useEffect(() => {
     if (product) {
-      console.log(product);
+      // console.log(product);
       setSelectedImage(product.imageUrls[0]);
       setQuantity(1);
       setSelectedColor("maroon");
       setSelectedSize("M");
     }
 
-    console.log(id);
+    // console.log(id);
   }, [product]);
 
   if (loading) {

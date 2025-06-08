@@ -4,11 +4,11 @@ package com.learning.NrCreation.Service.User;
 import com.learning.NrCreation.Entity.*;
 import com.learning.NrCreation.Exception.InvalidInputException;
 import com.learning.NrCreation.Exception.ResourceNotFoundException;
-import com.learning.NrCreation.Repository.CartRepository;
 import com.learning.NrCreation.Repository.CustomerRepository;
 import com.learning.NrCreation.Repository.UserRepository;
 import com.learning.NrCreation.Request.RegisterRequest;
 import com.learning.NrCreation.Response.*;
+import com.learning.NrCreation.Service.Address.AddressService;
 import com.learning.NrCreation.Service.Auth.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,7 +24,6 @@ public class UserServiceImpl implements UserService {
 	private final JwtService jwtService;
 	private final PasswordEncoder passwordEncoder;
 	private final CustomerRepository customerRepo;
-	private final CartRepository cartRepository;
 
 	@Override
 	public List<User> getAllUsers() {
@@ -64,8 +63,6 @@ public class UserServiceImpl implements UserService {
 
 		Customer customer = customerOpt.get();
 
-
-
 		//Converting to AddressDto
 		List<AddressDTO> addressDTOs = new ArrayList<>();
 
@@ -74,12 +71,16 @@ public class UserServiceImpl implements UserService {
 		{
 			for(Address address : customer.getAddresses())
 			{
-				AddressDTO addressDto = new AddressDTO();
-				addressDto.setAddress1(address.getAddress1());
-				addressDto.setAddress2(address.getAddress2());
-				addressDto.setCity(address.getCity());
-				addressDto.setState(address.getState());
-				addressDto.setPinCode(address.getPinCode());
+				AddressDTO addressDto = new AddressDTO(
+						address.getId(),
+						address.getAddress(),
+						address.getFullName(),
+						address.getPhone(),
+						address.getCity(),
+						address.getState(),
+						address.getPinCode(),
+						address.getCountry()
+				);
 				addressDTOs.add(addressDto);
 			}
 		}

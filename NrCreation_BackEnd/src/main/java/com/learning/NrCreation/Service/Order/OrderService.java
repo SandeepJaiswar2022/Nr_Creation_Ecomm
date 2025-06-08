@@ -18,5 +18,4 @@ public interface OrderService {
     OrderDTO getOrderById(Long orderId);
     List<OrderDTO> getOrderByUserId(Long userId);
     public OrderDTO convertToDto(Order order);
-    void verifyPayment(Long orderId, String razorpayPaymentId, String razorpayOrderId, String razorpaySignature) throws RazorpayException;
 }

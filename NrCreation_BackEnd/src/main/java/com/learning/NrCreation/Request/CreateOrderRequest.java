@@ -7,7 +7,6 @@ import java.util.List;
 
 @Data
 public class CreateOrderRequest {
-    private List<CartItemDTO> cartItems;
     private Long shippingAddressId;
     private String shippingMethod;
 }

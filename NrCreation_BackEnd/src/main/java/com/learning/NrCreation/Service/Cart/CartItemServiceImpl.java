@@ -62,9 +62,9 @@ class CartItemServiceImpl implements CartItemService {
 	}
 
 	@Override
-	public void removeItemFromCart(Long cartId, Long productId) {
+	public void removeItemFromCart(Long cartId, Long cartItemId) {
 		Cart cart = cartService.getCartById(cartId);
-		CartItem itemToRemove = getCartItem(cartId, productId);
+		CartItem itemToRemove = getCartItem(cartId, cartItemId);
 		
 		cart.removeItem(itemToRemove);
 		cartRepo.save(cart);
@@ -99,12 +99,12 @@ class CartItemServiceImpl implements CartItemService {
 	}
 
 	@Override
-	public CartItem getCartItem(Long cartId, Long productId) {
+	public CartItem getCartItem(Long cartId, Long cartItemId) {
 		Cart cart = cartService.getCartById(cartId);
 		return cart.getItems()
 				.stream()
-				.filter(item -> item.getProduct().getId().equals(productId))
-				.findFirst().orElseThrow(()-> new ResourceNotFoundException("Item not Found!"));
+				.filter(item -> item.getId().equals(cartItemId))
+				.findFirst().orElseThrow(()-> new ResourceNotFoundException("Cart Item not Found!"));
 	}
 
 	@Override

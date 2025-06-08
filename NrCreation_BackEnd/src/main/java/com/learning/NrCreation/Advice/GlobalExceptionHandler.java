@@ -4,6 +4,7 @@ package com.learning.NrCreation.Advice;
 import com.learning.NrCreation.Exception.AlreadyExistException;
 import com.learning.NrCreation.Exception.InvalidInputException;
 import com.learning.NrCreation.Exception.ResourceNotFoundException;
+import com.learning.NrCreation.Exception.UnauthorizedAccessException;
 import com.learning.NrCreation.Response.ApiResponse;
 import com.razorpay.RazorpayException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -105,6 +106,11 @@ public class GlobalExceptionHandler {
 
 	@ExceptionHandler(RazorpayException.class)
 	public ResponseEntity<ApiResponse> handleRazorPayException(RazorpayException ex) {
+		return new ResponseEntity<>(new ApiResponse(ex.getMessage(),null),HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(UnauthorizedAccessException.class)
+	public ResponseEntity<ApiResponse> handleUnauthorizedAccess(RazorpayException ex) {
 		return new ResponseEntity<>(new ApiResponse(ex.getMessage(),null),HttpStatus.BAD_REQUEST);
 	}
 

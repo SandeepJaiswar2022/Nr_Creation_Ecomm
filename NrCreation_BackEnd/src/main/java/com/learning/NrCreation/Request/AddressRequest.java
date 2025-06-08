@@ -3,9 +3,10 @@ package com.learning.NrCreation.Request;
 import lombok.Data;
 
 @Data
-public class CreateAddressRequest {
-    private String address1;
-    private String address2;
+public class AddressRequest {
+    private String fullName;
+    private String phone;
+    private String address;
     private String city;
     private String state;
     private String pinCode;

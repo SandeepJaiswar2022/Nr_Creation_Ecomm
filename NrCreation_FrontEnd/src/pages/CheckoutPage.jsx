@@ -2,16 +2,47 @@ import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { CreditCard, MapPin, Truck } from "lucide-react";
+import { CreditCard, MapPin, Truck, Plus } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { selectCartTotal, fetchCartItems } from "@/store/slices/cartSlice";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
-  createPayment,
-  updatePayment,
   clearPaymentState,
+  createRazorpayOrder,
+  verifyRazorpayPayment,
 } from "@/store/slices/Payment/paymentSlice";
+import {
+  fetchAddresses,
+  addAddress,
+  selectAddresses,
+  selectSelectedAddress,
+  setSelectedAddress,
+  getSelectedAddressId,
+} from "@/store/slices/addressSlice";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { addressSchema, INDIAN_STATES } from "@/schemas/addressSchema";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import "@/styles/scrollbar.css";
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -21,6 +52,11 @@ const CheckoutPage = () => {
   const cartItems = useSelector((state) => state.cart.cartItems);
   const cartTotal = useSelector(selectCartTotal);
   const cartLoading = useSelector((state) => state.cart.loading);
+  const addresses = useSelector(selectAddresses);
+  const selectedAddress = useSelector(selectSelectedAddress);
+  const selectedAddressId = useSelector(getSelectedAddressId);
+  const { user } = useSelector((state) => state.auth);
+  const addressLoading = useSelector((state) => state.address.loading);
 
   // Fix: Check if state.payment exists before destructuring
   const payment = useSelector((state) => state.payment);
@@ -31,51 +67,22 @@ const CheckoutPage = () => {
 
   // Local state
   const [shippingMethod, setShippingMethod] = useState("dtdc");
-  const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    address1: "",
-    address2: "",
-    city: "",
-    state: "",
-    pinCode: "",
-    country: "India",
+  const [showAddressForm, setShowAddressForm] = useState(false);
+  const [showAllAddresses, setShowAllAddresses] = useState(false);
+
+  // Form setup
+  const form = useForm({
+    resolver: zodResolver(addressSchema),
+    defaultValues: {
+      name: "",
+      phone: "",
+      address: "",
+      city: "",
+      state: "",
+      pinCode: "",
+      country: "India",
+    },
   });
-  const [errors, setErrors] = useState({});
-
-  // Form input change handler
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
-  };
-
-  // Form validation
-  const validateForm = () => {
-    const newErrors = {};
-    if (!formData.firstName) newErrors.firstName = "First name is required";
-    if (!formData.email) newErrors.email = "Email is required";
-    else if (!/\S+@\S+\.\S+/.test(formData.email))
-      newErrors.email = "Invalid email format";
-    if (!formData.phone) newErrors.phone = "Phone number is required";
-    else if (!/^\d{10}$/.test(formData.phone))
-      newErrors.phone = "Phone number must be 10 digits";
-    if (!formData.address1) newErrors.address1 = "Address is required";
-    if (!formData.city) newErrors.city = "City is required";
-    if (!formData.pinCode) newErrors.pinCode = "PIN code is required";
-    else if (!/^\d{6}$/.test(formData.pinCode))
-      newErrors.pinCode = "PIN code must be 6 digits";
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
 
   // Calculate order totals
   const orderTotals = useMemo(() => {
@@ -85,10 +92,10 @@ const CheckoutPage = () => {
       shippingMethod === "dtdc"
         ? 99
         : shippingMethod === "fasteg"
-        ? 199
-        : shippingMethod === "worldwide"
-        ? 299
-        : 99;
+          ? 199
+          : shippingMethod === "worldwide"
+            ? 299
+            : 99;
     const total = subtotal + shipping + tax;
 
     return { subtotal, tax, shipping, total };
@@ -97,45 +104,95 @@ const CheckoutPage = () => {
   // Order details for payment
   const orderDetails = useMemo(
     () => ({
-      customerName: `${formData.firstName} ${formData.lastName}`.trim(),
-      customerEmail: formData.email,
-      customerPhone: formData.phone,
-      shippingAddress: {
-        address1: formData.address1,
-        address2: formData.address2,
-        city: formData.city,
-        state: formData.state,
-        pinCode: formData.pinCode,
-        country: formData.country,
-      },
+      customerName: selectedAddress?.name || "",
+      customerPhone: selectedAddress?.phone || "",
+      shippingAddress: selectedAddress
+        ? {
+          address: selectedAddress.address,
+          city: selectedAddress.city,
+          state: selectedAddress.state,
+          pinCode: selectedAddress.pinCode,
+          country: selectedAddress.country,
+        }
+        : null,
       items: cartItems.map((item) => ({
         productId: item.productId,
         quantity: item.quantity,
-        price: item.totalPrice / item.quantity, // Assuming totalPrice is quantity * price
+        price: item.totalPrice / item.quantity,
       })),
       shippingMethod,
       totalAmount: orderTotals.total,
     }),
-    [formData, cartItems, shippingMethod, orderTotals]
+    [selectedAddress, cartItems, shippingMethod, orderTotals]
   );
-  const { user } = useSelector((state) => state.auth);
-  console.log("User Details : ", user);
-
-  console.log("Order Details  : ", orderDetails);
 
   // Handle place order
-  const handlePlaceOrder = () => {
-    if (!validateForm()) {
-      toast.error("Please fill in all required fields correctly");
+  const handlePlaceOrder = async () => {
+    if (!selectedAddress) {
+      toast.error("Please select a delivery address");
       return;
     }
 
-    console.log("Order Details:", orderDetails);
-    // Get customerId from authenticated user (e.g., from JWT or Redux)
-    // const customerId = localStorage.getItem("customerId"); // Replace with actual logic
+    const orderPayload = {
+      shippingAddressId: selectedAddress?.addressId,
+      shippingMethod,
+    };
 
-    // Dispatch createPayment
-    dispatch(createPayment({ orderDetails }));
+    console.log("Order Details:", orderPayload);
+    try {
+      // Step 1: Create Order on backend
+      const razorpayOrderData = await dispatch(createRazorpayOrder(orderPayload)).unwrap();
+
+      console.log("Create order response:", razorpayOrderData);
+
+
+      const options = {
+        key: "rzp_test_fq5xX9fbSikzL0", // Replace this
+        amount: razorpayOrderData?.amount,
+        currency: razorpayOrderData?.currency,
+        order_id: razorpayOrderData?.razorpayOrderId,
+
+        handler: async function (response) {
+          console.log("Response from Razorpay : ", response);
+          const paymentVerificationData = {
+            razorpayOrderId: response.razorpay_order_id,
+            razorpayPaymentId: response.razorpay_payment_id,
+            razorpaySignature: response.razorpay_signature,
+          };
+
+          try {
+            // Step 2: Verify Payment
+            await dispatch(verifyRazorpayPayment(paymentVerificationData)).unwrap();
+            console.log("✅ Payment verified and order updated successfully!");
+          } catch (verifyError) {
+            console.error("❌ Error verifying payment:", verifyError);
+          }
+        },
+        prefill: {
+          name: (user?.firstName + user?.lastName) || "Guest User",
+          contact: selectedAddress?.phone || "0000000000",
+          email: user?.email || "guest980@gmail.com",
+        },
+        theme: {
+          color: "#3399cc",
+        },
+      };
+      const rzp = new window.Razorpay(options);
+      rzp.open();
+    } catch (createError) {
+      console.error("❌ Error creating Razorpay order:", createError);
+    }
+  };
+
+  // Handle address form submission
+  const onSubmit = async (data) => {
+    try {
+      await dispatch(addAddress(data)).unwrap();
+      setShowAddressForm(false);
+      form.reset();
+    } catch (error) {
+      toast.error(error);
+    }
   };
 
   // Handle payment status changes
@@ -146,22 +203,30 @@ const CheckoutPage = () => {
         state: {
           orderId: paymentData.orderId,
           paymentId: paymentData.razorpayPaymentId,
-          shippingDetails: formData,
+          shippingDetails: selectedAddress,
         },
       });
-      dispatch(clearPaymentState()); // Reset payment state
+      dispatch(clearPaymentState());
     } else if (paymentStatus === "failed" && paymentError) {
       toast.error(paymentError || "Payment failed. Please try again.");
     }
-  }, [paymentStatus, paymentError, paymentData, navigate, dispatch, formData]);
+  }, [paymentStatus, paymentError, paymentData, navigate, dispatch, selectedAddress]);
 
-  // Fetch cart items on mount
+  // Fetch addresses on mount
   useEffect(() => {
-    dispatch(fetchCartItems());
+    dispatch(fetchAddresses());
   }, [dispatch]);
 
+  // Set first address as selected by default when addresses are loaded
+  useEffect(() => {
+    if (addresses.length > 0 && !selectedAddress) {
+      if (selectedAddressId)
+        dispatch(setSelectedAddress(selectedAddressId));
+    }
+  }, [addresses, selectedAddress, dispatch, selectedAddressId]);
+
   // Loading and empty cart states
-  if (cartLoading || paymentLoading) {
+  if (cartLoading || paymentLoading || addressLoading) {
     return (
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-8">Checkout</h1>
@@ -195,151 +260,236 @@ const CheckoutPage = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white p-6 rounded-lg shadow-sm"
+            className="bg-white p-6 rounded-lg border border-[#871845] shadow-sm"
           >
-            <div className="flex items-center gap-2 mb-6">
-              <MapPin className="h-5 w-5 text-[#871845]" />
-              <h2 className="text-xl font-semibold">Shipping Information</h2>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-5 w-5 text-[#871845]" />
+                <h2 className="text-xl font-semibold">Shipping Information</h2>
+              </div>
+              {!showAddressForm && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowAddressForm(true)}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="h-4 w-4" />
+                  Add New Address
+                </Button>
+              )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {showAddressForm ? (
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={form.control}
+                      name="name"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Full Name</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="phone"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Phone</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="tel"
+                              maxLength={10}
+                              {...field}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/\D/g, '');
+                                field.onChange(value);
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="md:col-span-2">
+                      <FormField
+                        control={form.control}
+                        name="address"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Address</FormLabel>
+                            <FormControl>
+                              <Textarea
+                                {...field}
+                                placeholder="Enter your complete address"
+                                className="resize-none"
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <FormField
+                      control={form.control}
+                      name="city"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>City</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="state"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>State</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a state" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent className="max-h-[200px] overflow-y-auto custom-scrollbar">
+                              <div className="pr-2">
+                                {INDIAN_STATES.map((state) => (
+                                  <SelectItem key={state} value={state}>
+                                    {state}
+                                  </SelectItem>
+                                ))}
+                              </div>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="pinCode"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>PIN Code</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              maxLength={6}
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/\D/g, '');
+                                field.onChange(value);
+                              }}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="country"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Country</FormLabel>
+                          <FormControl>
+                            <Input {...field} disabled />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-4">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => setShowAddressForm(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit" className="bg-[#871845] hover:bg-[#611031]">
+                      Save & Deliver Here
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            ) : showAllAddresses ? (
+              <div className="space-y-4">
+                {addresses.map((address) => (
+                  <div
+                    key={address?.addressId}
+                    className="p-4 border rounded-lg hover:border-[#871845] transition-colors"
+                  >
+                    <div className="space-y-1">
+                      <p className="font-medium">{address?.name}</p>
+                      <p className="text-sm text-gray-600">{address?.phone}</p>
+                      <p className="text-sm text-gray-600">{address?.address}</p>
+                      <p className="text-sm text-gray-600">
+                        {address?.city}, {address?.state} - {address?.pinCode}
+                      </p>
+                      <p className="text-sm text-gray-600">{address?.country}</p>
+                    </div>
+                    <div className="mt-4 flex justify-end">
+                      <Button
+                        onClick={() => {
+                          // console.log(" address id  : ", address?.addressId);
+
+                          dispatch(setSelectedAddress(address?.addressId));
+                          setShowAllAddresses(false);
+                        }}
+                        className="bg-[#871845] hover:bg-[#611031]"
+                      >
+                        Deliver Here
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
               <div>
-                <label className="block text-sm font-medium mb-1">
-                  First Name <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleInputChange}
-                  className={errors.firstName ? "border-red-500" : ""}
-                />
-                {errors.firstName && (
-                  <p className="text-red-500 text-xs mt-1">
-                    {errors.firstName}
-                  </p>
+                {selectedAddress && (
+                  <div className="p-4 border border-[#871845] rounded-lg bg-[#871845]/5">
+                    <div className="space-y-1">
+                      <p className="font-medium">{selectedAddress.name}</p>
+                      <p className="text-sm text-gray-600">{selectedAddress.phone}</p>
+                      <p className="text-sm text-gray-600">{selectedAddress.address}</p>
+                      <p className="text-sm text-gray-600">
+                        {selectedAddress.city}, {selectedAddress.state} - {selectedAddress.pinCode}
+                      </p>
+                      <p className="text-sm text-gray-600">{selectedAddress.country}</p>
+                    </div>
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowAllAddresses(true)}
+                      className="mt-4"
+                    >
+                      Change Address
+                    </Button>
+                  </div>
                 )}
               </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Last Name
-                </label>
-                <Input
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleInputChange}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Email <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  type="email"
-                  name="email"
-                  value={formData.email}
-                  onChange={handleInputChange}
-                  className={errors.email ? "border-red-500" : ""}
-                />
-                {errors.email && (
-                  <p className="text-red-500 text-xs mt-1">{errors.email}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Phone <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  type="tel"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  className={errors.phone ? "border-red-500" : ""}
-                />
-                {errors.phone && (
-                  <p className="text-red-500 text-xs mt-1">{errors.phone}</p>
-                )}
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1">
-                  Address Line 1 <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  name="address1"
-                  value={formData.address1}
-                  onChange={handleInputChange}
-                  className={errors.address1 ? "border-red-500" : ""}
-                />
-                {errors.address1 && (
-                  <p className="text-red-500 text-xs mt-1">{errors.address1}</p>
-                )}
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium mb-1">
-                  Address Line 2
-                </label>
-                <Input
-                  name="address2"
-                  value={formData.address2}
-                  onChange={handleInputChange}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  City <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  name="city"
-                  value={formData.city}
-                  onChange={handleInputChange}
-                  className={errors.city ? "border-red-500" : ""}
-                />
-                {errors.city && (
-                  <p className="text-red-500 text-xs mt-1">{errors.city}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">State</label>
-                <Input
-                  name="state"
-                  value={formData.state}
-                  onChange={handleInputChange}
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  PIN Code <span className="text-red-500">*</span>
-                </label>
-                <Input
-                  name="pinCode"
-                  value={formData.pinCode}
-                  onChange={handleInputChange}
-                  className={errors.pinCode ? "border-red-500" : ""}
-                />
-                {errors.pinCode && (
-                  <p className="text-red-500 text-xs mt-1">{errors.pinCode}</p>
-                )}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-1">
-                  Country
-                </label>
-                <Input
-                  name="country"
-                  value={formData.country}
-                  onChange={handleInputChange}
-                  disabled
-                />
-              </div>
-            </div>
+            )}
           </motion.div>
 
           {/* Shipping Method */}
@@ -347,68 +497,57 @@ const CheckoutPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
-            className="bg-white p-6 rounded-lg shadow-sm"
+            className="bg-white p-6 border border-[#871845] rounded-lg shadow-sm"
           >
             <div className="flex items-center gap-2 mb-6">
               <Truck className="h-5 w-5 text-[#871845]" />
               <h2 className="text-xl font-semibold">Shipping Method</h2>
             </div>
 
-            <div className="space-y-4">
-              <label className="flex items-center p-4 border rounded-lg cursor-pointer hover:border-[#871845] transition-colors">
-                <input
-                  type="radio"
-                  name="shipping"
-                  value="dtdc"
-                  checked={shippingMethod === "dtdc"}
-                  onChange={() => setShippingMethod("dtdc")}
-                  className="text-[#871845]"
-                />
-                <div className="ml-4 flex-1">
-                  <p className="font-medium">Standard Shipping (DTDC)</p>
-                  <p className="text-sm text-gray-500">
-                    Delivery in 5-7 business days
-                  </p>
-                </div>
+            <RadioGroup
+              value={shippingMethod}
+              onValueChange={setShippingMethod}
+              className="space-y-4"
+            >
+              <div className="flex items-center p-4 border rounded-lg cursor-pointer hover:border-[#871845] transition-colors">
+                <RadioGroupItem value="dtdc" id="dtdc" />
+                <Label htmlFor="dtdc" className="flex-1 ml-4 cursor-pointer">
+                  <div>
+                    <p className="font-medium">Standard Shipping (DTDC)</p>
+                    <p className="text-sm text-gray-500">
+                      Delivery in 5-7 business days
+                    </p>
+                  </div>
+                </Label>
                 <span className="font-medium">₹99</span>
-              </label>
+              </div>
 
-              <label className="flex items-center p-4 border rounded-lg cursor-pointer hover:border-[#871845] transition-colors">
-                <input
-                  type="radio"
-                  name="shipping"
-                  value="fasteg"
-                  checked={shippingMethod === "fasteg"}
-                  onChange={() => setShippingMethod("fasteg")}
-                  className="text-[#871845]"
-                />
-                <div className="ml-4 flex-1">
-                  <p className="font-medium">Express Shipping (FastEG)</p>
-                  <p className="text-sm text-gray-500">
-                    Delivery in 2-3 business days
-                  </p>
-                </div>
+              <div className="flex items-center p-4 border rounded-lg cursor-pointer hover:border-[#871845] transition-colors">
+                <RadioGroupItem value="fasteg" id="fasteg" />
+                <Label htmlFor="fasteg" className="flex-1 ml-4 cursor-pointer">
+                  <div>
+                    <p className="font-medium">Express Shipping (FastEG)</p>
+                    <p className="text-sm text-gray-500">
+                      Delivery in 2-3 business days
+                    </p>
+                  </div>
+                </Label>
                 <span className="font-medium">₹199</span>
-              </label>
+              </div>
 
-              <label className="flex items-center p-4 border rounded-lg cursor-pointer hover:border-[#871845] transition-colors">
-                <input
-                  type="radio"
-                  name="shipping"
-                  value="worldwide"
-                  checked={shippingMethod === "worldwide"}
-                  onChange={() => setShippingMethod("worldwide")}
-                  className="text-[#871845]"
-                />
-                <div className="ml-4 flex-1">
-                  <p className="font-medium">International Shipping</p>
-                  <p className="text-sm text-gray-500">
-                    Delivery in 7-14 business days
-                  </p>
-                </div>
+              <div className="flex items-center p-4 border rounded-lg cursor-pointer hover:border-[#871845] transition-colors">
+                <RadioGroupItem value="worldwide" id="worldwide" />
+                <Label htmlFor="worldwide" className="flex-1 ml-4 cursor-pointer">
+                  <div>
+                    <p className="font-medium">International Shipping</p>
+                    <p className="text-sm text-gray-500">
+                      Delivery in 7-14 business days
+                    </p>
+                  </div>
+                </Label>
                 <span className="font-medium">₹299</span>
-              </label>
-            </div>
+              </div>
+            </RadioGroup>
           </motion.div>
 
           {/* Payment Method */}
@@ -416,7 +555,7 @@ const CheckoutPage = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="bg-white p-6 rounded-lg shadow-sm"
+            className="bg-white p-6 border border-[#871845] rounded-lg shadow-sm"
           >
             <div className="flex items-center gap-2 mb-6">
               <CreditCard className="h-5 w-5 text-[#871845]" />
@@ -440,7 +579,7 @@ const CheckoutPage = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="bg-white p-6 rounded-lg shadow-sm sticky top-8"
+            className="bg-white p-6 border border-[#871845] rounded-lg shadow-sm sticky top-24"
           >
             <h2 className="text-xl font-semibold mb-6">Order Summary</h2>
 
@@ -494,7 +633,7 @@ const CheckoutPage = () => {
             <Button
               className="w-full mt-6 bg-[#871845] hover:bg-[#611031]"
               onClick={handlePlaceOrder}
-              disabled={paymentLoading}
+              disabled={paymentLoading || !selectedAddress}
             >
               {paymentLoading ? "Processing..." : "Place Order"}
             </Button>

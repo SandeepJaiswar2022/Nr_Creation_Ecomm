@@ -9,9 +9,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { selectUniqueItemsCount } from "@/store/slices/cartSlice";
+import { fetchCartItems, selectUniqueItemsCount } from "@/store/slices/cartSlice";
 import { logoutUser } from "@/store/slices/Auth/authSlice";
 const Navbar = () => {
   const location = useLocation();
@@ -22,6 +22,11 @@ const Navbar = () => {
   const handleLogout = () => {
     dispatch(logoutUser());
   };
+
+  useEffect(() => {
+    dispatch(fetchCartItems())
+  }, [dispatch]);
+
   const uniqueItemsCount = useSelector(selectUniqueItemsCount);
 
   const { totalQuantity } = useSelector((state) => state.cart);
