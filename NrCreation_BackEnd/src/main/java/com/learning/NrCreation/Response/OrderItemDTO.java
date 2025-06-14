@@ -14,6 +14,7 @@ public class OrderItemDTO {
     private Long productId;
     private Integer quantity;
     private BigDecimal price; // Discounted price per unit
-    private BigDecimal totalPrice; // Original price per unit
+    private BigDecimal totalPrice;
+    private String imageUrl;// Original price per unit
 
 }

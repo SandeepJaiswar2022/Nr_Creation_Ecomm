@@ -17,12 +17,11 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderDTO {
-    private Long orderId;
     private LocalDateTime orderDate;
     private BigDecimal orderAmount;
     private Date shippingDate;
     private String orderStatus;
-    private Long customerId;
+    private String razorpayPaymentId;
     private String razorpayOrderId; // For frontend to initiate payment
     private Set<OrderItemDTO> orderItems;
     private AddressDTO shippingAddress;

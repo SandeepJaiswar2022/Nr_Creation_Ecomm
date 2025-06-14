@@ -2,20 +2,17 @@ import { Link, useLocation } from "react-router-dom";
 import { Search, ShoppingCart, User, Menu, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { fetchCartItems, selectUniqueItemsCount } from "@/store/slices/cartSlice";
 import { logoutUser } from "@/store/slices/Auth/authSlice";
+import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
+
 const Navbar = () => {
   const location = useLocation();
-  const [isOpen, setIsOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const dispatch = useDispatch();
   const { user, accessToken } = useSelector((state) => state.auth);
   // console.log("user : ", user);
@@ -26,6 +23,12 @@ const Navbar = () => {
   useEffect(() => {
     dispatch(fetchCartItems())
   }, [dispatch]);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 1024);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const uniqueItemsCount = useSelector(selectUniqueItemsCount);
 
@@ -77,28 +80,53 @@ const Navbar = () => {
             </span>
           </Link>
           {accessToken ? (
-            <div className="flex items-center space-x-4">
-              <Link
-                to="/profile"
-                variant="ghost"
-                size="icon"
-                className="bg-gray-300 p-2 rounded-sm hover:bg-gray-400"
-              >
-                <User className="h-5 w-5" />
-              </Link>
-              <div className="hidden lg:flex items-center space-x-2">
-                <span className="text-sm font-medium">Hi, {user?.firstName}</span>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="text-red-500 hover:text-red-600 hover:bg-red-50"
-                  onClick={handleLogout}
-                >
-                  <LogOut className="h-4 w-4 mr-2" />
-                  Logout
+            isMobile ? (
+              // Mobile: show Sheet
+              <>
+                <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setIsMobileSheetOpen(true)}>
+                  <User className="h-5 w-5" />
                 </Button>
+                <Sheet open={isMobileSheetOpen} onOpenChange={setIsMobileSheetOpen}>
+                  <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                    <SheetTitle className="sr-only">Account</SheetTitle>
+                    <div className="mt-8 space-y-4">
+                      <Link to="/profile" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={() => setIsMobileSheetOpen(false)}>My Profile</Link>
+                      <Link to="/orders" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={() => setIsMobileSheetOpen(false)}>My Orders</Link>
+                      <button onClick={() => { handleLogout(); setIsMobileSheetOpen(false); }} className="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-100">Logout</button>
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              </>
+            ) : (
+              // Desktop: show dropdown
+              <div className="flex items-center space-x-4 relative group" onMouseLeave={() => setIsDropdownOpen(false)}>
+                <div
+                  className="relative flex space-x-3 p-1.5 cursor-pointer rounded-md bg-gray-300 px-2 hover:bg-gray-400"
+                  onMouseEnter={() => setIsDropdownOpen(true)}
+                  onFocus={() => setIsDropdownOpen(true)}
+                  tabIndex={0}
+                  aria-haspopup="true" aria-expanded={isDropdownOpen}
+                >
+
+                  <User className="h-5 w-5" />
+                  <span>Account</span>
+                  {isDropdownOpen && (
+                    <div
+                      className="absolute right-0 w-48 top-9 bg-white border border-gray-200 rounded-md shadow-lg z-50"
+                      onMouseEnter={() => setIsDropdownOpen(true)}
+                      onMouseLeave={() => setIsDropdownOpen(false)}
+                    >
+                      <Link to="/profile" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={() => setIsDropdownOpen(false)}>My Profile</Link>
+                      <Link to="/orders" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={() => setIsDropdownOpen(false)}>My Orders</Link>
+                      <button onClick={() => { handleLogout(); setIsDropdownOpen(false); }} className="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-100">Logout</button>
+                    </div>
+                  )}
+                </div>
+                <div className="hidden lg:flex items-center space-x-2">
+                  <span className="text-sm font-medium">Hi, {user?.firstName}</span>
+                </div>
               </div>
-            </div>
+            )
           ) : (
             <Link to="/auth" className="hidden px-3 py-1.5 rounded-lg bg-[#871845] text-white hover:bg-[#611031] lg:flex">
               Login
@@ -107,60 +135,7 @@ const Navbar = () => {
         </div>
 
         {/* Menu Button - Show on md and below */}
-        <Sheet open={isOpen} onOpenChange={setIsOpen}>
-          <SheetTrigger asChild>
-            <Button variant="ghost" size="icon" className="lg:hidden">
-              <Menu className="h-6 w-6" />
-            </Button>
-          </SheetTrigger>
-          <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-            <SheetTitle className="sr-only">Navigation Drawer</SheetTitle>
-            <div className="mt-8 space-y-4">
-              <MobileNavLink
-                to="/"
-                isActive={location.pathname === "/"}
-                onClick={() => setIsOpen(false)}
-              >
-                Home
-              </MobileNavLink>
-              <MobileNavLink
-                to="category/men"
-                isActive={location.pathname === "/category/men"}
-                onClick={() => setIsOpen(false)}
-              >
-                Dupattas
-              </MobileNavLink>
-              {accessToken ? (
-                <>
-                  <MobileNavLink
-                    to="/profile"
-                    isActive={location.pathname === "/profile"}
-                    onClick={() => setIsOpen(false)}
-                  >
-                    Profile
-                  </MobileNavLink>
-                  <button
-                    onClick={() => {
-                      handleLogout();
-                      setIsOpen(false);
-                    }}
-                    className="w-full text-left text-red-500 hover:text-red-600 text-lg font-medium"
-                  >
-                    Logout
-                  </button>
-                </>
-              ) : (
-                <MobileNavLink
-                  to="/auth"
-                  isActive={location.pathname === "/auth"}
-                  onClick={() => setIsOpen(false)}
-                >
-                  Login
-                </MobileNavLink>
-              )}
-            </div>
-          </SheetContent>
-        </Sheet>
+        {/* Removed Sheet and mobile nav logic */}
       </div>
 
       {/* Mobile Search - Visible only on mobile */}
@@ -187,21 +162,6 @@ const NavLink = ({ to, children, isActive }) => (
     {children}
     <div
       className={`absolute -bottom-1 left-0 rounded-full w-full h-[0.2rem] bg-[#871845] transform transition-transform duration-300 ${isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
-        }`}
-    />
-  </Link>
-);
-
-const MobileNavLink = ({ to, children, isActive, onClick }) => (
-  <Link
-    to={to}
-    onClick={onClick}
-    className={`block w-fit text-lg font-medium hover:text-[#871845] transition-colors relative ${isActive ? "text-[#871845]" : ""
-      }`}
-  >
-    {children}
-    <div
-      className={`absolute -bottom-1 left-0 w-full h-[0.2rem] rounded-full bg-[#871845] transform transition-transform duration-300 ${isActive ? "scale-x-100" : "scale-x-0 group-hover:scale-x-100"
         }`}
     />
   </Link>

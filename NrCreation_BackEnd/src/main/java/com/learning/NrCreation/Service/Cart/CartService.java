@@ -10,7 +10,7 @@ public interface CartService {
 
     CartDTO getCartDTOResponseById(Long cartId);
     Cart getCartById(Long cartId);
-    void clearCart(Long cartId);
+    void clearCart(String authHeader);
     BigDecimal getTotalPrice(Long cartId);
     Cart getCartByCustomerId(Long customerId);
     Cart initializeNewCart(Customer user);

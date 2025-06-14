@@ -74,7 +74,7 @@ const CheckoutPage = () => {
   const form = useForm({
     resolver: zodResolver(addressSchema),
     defaultValues: {
-      name: "",
+      fullName: "",
       phone: "",
       address: "",
       city: "",
@@ -104,7 +104,7 @@ const CheckoutPage = () => {
   // Order details for payment
   const orderDetails = useMemo(
     () => ({
-      customerName: selectedAddress?.name || "",
+      customerName: selectedAddress?.fullName || "",
       customerPhone: selectedAddress?.phone || "",
       shippingAddress: selectedAddress
         ? {
@@ -138,13 +138,12 @@ const CheckoutPage = () => {
       shippingMethod,
     };
 
-    console.log("Order Details:", orderPayload);
+    // console.log("Order Details:", orderPayload);
     try {
       // Step 1: Create Order on backend
       const razorpayOrderData = await dispatch(createRazorpayOrder(orderPayload)).unwrap();
 
       console.log("Create order response:", razorpayOrderData);
-
 
       const options = {
         key: "rzp_test_fq5xX9fbSikzL0", // Replace this
@@ -153,7 +152,7 @@ const CheckoutPage = () => {
         order_id: razorpayOrderData?.razorpayOrderId,
 
         handler: async function (response) {
-          console.log("Response from Razorpay : ", response);
+          // console.log("Response from Razorpay : ", response);
           const paymentVerificationData = {
             razorpayOrderId: response.razorpay_order_id,
             razorpayPaymentId: response.razorpay_payment_id,
@@ -187,6 +186,8 @@ const CheckoutPage = () => {
   // Handle address form submission
   const onSubmit = async (data) => {
     try {
+      console.log("Address data to dispatch ");
+
       await dispatch(addAddress(data)).unwrap();
       setShowAddressForm(false);
       form.reset();
@@ -286,7 +287,7 @@ const CheckoutPage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
-                      name="name"
+                      name="fullName"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Full Name</FormLabel>
@@ -442,7 +443,7 @@ const CheckoutPage = () => {
                     className="p-4 border rounded-lg hover:border-[#871845] transition-colors"
                   >
                     <div className="space-y-1">
-                      <p className="font-medium">{address?.name}</p>
+                      <p className="font-medium">{address?.fullName}</p>
                       <p className="text-sm text-gray-600">{address?.phone}</p>
                       <p className="text-sm text-gray-600">{address?.address}</p>
                       <p className="text-sm text-gray-600">
@@ -471,7 +472,7 @@ const CheckoutPage = () => {
                 {selectedAddress && (
                   <div className="p-4 border border-[#871845] rounded-lg bg-[#871845]/5">
                     <div className="space-y-1">
-                      <p className="font-medium">{selectedAddress.name}</p>
+                      <p className="font-medium">{selectedAddress.fullName}</p>
                       <p className="text-sm text-gray-600">{selectedAddress.phone}</p>
                       <p className="text-sm text-gray-600">{selectedAddress.address}</p>
                       <p className="text-sm text-gray-600">

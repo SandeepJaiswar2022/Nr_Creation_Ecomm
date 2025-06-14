@@ -1,5 +1,6 @@
 package com.learning.NrCreation.Controller;
 
+import com.cloudinary.Api;
 import com.learning.NrCreation.Entity.Customer;
 import com.learning.NrCreation.Entity.Order;
 import com.learning.NrCreation.Entity.User;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -38,13 +40,20 @@ public class OrderController {
         Map<String, String> orderResponse = orderService.createOrder(authHeader, orderRequest);
         return new ResponseEntity<>(new ApiResponse("Order Creation Initiated!", orderResponse)
                 , HttpStatus.OK);
-
     }
 
     @GetMapping("/{orderId}")
     public ResponseEntity<OrderDTO> getOrder(@PathVariable Long orderId) {
         return ResponseEntity.ok(orderService.getOrderById(orderId));
     }
+
+    @GetMapping("/my-orders")
+    public ResponseEntity<ApiResponse> getMyOrders(@RequestHeader("Authorization") String authHeader) {
+        List<OrderDTO> allOrders = orderService.getParticularCustomerAllOrders(authHeader);
+        return new ResponseEntity<>(new ApiResponse("Orders Fetched!", allOrders)
+                , HttpStatus.OK);
+    }
+
 
     @PostMapping("/verify-payment")
     public ResponseEntity<ApiResponse> verifyPayment(@RequestBody PaymentVerificationRequest request) {

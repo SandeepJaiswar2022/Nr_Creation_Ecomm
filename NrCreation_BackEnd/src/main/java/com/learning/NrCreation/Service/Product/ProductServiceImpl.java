@@ -116,16 +116,22 @@ public class ProductServiceImpl implements ProductService{
     }
 
     @Override
+    @Transactional
     public List<String> addImagesToProduct(Long productId, List<MultipartFile> images) throws IOException {
         Product product = getProductById(productId);
         List<String> imageUrls = product.getImageUrls();
+        System.out.println("\nimageUrls : " + imageUrls);
+
         for (MultipartFile image : images) {
             String imageUrl = cloudinaryService.uploadImage(image);
+            System.out.println("Image url : " + imageUrl);
             imageUrls.add(imageUrl);
         }
+
+        System.out.println("\n\nSaving to product : ");
         product.setImageUrls(imageUrls);
         productRepo.save(product);
-
+        System.out.println("\n\nSaved to product : ");
         return product.getImageUrls();
     }
 

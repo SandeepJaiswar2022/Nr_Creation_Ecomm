@@ -327,7 +327,7 @@ const HomePage = () => {
           </div>
 
           <div className="mt-10 text-center">
-            <Link to="/products">
+            <Link to="/category/dupattas">
               <Button variant="outline" size="lg" className="border-[#871845] text-[#871845] hover:bg-[#871845] hover:text-white">
                 View All Products <ArrowRight className="ml-2 h-4 w-4" />
               </Button>

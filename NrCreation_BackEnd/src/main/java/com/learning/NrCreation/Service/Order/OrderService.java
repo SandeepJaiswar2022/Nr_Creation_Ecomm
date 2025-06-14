@@ -16,6 +16,6 @@ public interface OrderService {
     Map<String, String> createOrder(String authHeader, CreateOrderRequest orderRequest) throws RazorpayException;
 
     OrderDTO getOrderById(Long orderId);
-    List<OrderDTO> getOrderByUserId(Long userId);
+    List<OrderDTO> getParticularCustomerAllOrders(String authHeader);
     public OrderDTO convertToDto(Order order);
 }

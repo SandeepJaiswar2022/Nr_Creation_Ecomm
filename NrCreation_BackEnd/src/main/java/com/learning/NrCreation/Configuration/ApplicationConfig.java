@@ -2,6 +2,7 @@ package com.learning.NrCreation.Configuration;
 
 
 import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.learning.NrCreation.Exception.ResourceNotFoundException;
 import com.learning.NrCreation.Repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,12 +37,12 @@ public class ApplicationConfig {
 
 
 	@Bean
-	public Cloudinary getCloudinary() {
-		Map config = new HashMap();
-		config.put("cloud_name", cloudName);
-		config.put("api_key", apiKey);
-		config.put("api_secret", apiSecret);
-		return new Cloudinary(config);
+	public Cloudinary cloudinary() {
+		return new Cloudinary(ObjectUtils.asMap(
+				"cloud_name", cloudName,
+				"api_key", apiKey,
+				"api_secret", apiSecret
+		));
 	}
 	
 	@Bean

@@ -64,12 +64,12 @@ public class CartController {
         }
     }
 
-    @DeleteMapping("/{cartId}")
+    @DeleteMapping("/clear-cart")
     @PreAuthorize("hasAnyAuthority('admin:delete','user:delete')")
-    public ResponseEntity<ApiResponse> clearCart(@PathVariable Long cartId)
+    public ResponseEntity<ApiResponse> clearCart(@RequestHeader("Authorization") String authHeader)
     {
         try {
-            cartService.clearCart(cartId);
+            cartService.clearCart(authHeader);
             return new ResponseEntity<>(new ApiResponse("Cart Cleared Successfully", null)
                     ,HttpStatus.OK);
         } catch (Exception e) {

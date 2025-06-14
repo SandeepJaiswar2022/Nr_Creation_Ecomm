@@ -60,7 +60,7 @@ public class AuthController {
 
 	@PostMapping("/login")
 	public ResponseEntity<ApiResponse> authenticate(
-			@RequestBody LoginRequest request,
+			@Valid @RequestBody LoginRequest request,
 			HttpServletResponse response) {
 
 		Map<String,Object> loginResponse = authService.login(request);

@@ -42,7 +42,7 @@ export const INDIAN_STATES = [
 ];
 
 export const addressSchema = z.object({
-    name: z.string().min(1, "Name is required"),
+    fullName: z.string().min(1, "Name is required"),
     phone: z.string()
         .min(10, "Phone number must be 10 digits")
         .max(10, "Phone number must be 10 digits")

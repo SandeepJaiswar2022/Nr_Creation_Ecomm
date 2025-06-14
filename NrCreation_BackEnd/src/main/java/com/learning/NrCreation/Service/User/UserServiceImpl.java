@@ -122,8 +122,7 @@ public class UserServiceImpl implements UserService {
 			for(Order order : customer.getOrders())
 			{
 				OrderDTO orderDto = new OrderDTO();
-				orderDto.setOrderId(order.getOrderId());
-				orderDto.setCustomerId(order.getCustomer().getCustomerId());
+
 				orderDto.setOrderDate(order.getOrderDate());
 				orderDto.setOrderStatus(order.getOrderStatus().name());
 				orderDto.setOrderAmount(order.getOrderAmount());
@@ -135,6 +134,7 @@ public class UserServiceImpl implements UserService {
 					orderItemDTO.setQuantity(orderItem.getQuantity());
 					orderItemDTO.setTotalPrice(orderItem.getTotalPrice());
 					orderItemDTO.setProductId(orderItem.getProductId());
+					orderItemDTO.setImageUrl(orderItem.getImageUrl());
 					orderItemDTOs.add(orderItemDTO);
 				}
 				orderDto.setOrderItems(orderItemDTOs);

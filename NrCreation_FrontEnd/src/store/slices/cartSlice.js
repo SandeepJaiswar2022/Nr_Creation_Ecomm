@@ -149,13 +149,13 @@ const cartSlice = createSlice({
         const totals = calculateTotals(action.payload?.data?.items || []);
         state.totalQuantity = totals.totalQuantity;
         state.cartTotalAmount = totals.totalPrice;
-        toast.success(action.payload?.message);
+        // toast.success(action.payload?.message);
       })
       .addCase(fetchCartItems.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
         state.cartItems = [];
-        toast.error(action.payload);
+        // toast.error(action.payload);
       })
       // Add to Cart
       .addCase(addToCartAsync.pending, (state) => {

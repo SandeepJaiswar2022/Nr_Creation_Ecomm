@@ -65,7 +65,7 @@ public class PublicController {
         }
 
         List<ProductDTO> productDTOs = productService.getConvertedProducts(products);
-        return new ResponseEntity<>(new ApiResponse("All Product Fetched",productDTOs) ,HttpStatus.OK);
+        return new ResponseEntity<>(new ApiResponse("Product Fetched.",productDTOs) ,HttpStatus.OK);
     }
 
     @GetMapping("product/get/{productId}")

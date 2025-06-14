@@ -110,15 +110,17 @@ public class GlobalExceptionHandler {
 	}
 
 	@ExceptionHandler(UnauthorizedAccessException.class)
-	public ResponseEntity<ApiResponse> handleUnauthorizedAccess(RazorpayException ex) {
-		return new ResponseEntity<>(new ApiResponse(ex.getMessage(),null),HttpStatus.BAD_REQUEST);
+	public ResponseEntity<ApiResponse> handleUnauthorizedAccess(UnauthorizedAccessException ex) {
+		return new ResponseEntity<>(new ApiResponse(ex.getMessage(), null), HttpStatus.UNAUTHORIZED);
 	}
 
-//	@ExceptionHandler(Exception.class)
-//	public ResponseEntity<ApiResponse> handleAllExceptions(Exception ex) {
-//		ApiResponse response = new ApiResponse("An error occurred please after some time!", ex.getMessage());
-//		return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-//	}
+	@ExceptionHandler(Exception.class)
+	public ResponseEntity<ApiResponse> handleGeneralException(Exception ex) {
+		return new ResponseEntity<>(
+				new ApiResponse("Something went wrong! " + ex.getMessage(), null),
+				HttpStatus.INTERNAL_SERVER_ERROR
+		);
+	}
 
 
 }

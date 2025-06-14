@@ -17,6 +17,8 @@ import com.razorpay.RazorpayException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -27,6 +29,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
+    private static final Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
     private final OrderRepository orderRepository;
     private final CartService cartService;
     private final CustomerService customerService;
@@ -68,6 +71,8 @@ public class OrderServiceImpl implements OrderService {
             item.setQuantity(cartItem.getQuantity());
             item.setPrice(cartItem.getUnitPrice());
             item.setTotalPrice(cartItem.getTotalPrice());
+            System.out.println("Image url : " + cartItem.getProduct().getImageUrls().get(0));
+            item.setImageUrl(cartItem.getProduct().getImageUrls().get(0));
             item.setOrder(order);
             totalAmount = totalAmount.add(item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
             orderItems.add(item);
@@ -99,22 +104,22 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderDTO> getOrderByUserId(Long userId) {
-        List<Order> orders = orderRepository.findByCustomer_CustomerId(userId);
+    public List<OrderDTO> getParticularCustomerAllOrders(String authHeader) {
+        User user = userService.findUserByJwtToken(authHeader);
+        Customer customer = customerService.findCustomerByEmail(user.getEmail());
+        List<Order> orders = orderRepository.findByCustomer_CustomerId(customer.getCustomerId());
         return orders.stream().map(this::convertToDto).collect(Collectors.toList());
     }
 
     @Override
     public OrderDTO convertToDto(Order order) {
         OrderDTO dto = new OrderDTO();
-        dto.setOrderId(order.getOrderId());
         dto.setOrderDate(order.getOrderDate());
         dto.setOrderAmount(order.getOrderAmount());
         dto.setShippingDate(order.getShippingDate());
         dto.setOrderStatus(order.getOrderStatus().name());
-        dto.setCustomerId(order.getCustomer().getCustomerId());
         dto.setRazorpayOrderId(order.getRazorpayOrderId());
-        dto.setRazorpayOrderId(order.getRazorpayPaymentId());
+        dto.setRazorpayPaymentId(order.getRazorpayPaymentId());
         dto.setShippingMethod(order.getShippingMethod());
 
         // Set shipping address
@@ -129,6 +134,7 @@ public class OrderServiceImpl implements OrderService {
                     itemDTO.setProductId(item.getProductId());
                     itemDTO.setQuantity(item.getQuantity());
                     itemDTO.setPrice(item.getPrice());
+                    itemDTO.setImageUrl(item.getImageUrl());
                     itemDTO.setTotalPrice(item.getTotalPrice());
                     return itemDTO;
                 })

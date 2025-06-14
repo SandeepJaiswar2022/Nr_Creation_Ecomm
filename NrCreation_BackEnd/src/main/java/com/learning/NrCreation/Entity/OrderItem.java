@@ -21,6 +21,7 @@ public class OrderItem {
     private Integer quantity;
     private BigDecimal price; // Discounted price per unit
     private BigDecimal totalPrice;
+    private String imageUrl;
 
     @ManyToOne
     @JoinColumn(name = "order_id")

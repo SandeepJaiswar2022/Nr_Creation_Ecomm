@@ -7,7 +7,9 @@ import com.learning.NrCreation.Repository.CartItemRepository;
 import com.learning.NrCreation.Repository.CartRepository;
 import com.learning.NrCreation.Response.CartDTO;
 import com.learning.NrCreation.Response.CartItemDTO;
+import com.learning.NrCreation.Service.Customer.CustomerService;
 import com.learning.NrCreation.Service.Product.ProductService;
+import com.learning.NrCreation.Service.User.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +25,8 @@ public class CartServiceImpl implements CartService{
     private final CartRepository cartRepo;
     private final CartItemRepository cartItemRepo;
     private final ProductService productService;
+    private final CustomerService customerService;
+    private final UserService userService;
 
     @Override
     public Cart getCartById(Long cartId)
@@ -50,16 +54,16 @@ public class CartServiceImpl implements CartService{
 
     @Override
     @Transactional
-    public void clearCart(Long cartId) {
-        Cart cart = getCartById(cartId);
+    public void clearCart(String authHeader) {
 
         // Break the association with CartUser first
-        Customer user = cart.getCustomer();
-        if (user != null) {
-            user.setCart(null); // Remove reference
-        }
+        String email = userService.findUserByJwtToken(authHeader).getEmail();
+        Customer customer = customerService.findCustomerByEmail(email);
+        Cart cart = getCartByCustomerId(customer.getCustomerId());
+        customer.setCart(null); // Remove reference
 
-        cartItemRepo.deleteAllByCart_CartId(cartId);
+
+        cartItemRepo.deleteAllByCart_CartId(cart.getCartId());
         cart.getItems().clear();
         cartRepo.delete(cart);
         //Cleared All the cartItem and Removed Cart from DB;

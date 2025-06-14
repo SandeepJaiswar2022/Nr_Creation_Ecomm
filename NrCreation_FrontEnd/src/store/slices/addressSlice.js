@@ -21,7 +21,7 @@ export const addAddress = createAsyncThunk(
     "address/addAddress",
     async (addressData, { rejectWithValue }) => {
         try {
-            const response = await api.post("/address/add", addressData);
+            const response = await api.post("/address/save-address", addressData);
             return response.data;
         } catch (error) {
             const message = normalizeError(error);
@@ -107,7 +107,8 @@ const addressSlice = createSlice({
             .addCase(addAddress.fulfilled, (state, action) => {
                 state.loading = false;
                 state.addresses.push(action.payload?.data);
-                state.selectedAddressId = action.payload?.data?.id;
+
+                state.selectedAddressId = action.payload.data?.addressId || null;
                 toast.success(action.payload?.message);
             })
             .addCase(addAddress.rejected, (state, action) => {
