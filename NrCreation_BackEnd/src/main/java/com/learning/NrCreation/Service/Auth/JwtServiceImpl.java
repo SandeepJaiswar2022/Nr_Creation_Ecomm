@@ -76,7 +76,7 @@ public class JwtServiceImpl implements JwtService {
 
     // 🎟️ Generate Access Token (valid for 15 mins)
     public String generateAccessToken(UserDetails userDetails) {
-        return buildToken(new HashMap<>(), userDetails, 1000 * 60 * 15);
+        return buildToken(new HashMap<>(), userDetails, 1000 * 60 * 60);
     }
 
 

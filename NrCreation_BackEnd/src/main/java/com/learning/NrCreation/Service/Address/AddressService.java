@@ -13,5 +13,6 @@ public interface AddressService {
     public void deleteAddress(Long addressId, String authHeader);
     public Address getAddressByIdAndAuthHeader(Long addressId, String authHeader);
     public List<AddressDTO> getAllAddress();
+    public List<AddressDTO> getCustomerAllAddress(String authHeader);
     public AddressDTO convertToAddressDTO(Address address);
 }

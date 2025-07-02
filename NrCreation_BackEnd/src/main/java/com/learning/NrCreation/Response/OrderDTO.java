@@ -19,6 +19,9 @@ import java.util.Set;
 public class OrderDTO {
     private LocalDateTime orderDate;
     private BigDecimal orderAmount;
+    private Long orderId;
+    private Long customerId;
+    private String customerName;
     private Date shippingDate;
     private String orderStatus;
     private String razorpayPaymentId;

@@ -31,7 +31,7 @@ public class AddressController {
     @PreAuthorize("hasAnyAuthority('user:read')")
     @GetMapping("/get-all-my-addresses")
     public ResponseEntity<ApiResponse> getAllAddress(@RequestHeader("Authorization") String authHeader) {
-        List<AddressDTO> addressDTOList = addressService.getAllAddress();
+        List<AddressDTO> addressDTOList = addressService.getCustomerAllAddress(authHeader);
         return new ResponseEntity<>(new ApiResponse("All Address List!", addressDTOList), HttpStatus.OK);
     }
 }

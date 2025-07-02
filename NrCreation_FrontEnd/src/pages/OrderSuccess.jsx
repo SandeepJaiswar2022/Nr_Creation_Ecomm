@@ -4,7 +4,6 @@ import { motion } from "framer-motion";
 import {
   CheckCircle,
   Package,
-  ArrowRight,
   Home,
   ShoppingBag,
 } from "lucide-react";

@@ -44,7 +44,7 @@ public class UserController {
         return new ResponseEntity<>(new ApiResponse("Users Fetched Successfully!",userDTOs), HttpStatus.OK);
     }
 
-    @PreAuthorize("hasAnyAuthority('admin:read')")
+    @PreAuthorize("hasAnyAuthority('admin:update')")
     @PutMapping("/update-role")
     public ResponseEntity<ApiResponse> updateUserRole(@Valid @RequestBody RoleUpdateRequest request) {
         userService.changeUserRole(request.getUserEmail(),request.getRole());

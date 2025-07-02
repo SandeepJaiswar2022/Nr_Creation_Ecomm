@@ -25,6 +25,7 @@ public class ImageController {
 
     //1. Adding Single/Multiple images to particular product and providing urls
     @PostMapping("add/{productId}")
+    @PreAuthorize("hasAnyAuthority('admin:read')")
     public ResponseEntity<ApiResponse> addProductImage(@PathVariable Long productId,@RequestParam List<MultipartFile> images) {
         try {
             List<String> imageUrls = productService.addImagesToProduct(productId,images);
@@ -41,6 +42,7 @@ public class ImageController {
 
     //2. Delete a particular Image url from the Product
     @DeleteMapping("delete/{productId}")
+    @PreAuthorize("hasAnyAuthority('admin:read')")
     public ResponseEntity<ApiResponse> deleteProductImage(@PathVariable Long productId, @RequestParam String url) {
         try {
             productService.deleteProductImage(productId,url);

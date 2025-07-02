@@ -62,6 +62,7 @@ public class CartItemController {
     }
 
     @DeleteMapping("/delete")
+    @PreAuthorize("hasAnyAuthority('user:delete')")
     public ResponseEntity<ApiResponse> deleteItemFromCart(@RequestParam Long cartId,
                                                           @RequestParam Long cartItemId )
     {
@@ -78,6 +79,7 @@ public class CartItemController {
     //Handle Exception if the quantity to update is greater than the Stock(Inventory)
     //Handle Exception if the quantity = 0.
     @PutMapping("/update")
+    @PreAuthorize("hasAnyAuthority('user:update')")
     public ResponseEntity<ApiResponse> updateItemQuantity(@RequestHeader("Authorization") String authHeader, @RequestParam
     Long cartItemId, @RequestParam Integer quantity)
     {
@@ -93,6 +95,7 @@ public class CartItemController {
     }
 
     @GetMapping("/cart/{cartId}")
+    @PreAuthorize("hasAnyAuthority('user:read')")
     public ResponseEntity<ApiResponse> getCartItemsByCartId(@PathVariable Long cartId) {
         try {
             log.debug("Getting cart items by cartId {}", cartId);

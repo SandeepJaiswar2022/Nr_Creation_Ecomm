@@ -4,22 +4,31 @@ import com.cloudinary.Api;
 import com.learning.NrCreation.Entity.Customer;
 import com.learning.NrCreation.Entity.Order;
 import com.learning.NrCreation.Entity.User;
+import com.learning.NrCreation.Enum.OrderStatus;
 import com.learning.NrCreation.Repository.CustomerRepository;
 import com.learning.NrCreation.Request.CreateOrderRequest;
 import com.learning.NrCreation.Request.PaymentVerificationRequest;
 import com.learning.NrCreation.Response.ApiResponse;
 import com.learning.NrCreation.Response.OrderDTO;
+import com.learning.NrCreation.Response.PagedResponse;
 import com.learning.NrCreation.Service.Order.OrderService;
 import com.learning.NrCreation.Service.Razorpay.RazorpayService;
 import com.learning.NrCreation.Service.User.UserService;
 import com.razorpay.RazorpayException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.http.ResponseEntity;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +45,7 @@ public class OrderController {
 
 
     @PostMapping("/place")
+    @PreAuthorize("hasAnyAuthority('user:create')")
     public ResponseEntity<?> createOrder(@RequestHeader("Authorization") String authHeader, @RequestBody CreateOrderRequest orderRequest) throws RazorpayException {
         Map<String, String> orderResponse = orderService.createOrder(authHeader, orderRequest);
         return new ResponseEntity<>(new ApiResponse("Order Creation Initiated!", orderResponse)
@@ -43,19 +53,70 @@ public class OrderController {
     }
 
     @GetMapping("/{orderId}")
+    @PreAuthorize("hasAnyAuthority('admin:read','user:read')")
     public ResponseEntity<OrderDTO> getOrder(@PathVariable Long orderId) {
         return ResponseEntity.ok(orderService.getOrderById(orderId));
     }
 
-    @GetMapping("/my-orders")
-    public ResponseEntity<ApiResponse> getMyOrders(@RequestHeader("Authorization") String authHeader) {
-        List<OrderDTO> allOrders = orderService.getParticularCustomerAllOrders(authHeader);
-        return new ResponseEntity<>(new ApiResponse("Orders Fetched!", allOrders)
-                , HttpStatus.OK);
+
+
+@GetMapping("/my-orders")
+@PreAuthorize("hasAnyAuthority('user:read')")
+public ResponseEntity<?> getMyOrders(
+        @RequestHeader("Authorization") String authHeader,
+        @RequestParam(required = false) String search,
+        @RequestParam(required = false) OrderStatus status,
+        @RequestParam(required = false) String shippingMethod,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+        @RequestParam(defaultValue = "0") BigDecimal low,
+        @RequestParam(defaultValue = "1000000") BigDecimal high,
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "10") int size,
+        @RequestParam(defaultValue = "desc") String sortDir
+) {
+    int maxPageSize = 50;
+    if (size > maxPageSize) size = maxPageSize;
+
+    Sort.Direction direction = Sort.Direction.fromString(sortDir);
+    Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "orderDate"));
+
+    Page<OrderDTO> ordersPage = orderService.getParticularCustomerAllOrders(authHeader,search, status, shippingMethod, startDate, endDate, low, high, pageable);
+
+    PagedResponse<OrderDTO> response = new PagedResponse<>("Customer Orders Fetched!", ordersPage.getContent(), ordersPage);
+    return new ResponseEntity<>(response, HttpStatus.OK);
+}
+
+
+    @GetMapping("/all-orders")
+    @PreAuthorize("hasAnyAuthority('admin:read')")
+    public ResponseEntity<?> getAllOrders(
+            @RequestParam(required = false) OrderStatus status,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String shippingMethod,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
+            @RequestParam(defaultValue = "0") BigDecimal low,
+            @RequestParam(defaultValue = "1000000") BigDecimal high,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "desc") String sortDir
+    ) {
+        int maxPageSize = 50;
+        if (size > maxPageSize) size = maxPageSize;
+
+        Sort.Direction direction = Sort.Direction.fromString(sortDir);
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "orderDate"));
+
+        Page<OrderDTO> ordersPage = orderService.getAllOrders(search,status, shippingMethod, startDate, endDate, low, high, pageable);
+
+        PagedResponse<OrderDTO> response = new PagedResponse<>("All Orders Fetched!", ordersPage.getContent(), ordersPage);
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
 
     @PostMapping("/verify-payment")
+    @PreAuthorize("hasAnyAuthority('user:create')")
     public ResponseEntity<ApiResponse> verifyPayment(@RequestBody PaymentVerificationRequest request) {
 //        System.out.println("\n\nVerify payment request: " + request);
         Boolean isPaymentVerified = razorpayService.verifyPayment(request);

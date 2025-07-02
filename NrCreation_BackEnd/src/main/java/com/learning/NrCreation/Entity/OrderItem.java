@@ -18,6 +18,7 @@ public class OrderItem {
     private Long id;
 
     private Long productId;
+    private String productName;
     private Integer quantity;
     private BigDecimal price; // Discounted price per unit
     private BigDecimal totalPrice;

@@ -19,9 +19,13 @@ import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -68,6 +72,7 @@ public class OrderServiceImpl implements OrderService {
         for (CartItem cartItem : cart.getItems()) {
             OrderItem item = new OrderItem();
             item.setProductId(cartItem.getProduct().getId());
+            item.setProductName(cartItem.getProduct().getName());
             item.setQuantity(cartItem.getQuantity());
             item.setPrice(cartItem.getUnitPrice());
             item.setTotalPrice(cartItem.getTotalPrice());
@@ -104,11 +109,14 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public List<OrderDTO> getParticularCustomerAllOrders(String authHeader) {
+    public Page<OrderDTO> getParticularCustomerAllOrders(String authHeader, String search, OrderStatus status, String shippingMethod, LocalDate startDate, LocalDate endDate, BigDecimal low, BigDecimal high, Pageable pageable) {
         User user = userService.findUserByJwtToken(authHeader);
         Customer customer = customerService.findCustomerByEmail(user.getEmail());
-        List<Order> orders = orderRepository.findByCustomer_CustomerId(customer.getCustomerId());
-        return orders.stream().map(this::convertToDto).collect(Collectors.toList());
+
+        //Filter and pagination
+        //Filter and pagination
+        Specification<Order> spec = OrderSpecification.withFilters(search,status,  shippingMethod, startDate, endDate, low, high, customer.getCustomerId());
+        return orderRepository.findAll(spec, pageable).map(this::convertToDto);
     }
 
     @Override
@@ -121,6 +129,9 @@ public class OrderServiceImpl implements OrderService {
         dto.setRazorpayOrderId(order.getRazorpayOrderId());
         dto.setRazorpayPaymentId(order.getRazorpayPaymentId());
         dto.setShippingMethod(order.getShippingMethod());
+        dto.setOrderId(order.getOrderId());
+        dto.setCustomerId(order.getCustomer().getCustomerId());
+        dto.setCustomerName(order.getCustomer().getFirstName() + " " + order.getCustomer().getLastName());
 
         // Set shipping address
         AddressDTO addressDTO = addressService.convertToAddressDTO(order.getShippingAddress());
@@ -132,6 +143,7 @@ public class OrderServiceImpl implements OrderService {
                     OrderItemDTO itemDTO = new OrderItemDTO();
                     itemDTO.setId(item.getId());
                     itemDTO.setProductId(item.getProductId());
+                    itemDTO.setProductName(item.getProductName());
                     itemDTO.setQuantity(item.getQuantity());
                     itemDTO.setPrice(item.getPrice());
                     itemDTO.setImageUrl(item.getImageUrl());
@@ -144,6 +156,12 @@ public class OrderServiceImpl implements OrderService {
         return dto;
     }
 
+    @Override
+    public Page<OrderDTO> getAllOrders(String search,OrderStatus status, String shippingMethod, LocalDate startDate, LocalDate endDate, BigDecimal low, BigDecimal high, Pageable pageable) {
+        Specification<Order> spec = OrderSpecification.withFilters(search,status, shippingMethod, startDate, endDate, low, high, null);
+        return orderRepository.findAll(spec, pageable).map(this::convertToDto);
+    }
+
     private BigDecimal calculateTotalAmount(Set<OrderItem> orderItems) {
         // Implement logic to calculate total amount from order items
         return orderItems.stream()
@@ -151,8 +169,5 @@ public class OrderServiceImpl implements OrderService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    private String generateSignature(String razorpayOrderId, String razorpayPaymentId) {
-        // Implement signature generation logic (use Razorpay Utils)
-        return "generated_signature"; // Placeholder
-    }
+
 }

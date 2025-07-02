@@ -115,6 +115,16 @@ public class AddressServiceImpl implements AddressService{
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<AddressDTO> getCustomerAllAddress(String authHeader) {
+        User user = userService.findUserByJwtToken(authHeader);
+        Customer customer = customerService.findCustomerByEmail(user.getEmail());
+        List<Address> addresses = addressRepository.findByCustomerCustomerId(customer.getCustomerId());
+        return addresses.stream()
+                .map(this::convertToAddressDTO)
+                .collect(Collectors.toList());
+    }
+
 
     @Override
     public AddressDTO convertToAddressDTO(Address address) {

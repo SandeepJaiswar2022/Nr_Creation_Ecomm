@@ -117,7 +117,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(Exception.class)
 	public ResponseEntity<ApiResponse> handleGeneralException(Exception ex) {
 		return new ResponseEntity<>(
-				new ApiResponse("Something went wrong! " + ex.getMessage(), null),
+				new ApiResponse("Server Error! " + ex.getMessage(), null),
 				HttpStatus.INTERNAL_SERVER_ERROR
 		);
 	}
