@@ -1,3 +1,47 @@
+// import React, { useState } from 'react'
+
+// function App() {
+//   const [loaderId, setLoaderId] = useState(0);
+//   //0 to 10 
+//   const [progressCount, setProgressCount] = useState(0);
+
+
+//   const statrtLoader = () => {
+//     setLoaderId(setInterval(() => {
+//       setProgressCount(prev => prev + 1)
+//     }, 1000));
+//   }
+
+//   const stopLoader = () => {
+//     clearInterval(loaderId);
+//   }
+
+//   const clearLoading = () => {
+//     clearInterval(loaderId);
+//     setProgressCount(0);
+//   }
+
+
+//   return (
+//     <div className='flex flex-col gap-4 justify-center items-center min-h-screen'>
+//       {/* progress bar */}
+//       <div className='bg-white '>
+//         <span className={`bg-green-300 p-3`}>{progressCount} %</span>
+//       </div>
+//       <div className='flex gap-4'>
+//         <button className='bg-green-100 p-2' onClick={() => statrtLoader()}>Start Loader</button>
+//         <button className='bg-green-100 p-2' onClick={() => stopLoader()}>Stop Loader</button>
+//         <button className='bg-green-100 p-2' onClick={() => clearLoading()}>Clear Loader</button>
+//       </div>
+//     </div>
+//   )
+// }
+
+// export default App
+
+
+
+
 import {
   BrowserRouter as Router,
   Routes,
@@ -40,6 +84,7 @@ import { PageLoader } from "./components/ReusableComponents";
 import NewCartPage from "./pages/NewCartPage";
 import OrderSuccess from "./pages/OrderSuccess";
 import api from "./utils/api";
+import ProductImageAddUpdate from "./pages/adminPages/ProductImageAddUpdate";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -99,10 +144,9 @@ const App = () => {
               <Route path="/cart" element={<NewCartPage />} />
               <Route path="/wishlist" element={<WishlistPage />} />
               <Route path="/checkout" element={<CheckoutPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/profile/:tabId" element={<ProfilePage />} />
               <Route path="/track-order" element={<OrderTrackingPage />} />
               <Route path="/order-confirmation" element={<OrderSuccess />} />
-              {/* <Route path="orders" element={<OrdersPage />} /> */}
             </Route>
           </Route>
 
@@ -111,6 +155,7 @@ const App = () => {
             <Route path="/admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboard />} />
               <Route path="products" element={<ProductManagement />} />
+              <Route path="products/images/:productId" element={<ProductImageAddUpdate />} />
               <Route path="orders" element={<OrderManagement />} />
               <Route path="users" element={<UserManagement />} />
               <Route path="analytics" element={<Analytics />} />
@@ -127,3 +172,4 @@ const App = () => {
 };
 
 export default App;
+

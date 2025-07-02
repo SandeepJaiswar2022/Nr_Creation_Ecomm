@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 const OrderSuccess = () => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { orderId, paymentId, shippingDetails } = location.state || {};
+  const { orderId, shippingDetails } = location.state || {};
 
   // Redirect to home if accessed directly without order data
   useEffect(() => {
@@ -61,10 +61,10 @@ const OrderSuccess = () => {
               <span className="text-gray-600">Order ID</span>
               <span className="font-medium">{orderId}</span>
             </div>
-            <div className="flex justify-between">
+            {/* <div className="flex justify-between">
               <span className="text-gray-600">Payment ID</span>
               <span className="font-medium">{paymentId}</span>
-            </div>
+            </div> */}
             <div className="flex justify-between">
               <span className="text-gray-600">Date</span>
               <span className="font-medium">
@@ -91,31 +91,31 @@ const OrderSuccess = () => {
               <div>
                 <p className="text-gray-600 text-sm">Name</p>
                 <p className="font-medium">
-                  {shippingDetails.firstName} {shippingDetails.lastName}
+                  {shippingDetails?.fullName || "N/A"}
                 </p>
               </div>
               <div>
                 <p className="text-gray-600 text-sm">Email</p>
-                <p className="font-medium">{shippingDetails.email}</p>
+                <p className="font-medium">{shippingDetails?.email || "N/A"}</p>
               </div>
               <div>
                 <p className="text-gray-600 text-sm">Phone</p>
-                <p className="font-medium">{shippingDetails.phone}</p>
+                <p className="font-medium">{shippingDetails?.phone || "N/A"}</p>
               </div>
               <div>
                 <p className="text-gray-600 text-sm">Address</p>
                 <p className="font-medium">
-                  {shippingDetails.address1}
-                  {shippingDetails.address2 && `, ${shippingDetails.address2}`}
+                  {shippingDetails?.address || "N/A"}
+
                 </p>
               </div>
               <div>
                 <p className="text-gray-600 text-sm">City</p>
-                <p className="font-medium">{shippingDetails.city}</p>
+                <p className="font-medium">{shippingDetails?.city}</p>
               </div>
               <div>
                 <p className="text-gray-600 text-sm">PIN Code</p>
-                <p className="font-medium">{shippingDetails.pinCode}</p>
+                <p className="font-medium">{shippingDetails?.pinCode}</p>
               </div>
             </div>
           </div>
@@ -156,9 +156,9 @@ const OrderSuccess = () => {
         {/* Action Buttons */}
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Button asChild className="bg-[#871845] hover:bg-[#611031]">
-            <Link to="/">
+            <Link to="/profile/orders">
               <Home className="h-4 w-4 mr-2" />
-              Return to Home
+              My Orders
             </Link>
           </Button>
           <Button
@@ -166,7 +166,7 @@ const OrderSuccess = () => {
             variant="outline"
             className="border-[#871845] text-[#871845] hover:bg-[#871845] hover:text-white"
           >
-            <Link to="/products">
+            <Link to="/category/dupattas">
               <ShoppingBag className="h-4 w-4 mr-2" />
               Continue Shopping
             </Link>

@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { CreditCard, MapPin, Truck, Plus } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
-import { selectCartTotal, fetchCartItems } from "@/store/slices/cartSlice";
+import { selectCartTotal, fetchCartItems, clearCart } from "@/store/slices/cartSlice";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
@@ -44,6 +44,8 @@ import {
 } from "@/components/ui/select";
 import "@/styles/scrollbar.css";
 
+const key = "";
+
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -63,7 +65,8 @@ const CheckoutPage = () => {
   const paymentLoading = payment ? payment.loading : false;
   const paymentError = payment ? payment.error : null;
   const paymentStatus = payment ? payment.paymentStatus : null;
-  const paymentData = payment ? payment.paymentData : null;
+  const razorpayOrderData = payment ? payment.razorpayOrderData : null;
+
 
   // Local state
   const [shippingMethod, setShippingMethod] = useState("dtdc");
@@ -141,15 +144,15 @@ const CheckoutPage = () => {
     // console.log("Order Details:", orderPayload);
     try {
       // Step 1: Create Order on backend
-      const razorpayOrderData = await dispatch(createRazorpayOrder(orderPayload)).unwrap();
+      const razorpayCreatedOrderData = await dispatch(createRazorpayOrder(orderPayload)).unwrap();
 
-      console.log("Create order response:", razorpayOrderData);
+      console.log("Create order response:", razorpayCreatedOrderData);
 
       const options = {
-        key: "rzp_test_fq5xX9fbSikzL0", // Replace this
-        amount: razorpayOrderData?.amount,
-        currency: razorpayOrderData?.currency,
-        order_id: razorpayOrderData?.razorpayOrderId,
+        key: `rzp_test_fq5xX9fbSikzL0`, // Replace this
+        amount: razorpayCreatedOrderData?.data?.amount,
+        currency: razorpayCreatedOrderData?.data?.currency,
+        order_id: razorpayCreatedOrderData?.data?.razorpayOrderId,
 
         handler: async function (response) {
           // console.log("Response from Razorpay : ", response);
@@ -159,9 +162,19 @@ const CheckoutPage = () => {
             razorpaySignature: response.razorpay_signature,
           };
 
+          console.log("Payment verification data : ", paymentVerificationData);
+
+
           try {
             // Step 2: Verify Payment
             await dispatch(verifyRazorpayPayment(paymentVerificationData)).unwrap();
+
+
+            // const clearPromise = dispatch(clearCart());
+            // if (clearPromise.unwrap) {
+            //   await clearPromise.unwrap();
+            // }
+
             console.log("✅ Payment verified and order updated successfully!");
           } catch (verifyError) {
             console.error("❌ Error verifying payment:", verifyError);
@@ -198,20 +211,23 @@ const CheckoutPage = () => {
 
   // Handle payment status changes
   useEffect(() => {
-    if (paymentStatus === "verified" && paymentData) {
-      toast.success("Payment successful!");
+    if (paymentStatus === "verified" && razorpayOrderData) {
+      // toast.success("Payment successful!");
+      dispatch(clearPaymentState());
+      dispatch(clearCart());
       navigate("/order-confirmation", {
         state: {
-          orderId: paymentData.orderId,
-          paymentId: paymentData.razorpayPaymentId,
+          orderId: razorpayOrderData.razorpayOrderId,
+          // paymentId: razorpayOrderData.razorpayOrderId,
           shippingDetails: selectedAddress,
         },
+        replace: true,
       });
-      dispatch(clearPaymentState());
-    } else if (paymentStatus === "failed" && paymentError) {
-      toast.error(paymentError || "Payment failed. Please try again.");
+
+    } else if (paymentStatus === "failed") {
+      toast.error("Payment failed. Please try again.");
     }
-  }, [paymentStatus, paymentError, paymentData, navigate, dispatch, selectedAddress]);
+  }, [paymentStatus, paymentError, razorpayOrderData, selectedAddress]);
 
   // Fetch addresses on mount
   useEffect(() => {

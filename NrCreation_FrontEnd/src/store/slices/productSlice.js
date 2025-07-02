@@ -10,7 +10,7 @@ export const fetchProducts = createAsyncThunk(
   async (selectedFilters, { rejectWithValue }) => {
     try {
       // const response = await axios.get(`${API_BASE_URL}/public/product/get/all`);
-      console.log("Slice : Get All product : ", selectedFilters);
+      // console.log("Slice : Get All product : ", selectedFilters);
 
       const search = selectedFilters?.search || "";
       const category = "dupattas"

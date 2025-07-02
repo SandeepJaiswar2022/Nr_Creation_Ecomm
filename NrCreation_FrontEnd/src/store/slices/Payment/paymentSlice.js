@@ -20,7 +20,7 @@ export const createRazorpayOrder = createAsyncThunk(
   async (orderData, { rejectWithValue }) => {
     try {
       const res = await api.post("/orders/place", orderData);
-      return res.data.data;
+      return res.data;
     } catch (error) {
       const message = normalizeError(error);
       return rejectWithValue(message);
@@ -49,17 +49,17 @@ export const verifyRazorpayPayment = createAsyncThunk(
 const paymentSlice = createSlice({
   name: 'payment',
   initialState: {
-    orderData: null,
+    razorpayOrderData: null,
     loading: false,
     error: null,
-    paymentVerified: false,
+    paymentStatus: null,
   },
   reducers: {
-    resetPaymentState: (state) => {
-      state.orderData = null;
+    clearPaymentState: (state) => {
+      state.razorpayOrderData = null;
       state.loading = false;
       state.error = null;
-      state.paymentVerified = false;
+      state.paymentStatus = null;
     },
   },
   extraReducers: (builder) => {
@@ -70,25 +70,26 @@ const paymentSlice = createSlice({
       })
       .addCase(createRazorpayOrder.fulfilled, (state, action) => {
         state.loading = false;
-        state.orderData = action.payload;
-        toast.success("Order created successfully. Redirecting to payment...");
+        state.razorpayOrderData = action.payload?.data;
+        toast.success(action.payload?.message);
       })
       .addCase(createRazorpayOrder.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(action.payload);
       })
 
       // Optional - if you want to track payment verification
       .addCase(verifyRazorpayPayment.pending, (state) => {
-        state.paymentVerified = false;
+        state.paymentStatus = false;
         state.error = null;
       })
       .addCase(verifyRazorpayPayment.fulfilled, (state, action) => {
-        state.paymentVerified = action.payload.data?.isPaymentVerified;
+        state.paymentStatus = action.payload.data?.isPaymentVerified ? "verified" : "failed";
         toast.success(action.payload?.message);
       })
       .addCase(verifyRazorpayPayment.rejected, (state, action) => {
-        state.paymentVerified = false;
+        state.paymentStatus = "failed";
         state.error = action.payload;
         toast.error(action.payload || "Payment verification failed");
       });

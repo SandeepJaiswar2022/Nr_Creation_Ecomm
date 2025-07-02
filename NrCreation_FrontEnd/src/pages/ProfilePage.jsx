@@ -1,20 +1,50 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { User, Settings, ShoppingBag, Heart, LogOut } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import WishlistPage from './WishlistPage'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchParticularCustomerOrders } from '@/store/slices/ordersSlice'
+import { formatDate } from '@/utils/formatString'
+
+
+const tabs = [
+    { id: 'profile', label: 'Profile', icon: User },
+    { id: 'orders', label: 'Orders', icon: ShoppingBag },
+    { id: 'wishlist', label: 'Wishlist', icon: Heart },
+    { id: 'settings', label: 'Settings', icon: Settings },
+]
 
 const ProfilePage = () => {
-    const [activeTab, setActiveTab] = useState('profile')
+    const { tabId } = useParams();
+    const defaultTab = "profile";
+    const tabIds = tabs.map(t => t.id);
+    const initialTabId = tabIds.includes(tabId) ? tabId : defaultTab;
+    const [activeTab, setActiveTab] = useState(initialTabId);
+    const [openOrderId, setOpenOrderId] = useState(null);
+    const { customerOrders } = useSelector(state => state.orders);
 
-    const tabs = [
-        { id: 'profile', label: 'Profile', icon: User },
-        { id: 'orders', label: 'Orders', icon: ShoppingBag },
-        { id: 'wishlist', label: 'Wishlist', icon: Heart },
-        { id: 'settings', label: 'Settings', icon: Settings },
-    ]
+    const toggle = (id) =>
+        setOpenOrderId((prev) => (prev === id ? null : id));
+
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        if (activeTab === 'orders') {
+            dispatch(fetchParticularCustomerOrders());
+        }
+    }, [dispatch, activeTab])
+
+
+    useEffect(() => {
+        if (tabIds.includes(tabId)) {
+            setActiveTab(tabId);
+        } else {
+            setActiveTab(defaultTab);
+        }
+    }, [tabId]);
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -79,42 +109,186 @@ const ProfilePage = () => {
                             <WishlistPage />
                         )}
                         {activeTab === 'orders' && (
+                            // <div className="space-y-6">
+                            //     <h2 className="text-2xl font-semibold">My Orders</h2>
+                            //     <div className="space-y-4">
+                            //         {[1, 2, 3].map((order) => (
+                            //             <div
+                            //                 key={order}
+                            //                 className="border rounded-lg p-4 space-y-4"
+                            //             >
+                            //                 <div className="flex justify-between items-start">
+                            //                     <div>
+                            //                         <p className="font-medium">Order #{order}23456</p>
+                            //                         <p className="text-sm text-gray-500">
+                            //                             Placed on 12 March 2024
+                            //                         </p>
+                            //                     </div>
+                            //                     <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
+                            //                         Delivered
+                            //                     </span>
+                            //                 </div>
+                            //                 <div className="flex gap-4">
+                            //                     <div className="w-20 h-20 bg-gray-200 rounded-md">
+                            //                         <span className="sr-only">Product Image</span>
+                            //                     </div>
+                            //                     <div>
+                            //                         <p className="font-medium">Product Name</p>
+                            //                         <p className="text-sm text-gray-500">
+                            //                             Size: M | Qty: 1
+                            //                         </p>
+                            //                         <p className="text-[#871845] font-medium">₹4,999</p>
+                            //                     </div>
+                            //                 </div>
+                            //                 <Button variant="outline" className="w-full">
+                            //                     View Order Details
+                            //                 </Button>
+                            //             </div>
+                            //         ))}
+                            //     </div>
+                            // </div>
                             <div className="space-y-6">
                                 <h2 className="text-2xl font-semibold">My Orders</h2>
+
                                 <div className="space-y-4">
-                                    {[1, 2, 3].map((order) => (
-                                        <div
-                                            key={order}
-                                            className="border rounded-lg p-4 space-y-4"
-                                        >
-                                            <div className="flex justify-between items-start">
-                                                <div>
-                                                    <p className="font-medium">Order #{order}23456</p>
-                                                    <p className="text-sm text-gray-500">
-                                                        Placed on 12 March 2024
-                                                    </p>
+                                    {customerOrders.map((order) => {
+                                        const {
+                                            orderId,
+                                            orderDate,
+                                            orderStatus,
+                                            orderAmount,
+                                            orderItems,
+                                            shippingAddress,
+                                            shippingMethod,
+                                            totalDiscountPrice,
+                                        } = order;
+
+                                        const firstItem = orderItems[0] ?? {};
+                                        const itemCount = orderItems.length;
+
+                                        const badgeColor =
+                                            orderStatus === "DELIVERED"
+                                                ? "bg-green-100 text-green-700"
+                                                : orderStatus === "CONFIRMED"
+                                                    ? "bg-yellow-100 text-yellow-700"
+                                                    : "bg-gray-100 text-gray-600";
+
+                                        return (
+                                            <div
+                                                key={orderId}
+                                                className="border rounded-lg p-4 space-y-4"
+                                            >
+                                                {/* summary row */}
+                                                <div className="flex justify-between items-start">
+                                                    <div>
+                                                        <p className="font-medium">
+                                                            Order #{orderId.toString().padStart(6, "0")}
+                                                        </p>
+                                                        <p className="text-sm text-gray-500">
+                                                            Placed on {formatDate(orderDate)}
+                                                        </p>
+                                                    </div>
+                                                    <span
+                                                        className={`px-2 py-0.5 rounded-full text-sm whitespace-nowrap ${badgeColor}`}
+                                                    >
+                                                        {orderStatus}
+                                                    </span>
                                                 </div>
-                                                <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
-                                                    Delivered
-                                                </span>
+
+                                                {/* compact product preview */}
+                                                <div className="flex gap-4">
+                                                    <img
+                                                        src={firstItem.imageUrl}
+                                                        alt={firstItem.productName ?? "Product image"}
+                                                        className="w-20 h-20 object-cover rounded-md bg-gray-200"
+                                                    />
+                                                    <div>
+                                                        <p className="font-medium">
+                                                            {firstItem.productName ?? "Product Name"}
+                                                            {itemCount > 1 && (
+                                                                <span className="text-gray-500">
+                                                                    {" "}
+                                                                    + {itemCount - 1} more
+                                                                </span>
+                                                            )}
+                                                        </p>
+                                                        <p className="text-sm text-gray-500">
+                                                            Qty: {firstItem.quantity}
+                                                        </p>
+                                                        <p className="text-[#871845] font-medium">
+                                                            ₹{orderAmount.toFixed(2)}
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                {/* toggle button */}
+                                                <Button
+                                                    variant="outline"
+                                                    className="w-full"
+                                                    onClick={() => toggle(orderId)}
+                                                >
+                                                    {openOrderId === orderId
+                                                        ? "Hide Order Details"
+                                                        : "View Order Details"}
+                                                </Button>
+
+                                                {/* full order details (collapsible) */}
+                                                {openOrderId === orderId && (
+                                                    <div className="space-y-4 border-t pt-4 text-sm text-gray-700">
+                                                        {/* items list */}
+                                                        <div className="space-y-2">
+                                                            <p className="font-medium mb-1">Items:</p>
+                                                            {orderItems.map((item) => (
+                                                                <div
+                                                                    key={item.id}
+                                                                    className="flex justify-between"
+                                                                >
+                                                                    <span>
+                                                                        {item.productName ?? "Product"} × {item.quantity}
+                                                                    </span>
+                                                                    <span>₹{item.totalPrice.toFixed(2)}</span>
+                                                                </div>
+                                                            ))}
+                                                        </div>
+
+                                                        {/* price block */}
+                                                        <div className="flex justify-between font-medium">
+                                                            <span>Total:</span>
+                                                            <span>₹{orderAmount.toFixed(2)}</span>
+                                                        </div>
+                                                        {totalDiscountPrice && (
+                                                            <div className="flex justify-between text-gray-500">
+                                                                <span>Discounted Total:</span>
+                                                                <span>₹{totalDiscountPrice.toFixed(2)}</span>
+                                                            </div>
+                                                        )}
+
+                                                        {/* shipping */}
+                                                        <div>
+                                                            <p className="font-medium mb-1">Shipping Address:</p>
+                                                            <p>
+                                                                {shippingAddress.fullName}
+                                                                <br />
+                                                                {shippingAddress.address}
+                                                                <br />
+                                                                {shippingAddress.city}, {shippingAddress.state} –
+                                                                {shippingAddress.pinCode}
+                                                                <br />
+                                                                {shippingAddress.country}
+                                                                <br />
+                                                                Phone: {shippingAddress.phone}
+                                                            </p>
+                                                            {shippingMethod && (
+                                                                <p className="mt-2">
+                                                                    Shipping Method: {shippingMethod}
+                                                                </p>
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                )}
                                             </div>
-                                            <div className="flex gap-4">
-                                                <div className="w-20 h-20 bg-gray-200 rounded-md">
-                                                    <span className="sr-only">Product Image</span>
-                                                </div>
-                                                <div>
-                                                    <p className="font-medium">Product Name</p>
-                                                    <p className="text-sm text-gray-500">
-                                                        Size: M | Qty: 1
-                                                    </p>
-                                                    <p className="text-[#871845] font-medium">₹4,999</p>
-                                                </div>
-                                            </div>
-                                            <Button variant="outline" className="w-full">
-                                                View Order Details
-                                            </Button>
-                                        </div>
-                                    ))}
+                                        );
+                                    })}
                                 </div>
                             </div>
                         )}

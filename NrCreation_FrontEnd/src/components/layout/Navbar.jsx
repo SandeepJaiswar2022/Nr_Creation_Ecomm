@@ -90,8 +90,8 @@ const Navbar = () => {
                   <SheetContent side="left" className="w-[300px] sm:w-[400px]">
                     <SheetTitle className="sr-only">Account</SheetTitle>
                     <div className="mt-8 space-y-4">
-                      <Link to="/profile" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={() => setIsMobileSheetOpen(false)}>My Profile</Link>
-                      <Link to="/orders" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={() => setIsMobileSheetOpen(false)}>My Orders</Link>
+                      <Link to="/profile/profile" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={() => setIsMobileSheetOpen(false)}>My Profile</Link>
+                      <Link to="/profile/orders" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={() => setIsMobileSheetOpen(false)}>My Orders</Link>
                       <button onClick={() => { handleLogout(); setIsMobileSheetOpen(false); }} className="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-100">Logout</button>
                     </div>
                   </SheetContent>
@@ -116,8 +116,8 @@ const Navbar = () => {
                       onMouseEnter={() => setIsDropdownOpen(true)}
                       onMouseLeave={() => setIsDropdownOpen(false)}
                     >
-                      <Link to="/profile" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={() => setIsDropdownOpen(false)}>My Profile</Link>
-                      <Link to="/orders" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={() => setIsDropdownOpen(false)}>My Orders</Link>
+                      <Link to="/profile/profile" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={() => setIsDropdownOpen(false)}>My Profile</Link>
+                      <Link to="/profile/orders" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={() => setIsDropdownOpen(false)}>My Orders</Link>
                       <button onClick={() => { handleLogout(); setIsDropdownOpen(false); }} className="block w-full text-left px-4 py-2 text-red-500 hover:bg-gray-100">Logout</button>
                     </div>
                   )}

@@ -55,6 +55,20 @@ export const addToCartAsync = createAsyncThunk(
   }
 );
 
+export const clearCart = createAsyncThunk(
+  "cart/clearCart",
+  async (_, { rejectWithValue }) => {
+    try {
+      const response = await api.delete(`/cart/clear-cart`);
+
+      return response.data;
+    } catch (error) {
+      const message = normalizeError(error);
+      return rejectWithValue(message);
+    }
+  }
+);
+
 // Add this with other thunks
 export const deleteCartItem = createAsyncThunk(
   "cart/deleteCartItem",
@@ -92,7 +106,7 @@ const initialState = {
   cartItems: [],
   totalQuantity: 0,
   cartTotalAmount: 0,
-  cartLoading: false,
+  loading: false,
   error: null,
 };
 
@@ -125,12 +139,12 @@ const cartSlice = createSlice({
       }
     },
 
-    clearCart: (state) => {
-      state.cartItems = [];
-      state.totalQuantity = 0;
-      state.cartTotalAmount = 0;
-      toast.info("Cart cleared!");
-    },
+    // clearCart: (state) => {
+    //   state.cartItems = [];
+    //   state.totalQuantity = 0;
+    //   state.cartTotalAmount = 0;
+    //   toast.info("Cart cleared!");
+    // },
   },
   extraReducers: (builder) => {
     builder
@@ -237,7 +251,24 @@ const cartSlice = createSlice({
         state.loading = false;
         state.error = action.payload;
         toast.error(action.payload);
-      });
+      })
+      //clear cart
+      .addCase(clearCart.pending, (state) => {
+        state.loading = `FetchingCart`;
+        state.error = null;
+      })
+      .addCase(clearCart.fulfilled, (state, action) => {
+        state.loading = false;
+        state.cartItems = [];
+        state.totalQuantity = 0;
+        state.cartTotalAmount = 0;
+        // toast.success(action.payload?.message);
+      })
+      .addCase(clearCart.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+        toast.error(action.payload);
+      })
   },
 });
 
@@ -248,6 +279,6 @@ export const selectCartLoading = (state) => state.cart.loading;
 export const selectCartError = (state) => state.cart.error;
 
 // Actions
-export const { setCartItems, removeFromCart, clearCart } = cartSlice.actions;
+export const { setCartItems, removeFromCart } = cartSlice.actions;
 
 export default cartSlice.reducer;
