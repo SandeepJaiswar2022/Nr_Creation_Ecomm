@@ -6,7 +6,7 @@ import {
 } from "@/store/slices/Auth/authSlice";
 
 // export const API_BASE_URL = "http://localhost:8080/api/nr-creation/v1"; // Changed to http
-export const API_BASE_URL = "https://nrcreation-latest-1.onrender.com/api/nr-creation/v1";
+export const API_BASE_URL = "https://nrcreation-latest.onrender.com/api/nr-creation/v1";
 
 
 const api = axios.create({
