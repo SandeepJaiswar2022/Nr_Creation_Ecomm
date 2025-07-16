@@ -6,8 +6,9 @@ import { User, Settings, ShoppingBag, Heart, LogOut } from 'lucide-react'
 import { Link, useParams } from 'react-router-dom'
 import WishlistPage from './WishlistPage'
 import { useDispatch, useSelector } from 'react-redux'
-import { fetchParticularCustomerOrders } from '@/store/slices/ordersSlice'
+import { fetchParticularCustomerOrders, setSelectedOrderFilters } from '@/store/slices/ordersSlice'
 import { formatDate } from '@/utils/formatString'
+import Pagination from '@/components/ReusableComponents/Pagination'
 
 
 const tabs = [
@@ -17,6 +18,13 @@ const tabs = [
     { id: 'settings', label: 'Settings', icon: Settings },
 ]
 
+const orderStatusOptions = [
+    '', 'PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'
+];
+const shippingMethodOptions = [
+    '', 'Standard', 'Express', 'Pickup'
+];
+
 const ProfilePage = () => {
     const { tabId } = useParams();
     const defaultTab = "profile";
@@ -24,18 +32,20 @@ const ProfilePage = () => {
     const initialTabId = tabIds.includes(tabId) ? tabId : defaultTab;
     const [activeTab, setActiveTab] = useState(initialTabId);
     const [openOrderId, setOpenOrderId] = useState(null);
-    const { customerOrders } = useSelector(state => state.orders);
+    const { customerOrders, selectedOrderFilters, totalPages, loading } = useSelector(state => state.orders);
+    const [tempOrderFilters, setTempOrderFilters] = useState(selectedOrderFilters);
 
     const toggle = (id) =>
         setOpenOrderId((prev) => (prev === id ? null : id));
 
     const dispatch = useDispatch();
 
+    //any change in dependency called selectedOrderFilters will call the api and update the state
     useEffect(() => {
         if (activeTab === 'orders') {
-            dispatch(fetchParticularCustomerOrders());
+            dispatch(fetchParticularCustomerOrders(selectedOrderFilters));
         }
-    }, [dispatch, activeTab])
+    }, [dispatch, activeTab, selectedOrderFilters]);
 
 
     useEffect(() => {
@@ -45,6 +55,43 @@ const ProfilePage = () => {
             setActiveTab(defaultTab);
         }
     }, [tabId]);
+
+    // Filter Handlers
+    const handleOrderFilterChange = (type, value) => {
+        setTempOrderFilters(prev => ({
+            ...prev,
+            [type]: value
+        }));
+    };
+    const handleOrderDateChange = (type, value) => {
+        setTempOrderFilters(prev => ({
+            ...prev,
+            [type]: value
+        }));
+    };
+    const handleApplyOrderFilters = () => {
+        dispatch(setSelectedOrderFilters(tempOrderFilters));
+    };
+    const handleClearOrderFilters = () => {
+        const cleared = {
+            search: '',
+            startDate: '',
+            endDate: '',
+            orderStatus: '',
+            priceLow: 0,
+            priceHigh: 1000000,
+            shippingMethod: '',
+            page: 1,
+            pageSize: selectedOrderFilters.pageSize,
+        };
+        setTempOrderFilters(cleared);
+    };
+    const handleOrderPageChange = (newPage) => {
+        dispatch(setSelectedOrderFilters({ ...selectedOrderFilters, page: newPage }));
+    };
+    const handleOrderPageSizeChange = (newSize) => {
+        dispatch(setSelectedOrderFilters({ ...selectedOrderFilters, pageSize: newSize, page: 1 }));
+    };
 
     return (
         <div className="container mx-auto px-4 py-8">
@@ -109,48 +156,101 @@ const ProfilePage = () => {
                             <WishlistPage />
                         )}
                         {activeTab === 'orders' && (
-                            // <div className="space-y-6">
-                            //     <h2 className="text-2xl font-semibold">My Orders</h2>
-                            //     <div className="space-y-4">
-                            //         {[1, 2, 3].map((order) => (
-                            //             <div
-                            //                 key={order}
-                            //                 className="border rounded-lg p-4 space-y-4"
-                            //             >
-                            //                 <div className="flex justify-between items-start">
-                            //                     <div>
-                            //                         <p className="font-medium">Order #{order}23456</p>
-                            //                         <p className="text-sm text-gray-500">
-                            //                             Placed on 12 March 2024
-                            //                         </p>
-                            //                     </div>
-                            //                     <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm">
-                            //                         Delivered
-                            //                     </span>
-                            //                 </div>
-                            //                 <div className="flex gap-4">
-                            //                     <div className="w-20 h-20 bg-gray-200 rounded-md">
-                            //                         <span className="sr-only">Product Image</span>
-                            //                     </div>
-                            //                     <div>
-                            //                         <p className="font-medium">Product Name</p>
-                            //                         <p className="text-sm text-gray-500">
-                            //                             Size: M | Qty: 1
-                            //                         </p>
-                            //                         <p className="text-[#871845] font-medium">₹4,999</p>
-                            //                     </div>
-                            //                 </div>
-                            //                 <Button variant="outline" className="w-full">
-                            //                     View Order Details
-                            //                 </Button>
-                            //             </div>
-                            //         ))}
-                            //     </div>
-                            // </div>
                             <div className="space-y-6">
                                 <h2 className="text-2xl font-semibold">My Orders</h2>
-
+                                {/* Order Filters Bar */}
+                                <div className="flex flex-wrap gap-3 items-end bg-gray-50 p-4 rounded-lg border mb-4">
+                                    <Input
+                                        placeholder="Search by product name"
+                                        value={tempOrderFilters.search}
+                                        onChange={e => handleOrderFilterChange('search', e.target.value)}
+                                        className="max-w-xs"
+                                    />
+                                    <div>
+                                        <label className="block text-xs text-gray-500 mb-1">From</label>
+                                        <Input
+                                            type="date"
+                                            value={tempOrderFilters.startDate}
+                                            onChange={e => handleOrderDateChange('startDate', e.target.value)}
+                                            className="w-36"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-gray-500 mb-1">To</label>
+                                        <Input
+                                            type="date"
+                                            value={tempOrderFilters.endDate}
+                                            onChange={e => handleOrderDateChange('endDate', e.target.value)}
+                                            className="w-36"
+                                        />
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs text-gray-500 mb-1">Order Status</label>
+                                        <select
+                                            value={tempOrderFilters.orderStatus}
+                                            onChange={e => handleOrderFilterChange('orderStatus', e.target.value)}
+                                            className="border rounded px-2 py-1 text-sm"
+                                        >
+                                            {orderStatusOptions.map(opt => (
+                                                <option key={opt} value={opt}>{opt || 'All'}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    {/* <div>
+                                        <label className="block text-xs text-gray-500 mb-1">Price Range</label>
+                                        <div className="flex gap-1 items-center">
+                                            <Input
+                                                type="number"
+                                                min={0}
+                                                value={tempOrderFilters.priceLow}
+                                                onChange={e => handleOrderFilterChange('priceLow', Number(e.target.value))}
+                                                className="w-20"
+                                                placeholder="Min"
+                                            />
+                                            <span className="mx-1">-</span>
+                                            <Input
+                                                type="number"
+                                                min={0}
+                                                value={tempOrderFilters.priceHigh}
+                                                onChange={e => handleOrderFilterChange('priceHigh', Number(e.target.value))}
+                                                className="w-20"
+                                                placeholder="Max"
+                                            />
+                                        </div>
+                                    </div> */}
+                                    <div>
+                                        <label className="block text-xs text-gray-500 mb-1">Shipping</label>
+                                        <select
+                                            value={tempOrderFilters.shippingMethod}
+                                            onChange={e => handleOrderFilterChange('shippingMethod', e.target.value)}
+                                            className="border rounded px-2 py-1 text-sm"
+                                        >
+                                            {shippingMethodOptions.map(opt => (
+                                                <option key={opt} value={opt}>{opt || 'All'}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <Button
+                                        className="bg-[#871845] hover:bg-[#671234]"
+                                        onClick={handleApplyOrderFilters}
+                                        disabled={loading}
+                                    >
+                                        Apply
+                                    </Button>
+                                    <Button
+                                        variant="outline"
+                                        className="border-red-500 text-red-600 hover:bg-red-50"
+                                        onClick={handleClearOrderFilters}
+                                        disabled={loading}
+                                    >
+                                        Clear
+                                    </Button>
+                                </div>
+                                {/* Orders List */}
                                 <div className="space-y-4">
+                                    {customerOrders.length === 0 && (
+                                        <div className="text-center text-gray-500">No orders found.</div>
+                                    )}
                                     {customerOrders.map((order) => {
                                         const {
                                             orderId,
@@ -271,7 +371,7 @@ const ProfilePage = () => {
                                                                 <br />
                                                                 {shippingAddress.address}
                                                                 <br />
-                                                                {shippingAddress.city}, {shippingAddress.state} –
+                                                                {shippingAddress.city}, {shippingAddress.state} –
                                                                 {shippingAddress.pinCode}
                                                                 <br />
                                                                 {shippingAddress.country}
@@ -290,6 +390,12 @@ const ProfilePage = () => {
                                         );
                                     })}
                                 </div>
+                                <Pagination
+                                    selectedFilters={selectedOrderFilters}
+                                    handlePageChange={handleOrderPageChange}
+                                    totalPages={totalPages}
+                                    handlePageSizeChange={handleOrderPageSizeChange}
+                                />
                             </div>
                         )}
 

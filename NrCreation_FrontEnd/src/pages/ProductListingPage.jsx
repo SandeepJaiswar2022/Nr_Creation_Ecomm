@@ -215,36 +215,42 @@ const ProductListingPage = () => {
       </div>
 
       {/* Product Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
-        {products && products.length > 0 ? (
-          products.map((product, index) =>
-            product.id ? (
-              <Link to={`/product/${product?.id}`} key={product?.id}>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={{ y: -5 }}
-                >
-                  <ProductCard product={product} />
-                </motion.div>
-              </Link>
-            ) : (
-              <div key={index} className="text-red-500">
-                Product ID missing
-              </div>
-            )
-          )
-        ) : (
-          <div className="text-center text-gray-500">
-            No products available.
-          </div>
-        )}
-      </div>
+
+      {products && products.length > 0 ?
+        (
+          <>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+              {products.map((product, index) =>
+                product.id ? (
+                  <Link to={`/product/${product?.id}`} key={product?.id}>
+                    <motion.div
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      whileHover={{ y: -5 }}
+                    >
+                      <ProductCard product={product} />
+                    </motion.div>
+                  </Link>
+                ) : (
+                  <div key={index} className="text-red-500">
+                    Product ID missing
+                  </div>
+                )
+              )}
+
+            </div>
+
+            <Pagination selectedFilters={selectedFilters} handlePageChange={handlePageChange} totalPages={totalPages} handlePageSizeChange={handlePageSizeChange} />
+          </>
+        ) : (<div className="text-center italic text-lg">No products Available!</div>)
+
+      }
+
 
       {/* Pagination */}
 
-      <Pagination selectedFilters={selectedFilters} handlePageChange={handlePageChange} totalPages={totalPages} handlePageSizeChange={handlePageSizeChange} />
+
     </div>
   );
 };
