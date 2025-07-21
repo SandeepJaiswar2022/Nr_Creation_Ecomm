@@ -102,20 +102,19 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDTO getOrderById(Long orderId) {
-        Order order = orderRepository.findById(orderId)
+    public Order getOrderById(Long orderId) {
+        return orderRepository.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found"));
-        return convertToDto(order);
     }
 
     @Override
-    public Page<OrderDTO> getParticularCustomerAllOrders(String authHeader, String search, OrderStatus status, String shippingMethod, LocalDate startDate, LocalDate endDate, BigDecimal low, BigDecimal high, Pageable pageable) {
+    public Page<OrderDTO> getParticularCustomerAllOrders(String authHeader, String search, OrderStatus status, String shippingMethod, LocalDate startDate, LocalDate endDate, BigDecimal priceLow, BigDecimal priceHigh, Pageable pageable) {
         User user = userService.findUserByJwtToken(authHeader);
         Customer customer = customerService.findCustomerByEmail(user.getEmail());
 
         //Filter and pagination
         //Filter and pagination
-        Specification<Order> spec = OrderSpecification.withFilters(search,status,  shippingMethod, startDate, endDate, low, high, customer.getCustomerId());
+        Specification<Order> spec = OrderSpecification.withFilters(search,status,  shippingMethod, startDate, endDate, priceLow, priceHigh, customer.getCustomerId());
         return orderRepository.findAll(spec, pageable).map(this::convertToDto);
     }
 
@@ -160,6 +159,12 @@ public class OrderServiceImpl implements OrderService {
     public Page<OrderDTO> getAllOrders(String search,OrderStatus status, String shippingMethod, LocalDate startDate, LocalDate endDate, BigDecimal low, BigDecimal high, Pageable pageable) {
         Specification<Order> spec = OrderSpecification.withFilters(search,status, shippingMethod, startDate, endDate, low, high, null);
         return orderRepository.findAll(spec, pageable).map(this::convertToDto);
+    }
+
+    @Override
+    public void deleteOrderById(Long orderId) {
+        Order order = getOrderById(orderId);
+        orderRepository.deleteById(order.getOrderId());
     }
 
     private BigDecimal calculateTotalAmount(Set<OrderItem> orderItems) {

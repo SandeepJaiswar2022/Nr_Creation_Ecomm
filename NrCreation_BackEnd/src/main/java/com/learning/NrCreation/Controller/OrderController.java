@@ -46,7 +46,7 @@ public class OrderController {
 
     @PostMapping("/place")
     @PreAuthorize("hasAnyAuthority('user:create')")
-    public ResponseEntity<?> createOrder(@RequestHeader("Authorization") String authHeader, @RequestBody CreateOrderRequest orderRequest) throws RazorpayException {
+    public ResponseEntity<ApiResponse> createOrder(@RequestHeader("Authorization") String authHeader, @RequestBody CreateOrderRequest orderRequest) throws RazorpayException {
         Map<String, String> orderResponse = orderService.createOrder(authHeader, orderRequest);
         return new ResponseEntity<>(new ApiResponse("Order Creation Initiated!", orderResponse)
                 , HttpStatus.OK);
@@ -54,10 +54,19 @@ public class OrderController {
 
     @GetMapping("/{orderId}")
     @PreAuthorize("hasAnyAuthority('admin:read','user:read')")
-    public ResponseEntity<OrderDTO> getOrder(@PathVariable Long orderId) {
-        return ResponseEntity.ok(orderService.getOrderById(orderId));
+    public ResponseEntity<ApiResponse> getOrder(@PathVariable Long orderId) {
+        OrderDTO orderDTO = orderService.convertToDto(orderService.getOrderById(orderId));
+        return new ResponseEntity<>(new ApiResponse("Order Fetched!", orderDTO)
+                , HttpStatus.OK);
     }
 
+    @DeleteMapping("/{orderId}")
+    @PreAuthorize("hasAnyAuthority('admin:delete')")
+    public ResponseEntity<ApiResponse> deleteOrderByOrderId(@PathVariable Long orderId) {
+        orderService.deleteOrderById(orderId);
+        return new ResponseEntity<>(new ApiResponse("Order Deleted!", null)
+                , HttpStatus.OK);
+    }
 
 
 @GetMapping("/my-orders")
@@ -69,21 +78,33 @@ public ResponseEntity<?> getMyOrders(
         @RequestParam(required = false) String shippingMethod,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
-        @RequestParam(defaultValue = "0") BigDecimal low,
-        @RequestParam(defaultValue = "1000000") BigDecimal high,
+        @RequestParam(defaultValue = "0") BigDecimal priceLow,
+        @RequestParam(defaultValue = "1000000") BigDecimal priceHigh,
         @RequestParam(defaultValue = "0") int page,
         @RequestParam(defaultValue = "10") int size,
         @RequestParam(defaultValue = "desc") String sortDir
 ) {
+    System.out.println("\n\nIn get my orders=======");
+    System.out.println("search: " + search);
+    System.out.println("status: " + status);
+    System.out.println("shippingMethod: " + shippingMethod);
+    System.out.println("startDate: " + startDate);
+    System.out.println("endDate: " + endDate);
+    System.out.println("priceLow: " + priceLow);
+    System.out.println("priceHigh: " + priceHigh);
+    System.out.println("page: " + page);
+    System.out.println("size: " + size);
+    System.out.println("sortDir: " + sortDir);
+    System.out.println("In get my orders=======\n\n");
     int maxPageSize = 50;
     if (size > maxPageSize) size = maxPageSize;
 
     Sort.Direction direction = Sort.Direction.fromString(sortDir);
     Pageable pageable = PageRequest.of(page, size, Sort.by(direction, "orderDate"));
 
-    Page<OrderDTO> ordersPage = orderService.getParticularCustomerAllOrders(authHeader,search, status, shippingMethod, startDate, endDate, low, high, pageable);
+    Page<OrderDTO> ordersPage = orderService.getParticularCustomerAllOrders(authHeader,search, status, shippingMethod, startDate, endDate, priceLow, priceHigh, pageable);
 
-    PagedResponse<OrderDTO> response = new PagedResponse<>("Customer Orders Fetched!", ordersPage.getContent(), ordersPage);
+    PagedResponse<OrderDTO> response = new PagedResponse<>("Orders Fetched!", ordersPage.getContent(), ordersPage);
     return new ResponseEntity<>(response, HttpStatus.OK);
 }
 

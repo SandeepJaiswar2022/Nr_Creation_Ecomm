@@ -20,9 +20,11 @@ public interface OrderService {
     @Transactional
     Map<String, String> createOrder(String authHeader, CreateOrderRequest orderRequest) throws RazorpayException;
 
-    OrderDTO getOrderById(Long orderId);
-    Page<OrderDTO> getParticularCustomerAllOrders(String authHeader, String search, OrderStatus status, String shippingMethod, LocalDate startDate, LocalDate endDate, BigDecimal low, BigDecimal high, Pageable pageable);
+    Order getOrderById(Long orderId);
+    Page<OrderDTO> getParticularCustomerAllOrders(String authHeader, String search, OrderStatus status, String shippingMethod, LocalDate startDate, LocalDate endDate, BigDecimal priceLow, BigDecimal priceHigh, Pageable pageable);
     public OrderDTO convertToDto(Order order);
 
     Page<OrderDTO> getAllOrders(String search,OrderStatus status, String shippingMethod, LocalDate startDate, LocalDate endDate, BigDecimal low, BigDecimal high, Pageable pageable);
+
+    void deleteOrderById(Long orderId);
 }

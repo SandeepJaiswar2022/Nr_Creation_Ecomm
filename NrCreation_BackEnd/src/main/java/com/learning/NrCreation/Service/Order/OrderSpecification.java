@@ -21,8 +21,8 @@ public class OrderSpecification {
             String shippingMethod,
             LocalDate startDate,
             LocalDate endDate,
-            BigDecimal low,
-            BigDecimal high,
+            BigDecimal priceLow,
+            BigDecimal priceHigh,
             Long customerId  // null for admin, not null for user
     ) {
         return (root, query, cb) -> {
@@ -34,7 +34,7 @@ public class OrderSpecification {
             }
 
             // Filter: Shipping Method
-            if (shippingMethod != null) {
+            if (shippingMethod != null && !shippingMethod.isBlank()) {
                 predicates.add(cb.equal(root.get("shippingMethod"), shippingMethod));
             }
 
@@ -48,8 +48,8 @@ public class OrderSpecification {
             }
 
             // Filter: Amount
-            if (low != null && high != null) {
-                predicates.add(cb.between(root.get("orderAmount"), low, high));
+            if (priceLow != null && priceHigh != null) {
+                predicates.add(cb.between(root.get("orderAmount"), priceLow, priceHigh));
             }
 
             // Filter: Customer ID (user only)
