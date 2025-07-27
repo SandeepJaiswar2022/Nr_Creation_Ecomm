@@ -87,6 +87,9 @@ const OrderManagement = () => {
         dispatch(fetchAllOrders(selectedOrderFilters));
     }, [dispatch, selectedOrderFilters]);
 
+    // console.log("Orders in OrderManagement: ", orders);
+
+
     // Filter Handlers
     const handleOrderFilterChange = (type, value) => {
         setTempOrderFilters(prev => ({
@@ -119,7 +122,7 @@ const OrderManagement = () => {
             pageSize: selectedOrderFilters.pageSize,
         };
 
-        
+
         setTempOrderFilters(cleared);
         dispatch(setSelectedOrderFilters(cleared));
     };

@@ -41,7 +41,6 @@
 
 
 
-
 import {
   BrowserRouter as Router,
   Routes,
@@ -85,6 +84,7 @@ import NewCartPage from "./pages/NewCartPage";
 import OrderSuccess from "./pages/OrderSuccess";
 import api from "./utils/api";
 import ProductImageAddUpdate from "./pages/adminPages/ProductImageAddUpdate";
+import HomePageNew from "./pages/HomePageNew";
 
 const App = () => {
   const dispatch = useDispatch();
@@ -131,7 +131,8 @@ const App = () => {
 
           {/* Public routes */}
           <Route path="/" element={<RootLayout />}>
-            <Route index element={<HomePage />} />
+            {/* <Route index element={<HomePage />} /> */}
+            <Route index element={<HomePageNew />} />
             <Route path="category/dupattas" element={<ProductListingPage />} />
             <Route path="product/:id" element={<ProductDescription />} />
             <Route path="about" element={<AboutPage />} />

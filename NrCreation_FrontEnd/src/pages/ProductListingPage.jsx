@@ -219,7 +219,7 @@ const ProductListingPage = () => {
       {products && products.length > 0 ?
         (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+            <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5  gap-">
               {products.map((product, index) =>
                 product.id ? (
                   <Link to={`/product/${product?.id}`} key={product?.id}>
