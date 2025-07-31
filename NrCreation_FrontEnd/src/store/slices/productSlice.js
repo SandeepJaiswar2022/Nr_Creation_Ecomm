@@ -14,12 +14,12 @@ export const fetchProducts = createAsyncThunk(
 
       const search = selectedFilters?.search || "";
       const category = "dupattas"
-      const available = selectedFilters.avavailability === 'Out of Stock' ? false : true;
-      const low = selectedFilters.priceLow || 0;
-      const high = selectedFilters.priceHigh || 10000000;
-      const page = selectedFilters.page - 1 || 0;
-      const size = selectedFilters.pageSize || 10;
-      const sortDir = selectedFilters.sortOrFeaturedOrNewest || 'asc';
+      const available = selectedFilters?.avavailability === 'Out of Stock' ? false : true;
+      const low = selectedFilters?.priceLow || 0;
+      const high = selectedFilters?.priceHigh || 10000000;
+      const page = selectedFilters?.page - 1 || 0;
+      const size = selectedFilters?.pageSize || 10000;
+      const sortDir = selectedFilters?.sortOrFeaturedOrNewest || 'asc';
 
 
       const response = await api.get(`/public/product/get-all`, {

@@ -34,7 +34,7 @@ export const verifyRazorpayPayment = createAsyncThunk(
   async (paymentVerificationData, { rejectWithValue }) => {
     try {
       const res = await api.post("/orders/verify-payment", paymentVerificationData);
-      console.log("Payment verification response:", res.data);
+      // console.log("Payment verification response:", res.data);
 
       return res.data;
     } catch (error) {
