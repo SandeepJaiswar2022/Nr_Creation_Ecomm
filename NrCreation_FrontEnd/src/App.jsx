@@ -68,7 +68,6 @@ import UserManagement from "./pages/adminPages/UserManagement";
 import Analytics from "./pages/adminPages/Analytics";
 import PageNotFound from "@/components/ReusableComponents/PageNotFound";
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
 import { ToastContainer } from "react-toastify";
 import { ProtectedRoute } from "./routes";
 import AdminLayout from "./components/layout/AdminLayout";
@@ -159,7 +158,7 @@ const App = () => {
               <Route path="products/images/:productId" element={<ProductImageAddUpdate />} />
               <Route path="orders" element={<OrderManagement />} />
               <Route path="users" element={<UserManagement />} />
-              <Route path="analytics" element={<Analytics />} />
+              {/* <Route path="analytics" element={<Analytics />} /> */}
             </Route>
           </Route>
 

@@ -21,6 +21,7 @@ public class Customer {
     private String email;
     private Date dateOfBirth;
     private String phone;
+    private String role = "USER";
 
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Address> addresses = new ArrayList<>();
