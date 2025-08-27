@@ -212,7 +212,7 @@ const AdminDashboard = () => {
             </div>
 
             {/* Quick Actions */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 {quickActions.map((action, index) => (
                     <motion.div
                         key={action.title}
@@ -228,7 +228,7 @@ const AdminDashboard = () => {
                         </Link>
                     </motion.div>
                 ))}
-            </div>
+            </div> */}
 
             {/* Recent Orders */}
             <div className="bg-white rounded-lg shadow-md p-6">

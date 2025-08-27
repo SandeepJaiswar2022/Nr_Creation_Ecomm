@@ -27,7 +27,6 @@ public class OrderSpecification {
     ) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
-
             // Filter: Status
             if (status != null) {
                 predicates.add(cb.equal(root.get("orderStatus"), status));

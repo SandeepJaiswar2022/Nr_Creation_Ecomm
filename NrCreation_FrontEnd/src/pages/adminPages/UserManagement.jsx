@@ -15,50 +15,19 @@ import {
     Filter
 } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
-import { PageLoader } from "@/components/ReusableComponents"
-import { fetchAllUser, updateUserRole } from "@/store/slices/userSlice"
+import { LoadingSpinner, PageLoader, Pagination } from "@/components/ReusableComponents"
+import { fetchAllUser, setFilters, updateUserRole } from "@/store/slices/userSlice"
+import { useMinimumLoading } from "@/hooks/useMinimumLoading"
 
 const UserManagement = () => {
-    // const [users, setUsers] = useState([
-    //     {
-    //         id: "USR001",
-    //         name: "John Doe",
-    //         email: "john@example.com",
-    //         phone: "+91 98765 43210",
-    //         role: "Customer",
-    //         status: "Active",
-    //         joinDate: "2024-01-15",
-    //         totalOrders: 12,
-    //         totalSpent: "₹24,500"
-    //     },
-    //     {
-    //         id: "USR002",
-    //         name: "Jane Smith",
-    //         email: "jane@example.com",
-    //         phone: "+91 98765 43211",
-    //         role: "Admin",
-    //         status: "Active",
-    //         joinDate: "2024-02-01",
-    //         totalOrders: 8,
-    //         totalSpent: "₹18,750"
-    //     },
-    //     {
-    //         id: "USR003",
-    //         name: "Mike Johnson",
-    //         email: "mike@example.com",
-    //         phone: "+91 98765 43212",
-    //         role: "Vendor",
-    //         status: "Suspended",
-    //         joinDate: "2024-02-15",
-    //         totalOrders: 5,
-    //         totalSpent: "₹12,300"
-    //     }
-    // ])
-    const { users, loading } = useSelector((state) => state.user)
-    const { user } = useSelector((state) => state.auth)
+    const { users, filters, loading } = useSelector((state) => state.user)
+    const totalPages = filters?.totalPages;
+    const { user } = useSelector((state) => state.auth);
+    const { isLoading, startLoading } = useMinimumLoading(1000, 5000);
+
     const dispatch = useDispatch()
 
-    console.log(`My users in user management : `, users);
+    // console.log(`users in user management : `, users);
 
 
     const [searchQuery, setSearchQuery] = useState("")
@@ -69,12 +38,15 @@ const UserManagement = () => {
     const roles = ["all", "Admin", "Customer", "Vendor"]
     const statuses = ["all", "Active", "Suspended", "Inactive"]
 
+    // console.log("User Management - Filters: ", filters);
+
+
 
     useEffect(() => {
         // Fetch users from the API or any other source
-        if (user)
-            dispatch(fetchAllUser(user?.email));
-    }, [dispatch, user])
+        if (user?.role === 'ADMIN')
+            dispatch(fetchAllUser({ loggedInAdminEmail: user?.email, filters: filters }));
+    }, [dispatch, user, filters])
 
     // Filter users based on search query, role, and status
     // const filteredUsers = users.filter(user => {
@@ -103,14 +75,48 @@ const UserManagement = () => {
     //     ))
     // }
 
+    const handleFilterChange = async (newFilters) => {
+
+        // console.log("New filters: ", newFilters);
+        await startLoading(async () => {
+            dispatch(setFilters(newFilters));
+        });
+        // setSelectedStatus(newFilters.status || "all");
+    };
+
+
+    const handleSearch = async () => {
+        console.log("Search key : ", searchQuery);
+        await handleFilterChange({
+            ...filters,
+            search: searchQuery,
+        });
+    };
+
+    const handleRoleChange = (value) => {
+        setSelectedRole(value)
+        console.log("Selected role: ", value);
+        handleFilterChange({
+            ...filters,
+            role: value === "all" ? "" : value,
+        });
+    }
+
+    const handlePageNumberChange = async (newPage) => {
+        await handleFilterChange({ ...filters, page: newPage });
+    };
+    const handlePageSizeChange = async (newSize) => {
+        await handleFilterChange({ ...filters, pageSize: newSize, page: 1 });
+    };
     const toggleUserExpansion = (userId) => {
         setExpandedUser(expandedUser === userId ? null : userId)
     }
 
 
-    if (loading) {
+    if (isLoading) {
         return (
             <PageLoader message="Loading Users..." />
+            // <LoadingSpinner />
         )
     }
     return (
@@ -128,8 +134,15 @@ const UserManagement = () => {
                         onChange={(e) => setSearchQuery(e.target.value)}
                     />
                 </div>
+                <Button
+                    variant="outline"
+                    className="text-sm sm:text-base bg-[#871845] color-transition-delay hover:bg-[#430e2b] text-white hover:text-white px-3 sm:px-4 py-1.5 sm:py-2"
+                    onClick={() => handleSearch()}
+                >
+                    Search
+                </Button>
                 <div className="flex flex-wrap gap-2">
-                    <Select value={selectedRole} onValueChange={setSelectedRole}>
+                    <Select value={selectedRole} onValueChange={handleRoleChange}>
                         <SelectTrigger className="w-full sm:w-[180px] text-sm sm:text-base">
                             <SelectValue placeholder="Select role" />
                         </SelectTrigger>
@@ -153,6 +166,7 @@ const UserManagement = () => {
                             ))}
                         </SelectContent>
                     </Select>
+
                     <Button
                         variant="outline"
                         className="text-sm sm:text-base px-3 sm:px-4 py-1.5 sm:py-2"
@@ -171,10 +185,10 @@ const UserManagement = () => {
             {/* Users List - Mobile View */}
             <div className="block sm:hidden space-y-3">
                 {users.map((user) => (
-                    <div key={user?.id} className="bg-white rounded-lg shadow-md p-3">
+                    <div key={user?.userId} className="bg-white rounded-lg shadow-md p-3">
                         {/* ... existing user card header ... */}
 
-                        {expandedUser === user?.id && (
+                        {expandedUser === user?.userId && (
                             <div className="space-y-3 pt-3 border-t">
                                 {/* ... existing user details ... */}
 
@@ -231,7 +245,7 @@ const UserManagement = () => {
                             </thead>
                             <tbody>
                                 {users.map((user) => (
-                                    <tr key={user?.id} className="border-b hover:bg-gray-50 transition-colors">
+                                    <tr key={user?.userId} className="border-b hover:bg-gray-50 transition-colors">
                                         <td className="py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">USR00{user?.userId}</td>
                                         <td className="py-3 sm:py-4 px-3 sm:px-6 whitespace-nowrap">
                                             <div>
@@ -303,6 +317,12 @@ const UserManagement = () => {
                     </div>
                 </div>
             </div>
+            <Pagination
+                selectedFilters={filters}
+                handlePageChange={handlePageNumberChange}
+                totalPages={totalPages}
+                handlePageSizeChange={handlePageSizeChange}
+            />
         </div>
     )
 }
