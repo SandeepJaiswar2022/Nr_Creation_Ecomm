@@ -21,11 +21,12 @@ import axios from "axios";
 import { add } from "date-fns";
 import { addToCartAsync } from "@/store/slices/cartSlice";
 import { toast } from "react-toastify";
-
+import { setBuyNowItem } from "@/store/slices/buyNowSlice";
+import { fetchProducts } from "@/store/slices/productSlice";
 const ProductDescription = () => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [selectedColor, setSelectedColor] = useState("maroon");
+  // const [selectedColor, setSelectedColor] = useState("maroon");
   const [selectedSize, setSelectedSize] = useState("M");
   const [openSection, setOpenSection] = useState(null);
   const [startIndex, setStartIndex] = useState(0);
@@ -33,8 +34,22 @@ const ProductDescription = () => {
   const [activeTab, setActiveTab] = useState("reviews");
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
+  const { product, loading, error } = useSelector((state) => state.product);
+  
+  
+const navigate = useNavigate();
 
-  const navigate = useNavigate();
+  const products = useSelector((state) => state.product.products);
+  // console.log("product.id: ", product.id)
+  const sortedProducts = [...products]
+    .filter((p) => p.id !== product.id)
+    .sort((a, b) => b.id - a.id);
+
+  useEffect(() => {
+    dispatch(fetchProducts()); 
+  }, [dispatch]);
+
+  // console.log("All Products:", products);
 
   const handleAddToCart = async () => {
     if (!product) {
@@ -55,15 +70,35 @@ const ProductDescription = () => {
     try {
       const response = await dispatch(addToCartAsync(cartItem)).unwrap();
       // console.log("Cart item added:", response);
-      navigate("/cart"); // Redirect on success
+      navigate(`/checkout/null`) // Redirect on success
     } catch (err) {
-      console.error("Failed to add to cart:", err);
+      console.error("Can't Buy this item for this perticular moment", err);
     }
   };
 
+
+
+const handleBuyNow = () => {
+  if (!user) {
+    navigate("/auth");
+    return;
+  }
+
+  // Optionally set buy now item in redux if you want to keep that logic
+  // dispatch(
+  //   setBuyNowItem({
+  //     product,
+  //     quantity,
+  //   })
+  // );
+
+  // Pass productId and quantity in URL for checkout page
+  // console.log("Navigating to checkout with product:", product.id);
+  navigate(`/checkout/${product.id}`);
+};
+
   // const product = [...featuredProducts, ...womensProducts, ...mensProducts].find(product => product.id === id);
 
-  const { product, loading, error } = useSelector((state) => state.product);
 
   useEffect(() => {
     if (id) {
@@ -73,11 +108,11 @@ const ProductDescription = () => {
 
   useEffect(() => {
     if (product) {
-      // console.log(product);
+      console.log(product);
       setSelectedImage(product.imageUrls[0]);
       setQuantity(1);
-      setSelectedColor("maroon");
-      setSelectedSize("M");
+      // setSelectedColor("maroon");
+      setSelectedSize(product.size );
     }
 
     // console.log(id);
@@ -98,6 +133,7 @@ const ProductDescription = () => {
       </div>
     );
   }
+  // console.log("Product data : ", product);
 
   const images = [
     "/Images/Duppta1.jpeg",
@@ -108,13 +144,13 @@ const ProductDescription = () => {
     "/Images/Duppta5.jpeg",
   ];
 
-  const colors = [
+  const s = [
     { name: "maroon", value: "#871845" },
     { name: "blue", value: "#1E40AF" },
-    { name: "green", value: "#065F46" },
+    { name: "gcolorreen", value: "#065F46" },
     { name: "black", value: "#111827" },
   ];
-  const sizes = ["XS", "S", "M", "L", "XL"];
+  const sizes = [product.size , product.size] ;
 
   const toggleSection = (section) => {
     setOpenSection(openSection === section ? null : section);
@@ -133,7 +169,7 @@ const ProductDescription = () => {
   // Mock data for reviews
   const mockReviews = [
     {
-      userName: "John Doe",
+      userName: "Rajni singh",
       date: "2024-03-15",
       rating: 5,
       comment:
@@ -141,7 +177,7 @@ const ProductDescription = () => {
       images: ["/Images/lehnga5.jpeg", "/Images/lehnga6.jpeg"],
     },
     {
-      userName: "Jane Smith",
+      userName: "Archana yadav",
       date: "2024-03-10",
       rating: 4,
       comment:
@@ -149,7 +185,7 @@ const ProductDescription = () => {
       images: [],
     },
     {
-      userName: "Mike Johnson",
+      userName: "Suman Kumari",
       date: "2024-03-05",
       rating: 5,
       comment:
@@ -183,7 +219,7 @@ const ProductDescription = () => {
               </button>
 
               <div className="flex flex-col gap-4 py-2 h-[calc(6*5rem+3*1rem)] overflow-hidden">
-                {images.map((img, index) => (
+                {product.imageUrls.map((img, index) => (
                   <motion.div
                     key={startIndex + index}
                     className={`w-20 max-sm:w-16 h-28 max-sm:h-24 cursor-pointer border-2 ${selectedImage === startIndex + index
@@ -238,9 +274,12 @@ const ProductDescription = () => {
                   <ShoppingCart className="mr-2 h-4 w-4" />
                   <h1>Add to Cart</h1>
                 </button>
-                <button className=" text-white bg-[#871845] font-medium hover:bg-[#611031]">
-                  Buy Now
-                </button>
+                  <button
+                    className="text-white bg-[#871845] font-medium hover:bg-[#611031]"
+                    onClick={handleBuyNow}
+                  >
+                    Buy Now
+                  </button>
               </div>
             </div>
           </div>
@@ -280,7 +319,7 @@ const ProductDescription = () => {
 
             {/* Color Selection */}
             <div className="space-y-3">
-              <h3 className="font-medium">Select Color</h3>
+              {/* <h3 className="font-medium">Select Color</h3>
               <div className="flex gap-3">
                 {colors.map((color) => (
                   <motion.div
@@ -295,7 +334,7 @@ const ProductDescription = () => {
                     whileTap={{ scale: 0.95 }}
                   />
                 ))}
-              </div>
+              </div> */}
             </div>
 
             <div className="grid grid-cols-2 gap-4 max-sm:gap-2">
@@ -347,6 +386,7 @@ const ProductDescription = () => {
               </div>
 
               {/* Quantity Selection */}
+              {/* </div>
               <div className="space-y-2 bg-[#f0e3e9]  p-4 max-sm:p-2">
                 <h3 className="font-medium">Quantity</h3>
                 <div className="flex items-center gap-4">
@@ -369,9 +409,8 @@ const ProductDescription = () => {
                   >
                     <Plus className="h-4 w-4" />
                   </Button>
-                </div>
-              </div>
-            </div>
+                </div>*/ }
+            </div> 
           </div>
 
           {/* Accordion Sections */}
@@ -500,9 +539,7 @@ const ProductDescription = () => {
             </TabsList>
             <TabsContent value="description" className="mt-4">
               <p className="text-gray-600">
-                Detailed product description goes here. Lorem ipsum dolor sit
-                amet, consectetur adipiscing elit. Sed do eiusmod tempor
-                incididunt ut labore et dolore magna aliqua.
+               {product?.description || "No description available for this product."}
               </p>
             </TabsContent>
             <TabsContent value="specifications" className="mt-4">
@@ -544,7 +581,7 @@ const ProductDescription = () => {
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          {featuredProducts.map((product) => (
+          {sortedProducts.map((product) => (
             <Link to={`/product/${product.id}`} key={product.id}>
               <ProductCard key={product.id} product={product} />
             </Link>

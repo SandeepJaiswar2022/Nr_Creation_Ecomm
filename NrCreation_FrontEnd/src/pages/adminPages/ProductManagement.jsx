@@ -138,6 +138,7 @@ const ProductManagement = () => {
 
     useEffect(() => {
         if (isEditingProduct && editingProduct) {
+            // console.log("Editing Product:", editingProduct);
             setProductForm({
                 name: editingProduct?.name || "",
                 category: editingProduct?.category?.name || "",
@@ -159,7 +160,6 @@ const ProductManagement = () => {
         }
     }, [isAddingProduct, isEditingProduct, editingProduct]);
 
-
     //Dispatch Add Product
     const handleAddProduct = () => {
         const productData = {
@@ -176,6 +176,7 @@ const ProductManagement = () => {
 
 
     const handleEditProduct = (product) => {
+        // console.log("Editing Products:", product);
         setIsEditingProduct(true)
         setEditingProduct(product)
     }

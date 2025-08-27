@@ -55,12 +55,12 @@ export const addToCartAsync = createAsyncThunk(
   }
 );
 
+
 export const clearCart = createAsyncThunk(
   "cart/clearCart",
   async (_, { rejectWithValue }) => {
     try {
       const response = await api.delete(`/cart/clear-cart`);
-
       return response.data;
     } catch (error) {
       const message = normalizeError(error);

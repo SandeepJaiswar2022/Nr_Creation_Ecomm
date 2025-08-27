@@ -178,6 +178,8 @@ public class ProductServiceImpl implements ProductService{
         product.setCategory(foundCategory);
         product.setDescription(request.getDescription());
 
+//        System.out.println("");
+
         return productRepo.save(product);
     }
 

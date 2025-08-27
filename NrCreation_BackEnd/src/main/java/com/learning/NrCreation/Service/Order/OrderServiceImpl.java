@@ -68,7 +68,6 @@ public class OrderServiceImpl implements OrderService {
 
         // Create order items
         Cart cart = cartService.getCartByCustomerId(customer.getCustomerId());
-
         for (CartItem cartItem : cart.getItems()) {
             OrderItem item = new OrderItem();
             item.setProductId(cartItem.getProduct().getId());
