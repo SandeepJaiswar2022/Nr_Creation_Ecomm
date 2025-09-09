@@ -146,7 +146,7 @@ const CheckoutPage = () => {
       // Step 1: Create Order on backend
       const razorpayCreatedOrderData = await dispatch(createRazorpayOrder(orderPayload)).unwrap();
 
-      console.log("Create order response:", razorpayCreatedOrderData);
+      // console.log("Create order response:", razorpayCreatedOrderData);
 
       const options = {
         key: `rzp_test_fq5xX9fbSikzL0`, // Replace this
@@ -162,7 +162,7 @@ const CheckoutPage = () => {
             razorpaySignature: response.razorpay_signature,
           };
 
-          console.log("Payment verification data : ", paymentVerificationData);
+          // console.log("Payment verification data : ", paymentVerificationData);
 
 
           try {

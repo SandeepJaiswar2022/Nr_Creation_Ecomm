@@ -20,6 +20,7 @@ import { EmptyState, PageLoader } from "@/components/ReusableComponents";
 import axios from "axios";
 import { add } from "date-fns";
 import { addToCartAsync } from "@/store/slices/cartSlice";
+import { toast } from "react-toastify";
 
 const ProductDescription = () => {
   const [selectedImage, setSelectedImage] = useState(0);
@@ -30,6 +31,7 @@ const ProductDescription = () => {
   const [startIndex, setStartIndex] = useState(0);
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState("reviews");
+  const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
 
   const navigate = useNavigate();
@@ -37,6 +39,11 @@ const ProductDescription = () => {
   const handleAddToCart = async () => {
     if (!product) {
       console.error("No product available to add to cart");
+      return;
+    }
+
+    if (!user) {
+      navigate("/auth");
       return;
     }
 

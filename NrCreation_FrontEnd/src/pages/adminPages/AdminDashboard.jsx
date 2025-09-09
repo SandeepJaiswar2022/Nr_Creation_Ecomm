@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import {
@@ -12,10 +12,18 @@ import {
     ArrowDownRight
 } from "lucide-react"
 import { Link } from "react-router-dom"
+import { OrderCharts, ProductCharts } from "@/features"
+import { fetchAllOrders } from "@/store/slices/ordersSlice"
+import { useDispatch, useSelector } from "react-redux"
+import { fetchProducts } from "@/store/slices/productSlice"
 
 const AdminDashboard = () => {
     const [timeRange, setTimeRange] = useState("week")
+    const { orders, loading, selectedOrderFilters, totalPages } = useSelector(state => state.orders);
+    const { products, categories, } = useSelector(store => store.product);
 
+
+    const dispatch = useDispatch();
     const stats = [
         {
             title: "Total Revenue",
@@ -102,6 +110,14 @@ const AdminDashboard = () => {
         }
     ]
 
+    useEffect(() => {
+        dispatch(fetchAllOrders(selectedOrderFilters));
+        dispatch(fetchProducts({}));
+    }, [dispatch]);
+
+
+
+
     return (
         <div className="container space-y-10 mx-auto px-2 sm:px-4 py-4 sm:py-8">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4 mb-4 sm:mb-8">
@@ -158,22 +174,27 @@ const AdminDashboard = () => {
             {/* Charts Grid */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
                 {/* Revenue Chart */}
-                <div className="bg-white rounded-lg shadow-md p-3 sm:p-4">
+                {/* <div className="bg-white rounded-lg shadow-md p-3 sm:p-4">
                     <h3 className="text-sm sm:text-base font-medium mb-3">Revenue Overview</h3>
                     <div className="h-[300px] flex items-center justify-center bg-gray-50 rounded-lg">
                         <p className="text-gray-500 text-sm">Revenue Chart Placeholder</p>
                     </div>
-                </div>
+                </div> */}
 
                 {/* Orders Chart */}
-                <div className="bg-white rounded-lg shadow-md p-3 sm:p-4">
-                    <h3 className="text-sm sm:text-base font-medium mb-3">Orders Overview</h3>
-                    <div className="h-[300px] flex items-center justify-center bg-gray-50 rounded-lg">
-                        <p className="text-gray-500 text-sm">Orders Chart Placeholder</p>
-                    </div>
+
+                <div className="col-span-2">
+                    <ProductCharts products={products} />
                 </div>
 
-                {/* Customer Demographics */}
+
+                <div className="col-span-2">
+                    <OrderCharts orders={orders} />
+                </div>
+
+
+
+                {/* Customer Demographics
                 <div className="bg-white rounded-lg shadow-md p-3 sm:p-4">
                     <h3 className="text-sm sm:text-base font-medium mb-3">Customer Demographics</h3>
                     <div className="h-[300px] flex items-center justify-center bg-gray-50 rounded-lg">
@@ -181,13 +202,13 @@ const AdminDashboard = () => {
                     </div>
                 </div>
 
-                {/* Product Categories */}
+                Product Categories
                 <div className="bg-white rounded-lg shadow-md p-3 sm:p-4">
                     <h3 className="text-sm sm:text-base font-medium mb-3">Product Categories</h3>
                     <div className="h-[300px] flex items-center justify-center bg-gray-50 rounded-lg">
                         <p className="text-gray-500 text-sm">Categories Chart Placeholder</p>
                     </div>
-                </div>
+                </div> */}
             </div>
 
             {/* Quick Actions */}

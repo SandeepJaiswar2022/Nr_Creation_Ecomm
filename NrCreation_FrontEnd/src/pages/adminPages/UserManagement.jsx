@@ -58,6 +58,9 @@ const UserManagement = () => {
     const { user } = useSelector((state) => state.auth)
     const dispatch = useDispatch()
 
+    console.log(`My users in user management : `, users);
+
+
     const [searchQuery, setSearchQuery] = useState("")
     const [selectedRole, setSelectedRole] = useState("all")
     const [selectedStatus, setSelectedStatus] = useState("all")

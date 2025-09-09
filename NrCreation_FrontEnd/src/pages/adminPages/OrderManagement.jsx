@@ -28,6 +28,8 @@ import {
 import { useDispatch, useSelector } from "react-redux"
 import { fetchAllOrders } from "@/store/slices/ordersSlice"
 import { formatDate } from "@/utils/formatString"
+import Pagination from "@/components/ReusableComponents/Pagination"
+import { setSelectedOrderFilters } from "@/store/slices/ordersSlice"
 
 const OrderManagement = () => {
     // const [orders, setOrders] = useState([
@@ -70,16 +72,66 @@ const OrderManagement = () => {
     //     }
     // ])
 
-    const { orders, loading } = useSelector(state => state.orders);
-
-    const [searchQuery, setSearchQuery] = useState("")
-    const [selectedStatus, setSelectedStatus] = useState("all")
-    const [expandedOrder, setExpandedOrder] = useState(null)
+    const { orders, loading, selectedOrderFilters, totalPages } = useSelector(state => state.orders);
+    const [tempOrderFilters, setTempOrderFilters] = useState(selectedOrderFilters);
+    const [expandedOrder, setExpandedOrder] = useState(null);
     const dispatch = useDispatch();
 
+    // Sync tempOrderFilters with redux selectedOrderFilters
     useEffect(() => {
-        dispatch(fetchAllOrders());
-    }, [dispatch])
+        setTempOrderFilters(selectedOrderFilters);
+    }, [selectedOrderFilters]);
+
+    // Fetch all orders when filters change
+    useEffect(() => {
+        dispatch(fetchAllOrders(selectedOrderFilters));
+    }, [dispatch, selectedOrderFilters]);
+
+    // console.log("Orders in OrderManagement: ", orders);
+
+
+    // Filter Handlers
+    const handleOrderFilterChange = (type, value) => {
+        setTempOrderFilters(prev => ({
+            ...prev,
+            [type]: value
+        }));
+    };
+    const handleOrderDateChange = (type, value) => {
+        setTempOrderFilters(prev => ({
+            ...prev,
+            [type]: value
+        }));
+    };
+    const handleApplyOrderFilters = () => {
+        dispatch(setSelectedOrderFilters(tempOrderFilters));
+    };
+    const handleClearOrderFilters = () => {
+
+
+
+        const cleared = {
+            search: '',
+            startDate: '',
+            endDate: '',
+            orderStatus: '',
+            priceLow: 0,
+            priceHigh: 1000000,
+            shippingMethod: '',
+            page: 1,
+            pageSize: selectedOrderFilters.pageSize,
+        };
+
+
+        setTempOrderFilters(cleared);
+        dispatch(setSelectedOrderFilters(cleared));
+    };
+    const handleOrderPageChange = (newPage) => {
+        dispatch(setSelectedOrderFilters({ ...selectedOrderFilters, page: newPage }));
+    };
+    const handleOrderPageSizeChange = (newSize) => {
+        dispatch(setSelectedOrderFilters({ ...selectedOrderFilters, pageSize: newSize, page: 1 }));
+    };
 
     const statuses = [
         "all",
@@ -181,42 +233,75 @@ const OrderManagement = () => {
                 </Button>
             </div>
 
-            {/* Search and Filter */}
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 mb-4 sm:mb-6">
-                <div className="relative flex-1">
-                    <Search className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4 sm:w-5 sm:h-5" />
+            {/* Search and Filter Bar (like ProfilePage) */}
+            <div className="flex flex-wrap gap-3 items-end bg-gray-50 p-4 rounded-lg border mb-4">
+                <Input
+                    placeholder="Search by product name or customer email"
+                    value={tempOrderFilters.search}
+                    onChange={e => handleOrderFilterChange('search', e.target.value)}
+                    className="max-w-xs"
+                />
+                <div>
+                    <label className="block text-xs text-gray-500 mb-1">From</label>
                     <Input
-                        placeholder="Search orders..."
-                        className="pl-8 sm:pl-10 text-sm sm:text-base"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
+                        type="date"
+                        value={tempOrderFilters.startDate}
+                        onChange={e => handleOrderDateChange('startDate', e.target.value)}
+                        className="w-36"
                     />
                 </div>
-                <div className="flex flex-wrap gap-2">
-                    <Select value={selectedStatus} onValueChange={setSelectedStatus}>
-                        <SelectTrigger className="w-full sm:w-[180px] text-sm sm:text-base">
-                            <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {statuses.map(status => (
-                                <SelectItem key={status} value={status}>
-                                    {status.charAt(0).toUpperCase() + status.slice(1)}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
-                    <Button
-                        variant="outline"
-                        className="text-sm sm:text-base px-3 sm:px-4 py-1.5 sm:py-2"
-                        onClick={() => {
-                            setSelectedStatus("all")
-                            setSearchQuery("")
-                        }}
-                    >
-                        <Filter className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />
-                        Reset Filters
-                    </Button>
+                <div>
+                    <label className="block text-xs text-gray-500 mb-1">To</label>
+                    <Input
+                        type="date"
+                        value={tempOrderFilters.endDate}
+                        onChange={e => handleOrderDateChange('endDate', e.target.value)}
+                        className="w-36"
+                    />
                 </div>
+                <div>
+                    <label className="block text-xs text-gray-500 mb-1">Order Status</label>
+                    <select
+                        value={tempOrderFilters.orderStatus}
+                        onChange={e => handleOrderFilterChange('orderStatus', e.target.value)}
+                        className="border rounded px-2 py-1 text-sm"
+                    >
+                        <option value=''>All</option>
+                        <option value='PENDING'>Pending</option>
+                        <option value='CONFIRMED'>Confirmed</option>
+                        <option value='SHIPPED'>Shipped</option>
+                        <option value='DELIVERED'>Delivered</option>
+                        <option value='CANCELLED'>Cancelled</option>
+                    </select>
+                </div>
+                <div>
+                    <label className="block text-xs text-gray-500 mb-1">Shipping</label>
+                    <select
+                        value={tempOrderFilters.shippingMethod}
+                        onChange={e => handleOrderFilterChange('shippingMethod', e.target.value)}
+                        className="border rounded px-2 py-1 text-sm"
+                    >
+                        <option value=''>All</option>
+                        <option value='Standard'>Standard</option>
+                        <option value='Express'>Express</option>
+                        <option value='Pickup'>Pickup</option>
+                    </select>
+                </div>
+                <Button
+                    className="bg-[#871845] hover:bg-[#671234]"
+                    onClick={handleApplyOrderFilters}
+                    disabled={loading}
+                >
+                    Apply
+                </Button>
+                <Button
+                    variant="outline"
+                    className="border-red-500 text-red-600 hover:bg-red-50"
+                    onClick={handleClearOrderFilters}
+                    disabled={loading}
+                >
+                    Clear
+                </Button>
             </div>
 
             {/* Orders List - Mobile View */}
@@ -254,7 +339,7 @@ const OrderManagement = () => {
                                     <div className="text-xs font-medium">Order Items:</div>
                                     {order?.items?.map((item, index) => (
                                         <div key={index} className="text-xs">
-                                            {item?.quantity}x {item?.name} - ₹{item?.price}
+                                            {item?.quantity}x {item?.productName} - ₹{item?.price}
                                         </div>
                                     ))}
                                     <div className="text-xs font-medium mt-1">
@@ -325,7 +410,7 @@ const OrderManagement = () => {
                                             <div className="space-y-0.5">
                                                 {order?.orderItems.map((item, index) => (
                                                     <div key={index} className="text-xs sm:text-sm">
-                                                        {item?.quantity}x {item?.name}
+                                                        {item?.quantity}x {item?.productName}
                                                     </div>
                                                 ))}
                                             </div>
@@ -355,8 +440,8 @@ const OrderManagement = () => {
                                                         <SelectItem value="CONFIRMED">Confirmed</SelectItem>
                                                         <SelectItem value="SHIPPED">Shipped</SelectItem>
                                                         <SelectItem value="Out for Delivery">Out for Delivery</SelectItem>
-                                                        <SelectItem value="DELIVERED">Delivered</SelectItem>
-                                                        <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                                                        <SelectItem value="Delivered">Delivered</SelectItem>
+                                                        <SelectItem value="Cancelled">Cancelled</SelectItem>
                                                         <SelectItem value="Refunded">Refunded</SelectItem>
                                                         <SelectItem value="Failed Delivery">Failed Delivery</SelectItem>
                                                     </SelectContent>
@@ -370,6 +455,12 @@ const OrderManagement = () => {
                     </div>
                 </div>
             </div>
+            <Pagination
+                selectedFilters={selectedOrderFilters}
+                handlePageChange={handleOrderPageChange}
+                totalPages={totalPages}
+                handlePageSizeChange={handleOrderPageSizeChange}
+            />
         </div>
     )
 }

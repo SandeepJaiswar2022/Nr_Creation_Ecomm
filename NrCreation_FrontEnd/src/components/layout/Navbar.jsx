@@ -21,7 +21,8 @@ const Navbar = () => {
   };
 
   useEffect(() => {
-    dispatch(fetchCartItems())
+    if (user && user?.role === "USER")
+      dispatch(fetchCartItems())
   }, [dispatch]);
 
   useEffect(() => {
