@@ -1,21 +1,18 @@
 package com.learning.NrCreation.Service.Cart;
 
 import com.learning.NrCreation.Entity.Cart;
-import com.learning.NrCreation.Entity.Customer;
+import com.learning.NrCreation.Entity.User;
 import com.learning.NrCreation.Exception.ResourceNotFoundException;
 import com.learning.NrCreation.Repository.CartItemRepository;
 import com.learning.NrCreation.Repository.CartRepository;
 import com.learning.NrCreation.Response.CartDTO;
 import com.learning.NrCreation.Response.CartItemDTO;
-import com.learning.NrCreation.Service.Customer.CustomerService;
-import com.learning.NrCreation.Service.Product.ProductService;
 import com.learning.NrCreation.Service.User.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -24,8 +21,6 @@ import java.util.stream.Collectors;
 public class CartServiceImpl implements CartService{
     private final CartRepository cartRepo;
     private final CartItemRepository cartItemRepo;
-    private final ProductService productService;
-    private final CustomerService customerService;
     private final UserService userService;
 
     @Override
@@ -57,10 +52,9 @@ public class CartServiceImpl implements CartService{
     public void clearCart(String authHeader) {
 
         // Break the association with CartUser first
-        String email = userService.findUserByJwtToken(authHeader).getEmail();
-        Customer customer = customerService.findCustomerByEmail(email);
-        Cart cart = getCartByCustomerId(customer.getCustomerId());
-        customer.setCart(null); // Remove reference
+        User user = userService.findUserByJwtToken(authHeader);
+        Cart cart = getCartByUserId(user.getId());
+        user.setCart(null); // Remove reference
 
 
         cartItemRepo.deleteAllByCart_CartId(cart.getCartId());
@@ -76,19 +70,19 @@ public class CartServiceImpl implements CartService{
     }
 
     @Override
-    public Cart initializeNewCart(Customer customer) {
-        System.out.println("M I initializing new Cart with customer: " + customer.getEmail());
-        return cartRepo.findByCustomer_CustomerId(customer.getCustomerId())
+    public Cart initializeNewCart(User user) {
+//        System.out.println("M I initializing new Cart with customer: " + user.getEmail());
+        return cartRepo.findByUserId(user.getId())
                 .orElseGet(() -> {
                     Cart cart = new Cart();
-                    cart.setCustomer(customer);
+                    cart.setUser(user);
                     return cartRepo.save(cart);
                 });
 
     }
 
     @Override
-    public Cart getCartByCustomerId(Long userId) {
-        return cartRepo.findByCustomer_CustomerId(userId).orElseThrow(()-> new ResourceNotFoundException("No Cart Item Found, Cart is Empty!"));
+    public Cart getCartByUserId(Long userId) {
+        return cartRepo.findByUserId(userId).orElseThrow(()-> new ResourceNotFoundException("No Cart Item Found, Cart is Empty!"));
     }
 }

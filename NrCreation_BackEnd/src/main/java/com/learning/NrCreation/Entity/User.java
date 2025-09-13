@@ -11,6 +11,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
+import java.util.List;
 
 @Entity
 @Setter
@@ -35,15 +37,38 @@ public class User implements UserDetails {
 	
 	private String password;
 
+    private Date dateOfBirth;
+
     private String refreshToken;
 	
 	@Enumerated(EnumType.STRING)
 	private Role role;
 
+    //Mapping with other entities
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Address> addresses = new ArrayList<>();
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Cart cart;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Review> reviews = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Payment> payments = new ArrayList<>();
+
+
+    //Mapping with other entities
+
 	@Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return role.getGrantedAuthorities();
     }
+
+
 
     @Override
     public String getPassword() {

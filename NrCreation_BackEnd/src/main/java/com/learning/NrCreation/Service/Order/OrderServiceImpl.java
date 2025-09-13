@@ -5,12 +5,10 @@ import com.learning.NrCreation.Enum.OrderStatus;
 import com.learning.NrCreation.Repository.OrderRepository;
 import com.learning.NrCreation.Request.CreateOrderRequest;
 import com.learning.NrCreation.Response.AddressDTO;
-import com.learning.NrCreation.Response.CartItemDTO;
 import com.learning.NrCreation.Response.OrderDTO;
 import com.learning.NrCreation.Response.OrderItemDTO;
 import com.learning.NrCreation.Service.Address.AddressService;
 import com.learning.NrCreation.Service.Cart.CartService;
-import com.learning.NrCreation.Service.Customer.CustomerService;
 import com.learning.NrCreation.Service.Razorpay.RazorpayService;
 import com.learning.NrCreation.Service.User.UserService;
 import com.razorpay.RazorpayException;
@@ -36,7 +34,6 @@ public class OrderServiceImpl implements OrderService {
     private static final Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
     private final OrderRepository orderRepository;
     private final CartService cartService;
-    private final CustomerService customerService;
     private final RazorpayService razorpayService;
     private final AddressService addressService;
 
@@ -50,13 +47,12 @@ public class OrderServiceImpl implements OrderService {
 
         User user = userService.findUserByJwtToken(authHeader);
 
-       Customer customer = customerService.findCustomerByEmail(user.getEmail());
 
         Address address = addressService.getAddressByIdAndAuthHeader(orderRequest.getShippingAddressId(), authHeader);
 
         // Create order entity
         Order order = new Order();
-        order.setCustomer(customer);
+        order.setUser(user);
         order.setOrderDate(LocalDateTime.now());
         order.setOrderStatus(OrderStatus.PENDING);
         order.setShippingMethod(orderRequest.getShippingMethod());
@@ -67,7 +63,12 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal totalAmount = BigDecimal.ZERO;
 
         // Create order items
+<<<<<<< Updated upstream
         Cart cart = cartService.getCartByCustomerId(customer.getCustomerId());
+=======
+        Cart cart = cartService.getCartByUserId(user.getId());
+
+>>>>>>> Stashed changes
         for (CartItem cartItem : cart.getItems()) {
             OrderItem item = new OrderItem();
             item.setProductId(cartItem.getProduct().getId());
@@ -89,7 +90,7 @@ public class OrderServiceImpl implements OrderService {
         JSONObject orderRequestJson = new JSONObject();
         orderRequestJson.put("amount", totalAmount.multiply(BigDecimal.valueOf(100)).intValue()); // Amount in paise
         orderRequestJson.put("currency", "INR");
-        orderRequestJson.put("receipt", "order_rcptid_" + customer.getCustomerId());
+        orderRequestJson.put("receipt", "order_rcptid_" + user.getId());
 
         Map<String,String> razorpayResponse = razorpayService.createRazorPayOrder(orderRequestJson);
         order.setRazorpayOrderId(razorpayResponse.get("razorpayOrderId"));
@@ -109,11 +110,9 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public Page<OrderDTO> getParticularCustomerAllOrders(String authHeader, String search, OrderStatus status, String shippingMethod, LocalDate startDate, LocalDate endDate, BigDecimal priceLow, BigDecimal priceHigh, Pageable pageable) {
         User user = userService.findUserByJwtToken(authHeader);
-        Customer customer = customerService.findCustomerByEmail(user.getEmail());
 
         //Filter and pagination
-        //Filter and pagination
-        Specification<Order> spec = OrderSpecification.withFilters(search,status,  shippingMethod, startDate, endDate, priceLow, priceHigh, customer.getCustomerId());
+        Specification<Order> spec = OrderSpecification.withFilters(search,status,  shippingMethod, startDate, endDate, priceLow, priceHigh, user.getId());
         return orderRepository.findAll(spec, pageable).map(this::convertToDto);
     }
 
@@ -128,8 +127,8 @@ public class OrderServiceImpl implements OrderService {
         dto.setRazorpayPaymentId(order.getRazorpayPaymentId());
         dto.setShippingMethod(order.getShippingMethod());
         dto.setOrderId(order.getOrderId());
-        dto.setCustomerId(order.getCustomer().getCustomerId());
-        dto.setCustomerName(order.getCustomer().getFirstName() + " " + order.getCustomer().getLastName());
+        dto.setCustomerId(order.getUser().getId());
+        dto.setCustomerName(order.getUser().getFirstName() + " " + order.getUser().getLastName());
 
         // Set shipping address
         AddressDTO addressDTO = addressService.convertToAddressDTO(order.getShippingAddress());

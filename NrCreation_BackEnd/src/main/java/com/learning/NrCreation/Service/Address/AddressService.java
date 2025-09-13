@@ -8,11 +8,11 @@ import com.learning.NrCreation.Response.AddressDTO;
 import java.util.List;
 
 public interface AddressService {
-    public Address addAddress(String authHeader, AddressRequest address);
-    public AddressDTO updateAddress(AddressRequest addressRequest, Long addressId, String authHeader);
-    public void deleteAddress(Long addressId, String authHeader);
-    public Address getAddressByIdAndAuthHeader(Long addressId, String authHeader);
-    public List<AddressDTO> getAllAddress();
-    public List<AddressDTO> getCustomerAllAddress(String authHeader);
-    public AddressDTO convertToAddressDTO(Address address);
+     Address addAddress(String authHeader, AddressRequest address);
+     AddressDTO updateAddress(AddressRequest addressRequest, Long addressId, String authHeader);
+     void deleteAddress(Long addressId, String authHeader);
+     Address getAddressByIdAndAuthHeader(Long addressId, String authHeader);
+     List<AddressDTO> getAllAddress();
+     List<AddressDTO> getCustomerAllAddress(String authHeader);
+     AddressDTO convertToAddressDTO(Address address);
 }

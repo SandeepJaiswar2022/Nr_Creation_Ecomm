@@ -1,18 +1,15 @@
 package com.learning.NrCreation.Service.Address;
 
 import com.learning.NrCreation.Entity.Address;
-import com.learning.NrCreation.Entity.Customer;
 import com.learning.NrCreation.Entity.User;
 import com.learning.NrCreation.Exception.ResourceNotFoundException;
 import com.learning.NrCreation.Exception.UnauthorizedAccessException;
 import com.learning.NrCreation.Repository.AddressRepository;
 import com.learning.NrCreation.Request.AddressRequest;
 import com.learning.NrCreation.Response.AddressDTO;
-import com.learning.NrCreation.Service.Customer.CustomerService;
 import com.learning.NrCreation.Service.User.UserService;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,19 +19,16 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AddressServiceImpl implements AddressService{
     private final UserService userService;
-    private final CustomerService customerService;
     private final AddressRepository addressRepository;
 
     @Override
     public Address addAddress(String authHeader, AddressRequest addressRequest) {
         User user = userService.findUserByJwtToken(authHeader);
-        Customer customer = customerService.findCustomerByEmail(user.getEmail());
-        Address addressToSave = getAddress(addressRequest, customer);
-
+        Address addressToSave = getAddress(addressRequest, user);
        return addressRepository.save(addressToSave);
     }
 
-    private static @NotNull Address getAddress(AddressRequest addressRequest, Customer customer) {
+    private static @NotNull Address getAddress(AddressRequest addressRequest, User user) {
         Address addressToSave = new Address();
         addressToSave.setCity(addressRequest.getCity());
         addressToSave.setCountry(addressRequest.getCountry());
@@ -43,22 +37,14 @@ public class AddressServiceImpl implements AddressService{
         addressToSave.setAddress(addressRequest.getAddress());
         addressToSave.setPinCode(addressRequest.getPinCode());
         addressToSave.setPhone(addressRequest.getPhone()); // Include phone from request
-        addressToSave.setCustomer(customer);
+        addressToSave.setUser(user);
         return addressToSave;
     }
 
     @Override
     public AddressDTO updateAddress(AddressRequest addressRequest, Long addressId, String authHeader) {
-        User user = userService.findUserByJwtToken(authHeader);
-        Customer customer = customerService.findCustomerByEmail(user.getEmail());
 
-        Address existingAddress = addressRepository.findById(addressId)
-                .orElseThrow(() -> new ResourceNotFoundException("Address not found"));
-
-        // Optional: Check if the address belongs to the same customer
-        if (!existingAddress.getCustomer().getCustomerId().equals(customer.getCustomerId())) {
-            throw new UnauthorizedAccessException("You are not authorized to update this address.");
-        }
+        Address existingAddress = getAddressByIdAndAuthHeader(addressId, authHeader);
 
         // Update fields
         existingAddress.setFullName(addressRequest.getFullName());
@@ -75,32 +61,23 @@ public class AddressServiceImpl implements AddressService{
 
     @Override
     public void deleteAddress(Long addressId, String authHeader) {
-        User user = userService.findUserByJwtToken(authHeader);
-        Customer customer = customerService.findCustomerByEmail(user.getEmail());
-
-        Address address = addressRepository.findById(addressId)
-                .orElseThrow(() -> new ResourceNotFoundException("Address not found"));
-
-        if (!address.getCustomer().getCustomerId().equals(customer.getCustomerId())) {
-            throw new UnauthorizedAccessException("You are not authorized to delete this address.");
-        }
-
+        Address address = getAddressByIdAndAuthHeader(addressId, authHeader);
         addressRepository.delete(address);
     }
 
     @Override
     public Address getAddressByIdAndAuthHeader(Long addressId, String authHeader) {
         User user = userService.findUserByJwtToken(authHeader);
-        Customer customer = customerService.findCustomerByEmail(user.getEmail());
 
         Address address = addressRepository.findById(addressId)
                 .orElseThrow(() -> new ResourceNotFoundException("Address not found"));
-        if(address.getCustomer()==null)
+
+        if(address.getUser()==null)
         {
-            throw new UnauthorizedAccessException("You are not authorized to view this address.");
+            throw new UnauthorizedAccessException("Unauthorized to view this address.");
         }
-        if (!address.getCustomer().getCustomerId().equals(customer.getCustomerId())) {
-            throw new UnauthorizedAccessException("You are not authorized to view this address.");
+        if (!address.getUser().getId().equals(user.getId())) {
+            throw new UnauthorizedAccessException("Unauthorized to view this address.");
         }
 
         return address;
@@ -118,8 +95,7 @@ public class AddressServiceImpl implements AddressService{
     @Override
     public List<AddressDTO> getCustomerAllAddress(String authHeader) {
         User user = userService.findUserByJwtToken(authHeader);
-        Customer customer = customerService.findCustomerByEmail(user.getEmail());
-        List<Address> addresses = addressRepository.findByCustomerCustomerId(customer.getCustomerId());
+        List<Address> addresses = addressRepository.findByUserId(user.getId());
         return addresses.stream()
                 .map(this::convertToAddressDTO)
                 .collect(Collectors.toList());

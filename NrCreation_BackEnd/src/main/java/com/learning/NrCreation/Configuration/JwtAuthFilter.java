@@ -1,6 +1,7 @@
 package com.learning.NrCreation.Configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.learning.NrCreation.Exception.ResourceNotFoundException;
 import com.learning.NrCreation.Response.ApiResponse;
 import com.learning.NrCreation.Service.Auth.JwtService;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -14,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -49,7 +51,21 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 			
         	userEmail = jwtService.extractUsername(jwtToken);
             if(userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                UserDetails userDetails;
+                try {
+                    // 🔥 This is where we wrap it
+                    userDetails = this.userDetailsService.loadUserByUsername(userEmail);
+                } catch (UsernameNotFoundException | ResourceNotFoundException e) {
+                    // build custom JSON response
+                    ApiResponse apiResponse = new ApiResponse("User not found for token", null);
+
+                    response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                    response.setContentType("application/json");
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
+                    response.getWriter().flush();
+                    return;
+                }
                 if(jwtService.validateToken(jwtToken, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,

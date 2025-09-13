@@ -84,39 +84,39 @@ import OrderSuccess from "./pages/OrderSuccess";
 import api from "./utils/api";
 import ProductImageAddUpdate from "./pages/adminPages/ProductImageAddUpdate";
 import HomePageNew from "./pages/HomePageNew";
+import { useMinimumLoading } from "./hooks/useMinimumLoading";
 
 const App = () => {
   const dispatch = useDispatch();
   const { accessToken } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(true);
 
+  const { isLoading, startLoading } = useMinimumLoading(2000, 5000);
+
   useEffect(() => {
     const tryRefreshToken = async () => {
       try {
-        // console.log(`My access token in app : `, accessToken);
-
-        if (!accessToken) {
-          // console.log(`Token is not there then refresh it : `, accessToken);
-          const res = await api.post(
-            "/auth/refresh-token",
-            {},
-            { withCredentials: true }
-          );
-          dispatch(setAccessToken(res.data.data?.accessToken));
-          dispatch(setUser(res.data.data?.user));
-        }
+        await startLoading(async () => {
+          if (!accessToken) {
+            const res = await api.post(
+              "/auth/refresh-token",
+              {},
+              { withCredentials: true }
+            );
+            dispatch(setAccessToken(res.data.data?.accessToken));
+            dispatch(setUser(res.data.data?.user));
+          }
+        });
       } catch (err) {
         dispatch(clearAuthState());
-        console.error("Auto-refresh failed:", err);
-      } finally {
-        setLoading(false);
+        console.error("Auto-refresh failed:");
       }
     };
 
     tryRefreshToken();
-  }, [dispatch]);
+  }, [dispatch, accessToken, startLoading]);
 
-  if (loading) {
+  if (isLoading) {
     return <PageLoader />;
   }
 

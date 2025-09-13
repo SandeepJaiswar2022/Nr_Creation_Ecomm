@@ -1,6 +1,9 @@
-package com.learning.NrCreation.Service.Customer;
+package com.learning.NrCreation.Service.User;
 
-import com.learning.NrCreation.Entity.Customer;
+import com.learning.NrCreation.Entity.Address;
+import com.learning.NrCreation.Entity.User;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -8,9 +11,9 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class CustomerSpecification {
+public class UserSpecification {
 
-    public static Specification<Customer> withFilters(String search, Integer birthYear, String city, String state) {
+    public static Specification<User> withFilters(String search, Integer birthYear, String city, String state) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
 
@@ -25,7 +28,7 @@ public class CustomerSpecification {
                 );
             }
 
-            // Filter by year of birth
+            // Filter by year of birth (if User has dateOfBirth field)
             if (birthYear != null) {
                 Calendar start = Calendar.getInstance();
                 start.set(birthYear, Calendar.JANUARY, 1, 0, 0, 0);
@@ -40,20 +43,21 @@ public class CustomerSpecification {
 
             // Join with Address if filtering by city/state
             if ((city != null && !city.isEmpty()) || (state != null && !state.isEmpty())) {
-                root.join("addresses", jakarta.persistence.criteria.JoinType.LEFT);
+                Join<User, Address> addressJoin = root.join("addresses", JoinType.LEFT);
 
                 if (city != null && !city.isEmpty()) {
-                    predicates.add(cb.equal(cb.lower(root.join("addresses").get("city")), city.toLowerCase()));
+                    predicates.add(cb.equal(cb.lower(addressJoin.get("city")), city.toLowerCase()));
                 }
 
                 if (state != null && !state.isEmpty()) {
-                    predicates.add(cb.equal(cb.lower(root.join("addresses").get("state")), state.toLowerCase()));
+                    predicates.add(cb.equal(cb.lower(addressJoin.get("state")), state.toLowerCase()));
                 }
 
-                query.distinct(true); // Important when joining
+                query.distinct(true); // avoid duplicates
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
 }
+

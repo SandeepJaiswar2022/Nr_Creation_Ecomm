@@ -12,7 +12,7 @@ import java.util.Optional;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecificationExecutor<Order> {
 
-    List<Order> findByCustomer_CustomerId(Long customerId);
+//    List<Order> findByCustomer_CustomerId(Long customerId);
 
     Optional<Order> findByRazorpayOrderId(String razorpayOrderId);
 }

@@ -1,11 +1,7 @@
 package com.learning.NrCreation.Controller;
 
-import com.cloudinary.Api;
-import com.learning.NrCreation.Entity.Customer;
-import com.learning.NrCreation.Entity.Order;
-import com.learning.NrCreation.Entity.User;
+
 import com.learning.NrCreation.Enum.OrderStatus;
-import com.learning.NrCreation.Repository.CustomerRepository;
 import com.learning.NrCreation.Request.CreateOrderRequest;
 import com.learning.NrCreation.Request.PaymentVerificationRequest;
 import com.learning.NrCreation.Response.ApiResponse;
@@ -13,7 +9,6 @@ import com.learning.NrCreation.Response.OrderDTO;
 import com.learning.NrCreation.Response.PagedResponse;
 import com.learning.NrCreation.Service.Order.OrderService;
 import com.learning.NrCreation.Service.Razorpay.RazorpayService;
-import com.learning.NrCreation.Service.User.UserService;
 import com.razorpay.RazorpayException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -84,18 +79,18 @@ public ResponseEntity<?> getMyOrders(
         @RequestParam(defaultValue = "10") int size,
         @RequestParam(defaultValue = "desc") String sortDir
 ) {
-    System.out.println("\n\nIn get my orders=======");
-    System.out.println("search: " + search);
-    System.out.println("status: " + status);
-    System.out.println("shippingMethod: " + shippingMethod);
-    System.out.println("startDate: " + startDate);
-    System.out.println("endDate: " + endDate);
-    System.out.println("priceLow: " + priceLow);
-    System.out.println("priceHigh: " + priceHigh);
-    System.out.println("page: " + page);
-    System.out.println("size: " + size);
-    System.out.println("sortDir: " + sortDir);
-    System.out.println("In get my orders=======\n\n");
+//    System.out.println("\n\nIn get my orders=======");
+//    System.out.println("search: " + search);
+//    System.out.println("status: " + status);
+//    System.out.println("shippingMethod: " + shippingMethod);
+//    System.out.println("startDate: " + startDate);
+//    System.out.println("endDate: " + endDate);
+//    System.out.println("priceLow: " + priceLow);
+//    System.out.println("priceHigh: " + priceHigh);
+//    System.out.println("page: " + page);
+//    System.out.println("size: " + size);
+//    System.out.println("sortDir: " + sortDir);
+//    System.out.println("In get my orders=======\n\n");
     int maxPageSize = 50;
     if (size > maxPageSize) size = maxPageSize;
 

@@ -40,8 +40,6 @@ const UserManagement = () => {
 
     // console.log("User Management - Filters: ", filters);
 
-
-
     useEffect(() => {
         // Fetch users from the API or any other source
         if (user?.role === 'ADMIN')

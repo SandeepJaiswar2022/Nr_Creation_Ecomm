@@ -1,8 +1,8 @@
 package com.learning.NrCreation.Service.Order;
 
-import com.learning.NrCreation.Entity.Customer;
 import com.learning.NrCreation.Entity.Order;
 import com.learning.NrCreation.Entity.OrderItem;
+import com.learning.NrCreation.Entity.User;
 import com.learning.NrCreation.Enum.OrderStatus;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -23,10 +23,11 @@ public class OrderSpecification {
             LocalDate endDate,
             BigDecimal priceLow,
             BigDecimal priceHigh,
-            Long customerId  // null for admin, not null for user
+            Long userId  // null for admin, not null for user
     ) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
+
             // Filter: Status
             if (status != null) {
                 predicates.add(cb.equal(root.get("orderStatus"), status));
@@ -51,9 +52,9 @@ public class OrderSpecification {
                 predicates.add(cb.between(root.get("orderAmount"), priceLow, priceHigh));
             }
 
-            // Filter: Customer ID (user only)
-            if (customerId != null) {
-                predicates.add(cb.equal(root.get("customer").get("customerId"), customerId));
+            // Filter: User ID (user only)
+            if (userId != null) {
+                predicates.add(cb.equal(root.get("user").get("id"), userId));
             }
 
             // --- SEARCH ---
@@ -66,10 +67,10 @@ public class OrderSpecification {
                 // Match productName
                 searchPredicates.add(cb.like(cb.lower(orderItemsJoin.get("productName")), "%" + search.toLowerCase() + "%"));
 
-                // If admin, also match Customer email
-                if (customerId == null) {
-                    Join<Order, Customer> customerJoin = root.join("customer", JoinType.LEFT);
-                    searchPredicates.add(cb.like(cb.lower(customerJoin.get("email")), "%" + search.toLowerCase() + "%"));
+                // If admin, also match User email
+                if (userId == null) {
+                    Join<Order, User> userJoin = root.join("user", JoinType.LEFT);
+                    searchPredicates.add(cb.like(cb.lower(userJoin.get("email")), "%" + search.toLowerCase() + "%"));
                 }
 
                 // Combine productName OR email (if admin)
@@ -82,5 +83,6 @@ public class OrderSpecification {
             return cb.and(predicates.toArray(new Predicate[0]));
         };
     }
+
 }
 

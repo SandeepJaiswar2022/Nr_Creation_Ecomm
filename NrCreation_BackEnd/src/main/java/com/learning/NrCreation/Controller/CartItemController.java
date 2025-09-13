@@ -2,10 +2,8 @@ package com.learning.NrCreation.Controller;
 
 import com.learning.NrCreation.Entity.Cart;
 import com.learning.NrCreation.Entity.CartItem;
-import com.learning.NrCreation.Entity.Customer;
 import com.learning.NrCreation.Entity.User;
 import com.learning.NrCreation.Exception.ResourceNotFoundException;
-import com.learning.NrCreation.Repository.CustomerRepository;
 import com.learning.NrCreation.Response.ApiResponse;
 import com.learning.NrCreation.Response.CartItemDTO;
 import com.learning.NrCreation.Service.Cart.CartItemService;
@@ -30,7 +28,6 @@ public class CartItemController {
     private final CartItemService cartItemService;
     private final CartService cartService;
     private final UserService userService;
-    private final CustomerRepository customerRepo;
 
     //Handle Exception if the quantity to update is greater than the Stock(Inventory)
     @PreAuthorize("hasAuthority('user:create')")
@@ -43,13 +40,9 @@ public class CartItemController {
         try {
             log.debug("Adding product to user {}", authHeader);
             User user = userService.findUserByJwtToken(authHeader);
-            Optional<Customer> customer = customerRepo.findByEmail(user.getEmail());
-            if (customer.isEmpty()) {
-                return new ResponseEntity<>(new ApiResponse("Customer not found with email : "+user.getEmail(), null)
-                        ,HttpStatus.NOT_FOUND);
-            }
+
             log.debug("customer by id user found ");
-            Cart cart = cartService.initializeNewCart(customer.get());
+            Cart cart = cartService.initializeNewCart(user);
             log.debug("customer cart found ");
             CartItem cartItem= cartItemService.addItemToCart(cart.getCartId(), productId, quantity);
             CartItemDTO cartItemDTO  = cartItemService.convertToCartItemDTO(cartItem);
@@ -84,12 +77,7 @@ public class CartItemController {
     Long cartItemId, @RequestParam Integer quantity)
     {
         User user = userService.findUserByJwtToken(authHeader);
-        Optional<Customer> customer = customerRepo.findByEmail(user.getEmail());
-        if (customer.isEmpty()) {
-            throw new ResourceNotFoundException("Customer not found with email: " + user.getEmail());
-        }
-
-        Cart cart = cartService.getCartByCustomerId(customer.get().getCustomerId());
+        Cart cart = cartService.getCartByUserId(user.getId());
         cartItemService.updateItemQuantity(cart.getCartId(), cartItemId, quantity);
         return new ResponseEntity<>(new ApiResponse("Quantity Updated Successfully", null), HttpStatus.OK);
     }
