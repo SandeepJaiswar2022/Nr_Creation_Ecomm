@@ -21,7 +21,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Objects;
 
 @Validated
 @RestController
@@ -30,7 +29,6 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-    private final AddressRepository addressRepository;
 
     @PreAuthorize("hasAnyAuthority('admin:read','user:read')")
     @GetMapping("/get-user-profile")

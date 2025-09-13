@@ -6,7 +6,6 @@ import com.learning.NrCreation.Exception.ResourceNotFoundException;
 import com.learning.NrCreation.Repository.CategoryRepository;
 import com.learning.NrCreation.Repository.ProductRepository;
 import com.learning.NrCreation.Request.ProductRequest;
-import com.learning.NrCreation.Response.ImageDTO;
 import com.learning.NrCreation.Response.ProductDTO;
 import com.learning.NrCreation.Service.Cloudinary.CloudinaryService;
 import lombok.RequiredArgsConstructor;
@@ -20,9 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor

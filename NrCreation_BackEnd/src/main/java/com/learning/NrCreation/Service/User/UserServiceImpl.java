@@ -7,7 +7,6 @@ import com.learning.NrCreation.Exception.ResourceNotFoundException;
 import com.learning.NrCreation.Repository.UserRepository;
 import com.learning.NrCreation.Request.UpdateUserProfileRequest;
 import com.learning.NrCreation.Response.*;
-import com.learning.NrCreation.Service.Address.AddressService;
 import com.learning.NrCreation.Service.Auth.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,7 +23,6 @@ public class UserServiceImpl implements UserService {
 
 	private final UserRepository userRepo;
 	private final JwtService jwtService;
-	private final PasswordEncoder passwordEncoder;
 
 	@Override
 	public List<User> getAllUsers() {

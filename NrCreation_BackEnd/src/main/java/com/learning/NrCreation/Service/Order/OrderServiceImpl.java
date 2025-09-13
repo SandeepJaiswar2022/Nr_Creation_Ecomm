@@ -15,8 +15,7 @@ import com.razorpay.RazorpayException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.json.JSONObject;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -31,7 +30,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
-    private static final Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
     private final OrderRepository orderRepository;
     private final CartService cartService;
     private final RazorpayService razorpayService;
@@ -63,12 +61,8 @@ public class OrderServiceImpl implements OrderService {
         BigDecimal totalAmount = BigDecimal.ZERO;
 
         // Create order items
-<<<<<<< Updated upstream
-        Cart cart = cartService.getCartByCustomerId(customer.getCustomerId());
-=======
         Cart cart = cartService.getCartByUserId(user.getId());
 
->>>>>>> Stashed changes
         for (CartItem cartItem : cart.getItems()) {
             OrderItem item = new OrderItem();
             item.setProductId(cartItem.getProduct().getId());
