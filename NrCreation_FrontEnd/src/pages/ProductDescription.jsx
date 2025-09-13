@@ -21,7 +21,6 @@ import axios from "axios";
 import { add } from "date-fns";
 import { addToCartAsync } from "@/store/slices/cartSlice";
 import { toast } from "react-toastify";
-import { setBuyNowItem } from "@/store/slices/buyNowSlice";
 import { fetchProducts } from "@/store/slices/productSlice";
 const ProductDescription = () => {
   const [selectedImage, setSelectedImage] = useState(0);
@@ -35,9 +34,9 @@ const ProductDescription = () => {
   const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const { product, loading, error } = useSelector((state) => state.product);
-  
-  
-const navigate = useNavigate();
+
+
+  const navigate = useNavigate();
 
   const products = useSelector((state) => state.product.products);
   // console.log("product.id: ", product.id)
@@ -46,7 +45,7 @@ const navigate = useNavigate();
     .sort((a, b) => b.id - a.id);
 
   useEffect(() => {
-    dispatch(fetchProducts()); 
+    dispatch(fetchProducts());
   }, [dispatch]);
 
   // console.log("All Products:", products);
@@ -78,24 +77,18 @@ const navigate = useNavigate();
 
 
 
-const handleBuyNow = () => {
-  if (!user) {
-    navigate("/auth");
-    return;
-  }
+  const handleBuyNow = () => {
+    if (!user) {
+      navigate("/auth");
+      return;
+    }
 
-  // Optionally set buy now item in redux if you want to keep that logic
-  // dispatch(
-  //   setBuyNowItem({
-  //     product,
-  //     quantity,
-  //   })
-  // );
 
-  // Pass productId and quantity in URL for checkout page
-  // console.log("Navigating to checkout with product:", product.id);
-  navigate(`/checkout/${product.id}`);
-};
+
+    // Pass productId and quantity in URL for checkout page
+    // console.log("Navigating to checkout with product:", product.id);
+    navigate(`/checkout/${product.id}`);
+  };
 
   // const product = [...featuredProducts, ...womensProducts, ...mensProducts].find(product => product.id === id);
 
@@ -112,7 +105,7 @@ const handleBuyNow = () => {
       setSelectedImage(product.imageUrls[0]);
       setQuantity(1);
       // setSelectedColor("maroon");
-      setSelectedSize(product.size );
+      setSelectedSize(product.size);
     }
 
     // console.log(id);
@@ -150,7 +143,7 @@ const handleBuyNow = () => {
     { name: "gcolorreen", value: "#065F46" },
     { name: "black", value: "#111827" },
   ];
-  const sizes = [product.size , product.size] ;
+  const sizes = [product.size, product.size];
 
   const toggleSection = (section) => {
     setOpenSection(openSection === section ? null : section);
@@ -274,12 +267,12 @@ const handleBuyNow = () => {
                   <ShoppingCart className="mr-2 h-4 w-4" />
                   <h1>Add to Cart</h1>
                 </button>
-                  <button
-                    className="text-white bg-[#871845] font-medium hover:bg-[#611031]"
-                    onClick={handleBuyNow}
-                  >
-                    Buy Now
-                  </button>
+                <button
+                  className="text-white bg-[#871845] font-medium hover:bg-[#611031]"
+                  onClick={handleBuyNow}
+                >
+                  Buy Now
+                </button>
               </div>
             </div>
           </div>
@@ -410,7 +403,7 @@ const handleBuyNow = () => {
                     <Plus className="h-4 w-4" />
                   </Button>
                 </div>*/ }
-            </div> 
+            </div>
           </div>
 
           {/* Accordion Sections */}
@@ -539,7 +532,7 @@ const handleBuyNow = () => {
             </TabsList>
             <TabsContent value="description" className="mt-4">
               <p className="text-gray-600">
-               {product?.description || "No description available for this product."}
+                {product?.description || "No description available for this product."}
               </p>
             </TabsContent>
             <TabsContent value="specifications" className="mt-4">
