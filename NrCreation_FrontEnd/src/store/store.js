@@ -6,7 +6,6 @@ import userReducer from "./slices/userSlice";
 import addressReducer from "./slices/addressSlice";
 import paymentReducer from "./slices/Payment/paymentSlice"; // Assuming you have a paymentSlice.js
 import ordersReducer from "./slices/ordersSlice";
-import buyNowReducer from "./slices/buyNowSlice";
 
 export const store = configureStore({
   reducer: {
@@ -17,6 +16,5 @@ export const store = configureStore({
     address: addressReducer,
     payment: paymentReducer, // Assuming you have a paymentSlice.js
     orders: ordersReducer,
-    buyNow: buyNowReducer,
   },
 });
