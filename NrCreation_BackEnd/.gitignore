@@ -36,6 +36,5 @@ build/
 .vscode/
 docker-compose.yml
 Dockerfile
-application.properties
-application-dev.properties
-application-prod.properties
+# Ignore all application.properties / application-*.properties
+src/main/resources/application*.properties
