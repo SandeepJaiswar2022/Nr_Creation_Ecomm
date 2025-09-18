@@ -8,6 +8,7 @@ import {
   fetchCartItems,
   updateQuantity,
   deleteCartItem,
+  setCartItemForBuyNow,
 } from "@/store/slices/cartSlice";
 import { SkeletonLoader } from "@/components/ReusableComponents";
 import { Link } from "react-router-dom";
@@ -209,9 +210,13 @@ const NewCartPage = () => {
                       </p>
                     </div>
                   </div>
-                  <Button className="w-full mt-6 bg-[#871845] hover:bg-[#671234] text-white">
-                    <Link to={"/checkout"}>Proceed to Checkout </Link>
-                  </Button>
+                  <Link
+                    to="/checkout"
+                    onClick={() => dispatch(setCartItemForBuyNow({ product: null, isBuyNowRequest: false }))}
+                    className="w-full mt-6 bg-[#871845] hover:bg-[#671234] text-white px-4 py-2 rounded-md flex items-center justify-center"
+                  >
+                    Proceed to Checkout
+                  </Link>
                 </div>
               </motion.div>
             )}

@@ -4,26 +4,37 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { fetchCartItems, selectUniqueItemsCount } from "@/store/slices/cartSlice";
+import { clearCart, fetchCartItems, selectUniqueItemsCount } from "@/store/slices/cartSlice";
 import { logoutUser } from "@/store/slices/Auth/authSlice";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
 const Navbar = () => {
-  const location = useLocation();
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileSheetOpen, setIsMobileSheetOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
   const dispatch = useDispatch();
   const { user, accessToken } = useSelector((state) => state.auth);
+  const location = useLocation();
+
+  // check if current path is cart or checkout
+  const hideCartLink = location.pathname === "/cart" || location.pathname === "/checkout";
+
   // console.log("user : ", user);
-  const handleLogout = () => {
-    dispatch(logoutUser());
+  const handleLogout = async () => {
+    try {
+      await dispatch(clearCart()).unwrap(); // wait for clearCart to finish
+      dispatch(logoutUser()); // then logout
+    } catch (error) {
+      console.error("Failed to clear cart before logout:");
+    }
   };
 
   useEffect(() => {
     if (user && user?.role === "USER")
+      // console.info("Fetching cart Information in NAVBAR....");
+
       dispatch(fetchCartItems())
-  }, [dispatch]);
+  }, [user, dispatch]);
 
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 1024);
@@ -69,17 +80,19 @@ const Navbar = () => {
 
         {/* Actions */}
         <div className="flex items-center space-x-4">
-          <Link
-            to="/cart"
-            variant="ghost"
-            size="icon"
-            className="relative p-2 rounded-sm bg-gray-300 hover:bg-gray-400"
-          >
-            <ShoppingCart className="h-5 w-5" />
-            <span className="absolute -top-3 -right-2 bg-[#871845] text-primary-foreground rounded-full w-6 h-6 text-xs flex items-center justify-center">
-              <p>{uniqueItemsCount || 0}</p>
-            </span>
-          </Link>
+          {!hideCartLink && (
+            <Link
+              to="/cart"
+              variant="ghost"
+              size="icon"
+              className="relative p-2 rounded-sm bg-gray-300 hover:bg-gray-400"
+            >
+              <ShoppingCart className="h-5 w-5" />
+              <span className="absolute -top-3 -right-2 bg-[#871845] text-primary-foreground rounded-full w-6 h-6 text-xs flex items-center justify-center">
+                <p>{uniqueItemsCount || 0}</p>
+              </span>
+            </Link>
+          )}
           {accessToken ? (
             isMobile ? (
               // Mobile: show Sheet

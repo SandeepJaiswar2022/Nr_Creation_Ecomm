@@ -10,7 +10,6 @@ import {
   Filter,
 } from "lucide-react";
 import ProductCard from "@/components/ReusableComponents/ProductCard";
-import { featuredProducts } from "@/data/products";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ReviewSection from "@/components/ReusableComponents/ReviewSection";
@@ -19,7 +18,7 @@ import { fetchSingleProduct } from "@/store/slices/productSlice";
 import { EmptyState, PageLoader } from "@/components/ReusableComponents";
 import axios from "axios";
 import { add } from "date-fns";
-import { addToCartAsync } from "@/store/slices/cartSlice";
+import { addToCartAsync, setCartItemForBuyNow } from "@/store/slices/cartSlice";
 import { toast } from "react-toastify";
 import { fetchProducts } from "@/store/slices/productSlice";
 const ProductDescription = () => {
@@ -38,11 +37,11 @@ const ProductDescription = () => {
 
   const navigate = useNavigate();
 
-  const products = useSelector((state) => state.product.products);
+  const products = useSelector((state) => state.product?.products);
   // console.log("product.id: ", product.id)
   const sortedProducts = [...products]
-    .filter((p) => p.id !== product.id)
-    .sort((a, b) => b.id - a.id);
+    .filter((p) => p?.id !== product?.id)
+    .sort((a, b) => b?.id - a?.id);
 
   useEffect(() => {
     dispatch(fetchProducts());
@@ -67,9 +66,12 @@ const ProductDescription = () => {
     };
 
     try {
+      dispatch(setCartItemForBuyNow({ product: null, isBuyNowRequest: false }))
       const response = await dispatch(addToCartAsync(cartItem)).unwrap();
       // console.log("Cart item added:", response);
-      navigate(`/checkout/null`) // Redirect on success
+      // navigate(`/checkout`) // Redirect on success  
+      navigate(`/cart`) // Redirect on success  
+      // navigate(`/checkout/null`) // Redirect on success
     } catch (err) {
       console.error("Can't Buy this item for this perticular moment", err);
     }
@@ -78,22 +80,16 @@ const ProductDescription = () => {
 
 
   const handleBuyNow = () => {
+    if (!product) {
+      console.error("No product available Buy!");
+      return;
+    }
     if (!user) {
       navigate("/auth");
       return;
     }
-
-    // Optionally set buy now item in redux if you want to keep that logic
-    // dispatch(
-    //   setBuyNowItem({
-    //     product,
-    //     quantity,
-    //   })
-    // );
-
-    // Pass productId and quantity in URL for checkout page
-    // console.log("Navigating to checkout with product:", product.id);
-    navigate(`/checkout/${product.id}`);
+    dispatch(setCartItemForBuyNow({ product, isBuyNowRequest: true }))
+    navigate(`/checkout`);
   };
 
   // const product = [...featuredProducts, ...womensProducts, ...mensProducts].find(product => product.id === id);
@@ -107,11 +103,11 @@ const ProductDescription = () => {
 
   useEffect(() => {
     if (product) {
-      console.log(product);
-      setSelectedImage(product.imageUrls[0]);
+      // console.log(product);
+      setSelectedImage(product?.imageUrls[0]);
       setQuantity(1);
       // setSelectedColor("maroon");
-      setSelectedSize(product.size);
+      setSelectedSize(product?.size);
     }
 
     // console.log(id);
@@ -238,12 +234,12 @@ const ProductDescription = () => {
               </div>
 
               <button
-                className={`absolute -bottom-2 left-1/2 -translate-x-1/2 p-1 rounded-full bg-[#871845] shadow-md text-white z-10 ${startIndex >= images.length - 4
+                className={`absolute -bottom-2 left-1/2 -translate-x-1/2 p-1 rounded-full bg-[#871845] shadow-md text-white z-10 ${startIndex >= images?.length - 4
                   ? "opacity-50 cursor-not-allowed"
                   : "hover:bg-[#871845]"
                   }`}
                 onClick={nextThumbnails}
-                disabled={startIndex >= images.length - 4}
+                disabled={startIndex >= images?.length - 4}
               >
                 <ChevronDown className="h-4 w-4" />
               </button>
@@ -363,7 +359,7 @@ const ProductDescription = () => {
                         exit={{ opacity: 0, y: -10 }}
                         className="absolute z-10 w-full mt-2 bg-white border rounded-md shadow-lg"
                       >
-                        {sizes.map((size) => (
+                        {sizes?.map((size) => (
                           <button
                             key={size}
                             className={`w-full px-4 py-2 text-left hover:bg-gray-100 ${selectedSize === size
@@ -438,7 +434,7 @@ const ProductDescription = () => {
                     <div className="px-6 border-[#871845] ">
                       <div className="">
                         <div className="h-[1px] w-full bg-[#871845]"></div>
-                        <p className="text-black py-5">
+                        <p className="text-gray-600 py-5">
                           {product?.description}
                         </p>
                       </div>
@@ -561,7 +557,7 @@ const ProductDescription = () => {
               <ReviewSection
                 reviews={mockReviews}
                 averageRating={averageRating}
-                totalReviews={mockReviews.length}
+                totalReviews={mockReviews?.length}
               />
             </TabsContent>
           </Tabs>
@@ -580,9 +576,9 @@ const ProductDescription = () => {
           </div>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-6">
-          {sortedProducts.map((product) => (
-            <Link to={`/product/${product.id}`} key={product.id}>
-              <ProductCard key={product.id} product={product} />
+          {sortedProducts?.map((product) => (
+            <Link to={`/product/${product?.id}`} key={product?.id}>
+              <ProductCard key={product?.id} product={product} />
             </Link>
           ))}
         </div>

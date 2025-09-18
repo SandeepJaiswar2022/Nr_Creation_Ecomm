@@ -37,7 +37,6 @@ const ProductManagement = () => {
     const [isAddingProduct, setIsAddingProduct] = useState(false)
     const [isEditingProduct, setIsEditingProduct] = useState(false)
     const [editingProduct, setEditingProduct] = useState(null)
-    const [searchQuery, setSearchQuery] = useState("")
     const [selectedCategory, setSelectedCategory] = useState("Categories");
     const [selectedStatus, setSelectedStatus] = useState("Select Status")
     const [expandedProduct, setExpandedProduct] = useState(null)
@@ -292,7 +291,7 @@ const ProductManagement = () => {
                         onClick={() => {
                             setSelectedCategory("all")
                             setSelectedStatus("all")
-                            setSearchQuery("")
+                            setSearchTerm("")
                         }}
                     >
                         <Filter className="w-4 h-4 sm:w-5 sm:h-5 mr-1.5 sm:mr-2" />

@@ -9,6 +9,7 @@ import { useDispatch, useSelector } from 'react-redux'
 import { fetchParticularCustomerOrders, setSelectedOrderFilters } from '@/store/slices/ordersSlice'
 import { formatDate } from '@/utils/formatString'
 import Pagination from '@/components/ReusableComponents/Pagination'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 
 
 const tabs = [
@@ -19,7 +20,7 @@ const tabs = [
 ]
 
 const orderStatusOptions = [
-    '', 'PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'
+    'PENDING', 'CONFIRMED', 'SHIPPED', 'DELIVERED', 'CANCELLED'
 ];
 const shippingMethodOptions = [
     '', 'Standard', 'Express', 'Pickup'
@@ -186,15 +187,22 @@ const ProfilePage = () => {
                                     </div>
                                     <div>
                                         <label className="block text-xs text-gray-500 mb-1">Order Status</label>
-                                        <select
+                                        <Select
                                             value={tempOrderFilters.orderStatus}
-                                            onChange={e => handleOrderFilterChange('orderStatus', e.target.value)}
-                                            className="border rounded px-2 py-1 text-sm"
+                                            onValueChange={(value) => handleOrderFilterChange("orderStatus", value)}
                                         >
-                                            {orderStatusOptions.map(opt => (
-                                                <option key={opt} value={opt}>{opt || 'All'}</option>
-                                            ))}
-                                        </select>
+                                            <SelectTrigger className="w-[180px] border rounded px-2 py-1 text-sm">
+                                                <SelectValue placeholder="All" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {orderStatusOptions.map((opt) => (
+                                                    <SelectItem key={opt} value={opt}>
+                                                        {opt}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+
                                     </div>
                                     {/* <div>
                                         <label className="block text-xs text-gray-500 mb-1">Price Range</label>

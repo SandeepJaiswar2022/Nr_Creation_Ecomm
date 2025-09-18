@@ -25,7 +25,7 @@ export const fetchProducts = createAsyncThunk(
       const response = await api.get(`/public/product/get-all`, {
         params: { search, category, available, low, high, page, size, sortDir }
       });
-      console.log("Slice : Get All product response : ", response.data);
+      // console.log("Slice : Get All product response : ", response.data);
       return response.data;
     } catch (error) {
       const message = normalizeError(error);
@@ -93,7 +93,7 @@ export const addProduct = createAsyncThunk(
   async (productData, { rejectWithValue }) => {
     try {
       console.log("product data : ", productData);
-      
+
       const response = await api.post(`/product/add`, productData);
       console.log("Product save/update response : ", response.data);
 

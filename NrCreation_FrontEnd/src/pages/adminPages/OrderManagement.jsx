@@ -72,7 +72,7 @@ const OrderManagement = () => {
     //     }
     // ])
 
-    
+
     const { orders, loading, selectedOrderFilters, totalPages } = useSelector(state => state.orders);
     const [tempOrderFilters, setTempOrderFilters] = useState(selectedOrderFilters);
     const [expandedOrder, setExpandedOrder] = useState(null);
@@ -217,7 +217,6 @@ const OrderManagement = () => {
         //     order.id === orderId ? { ...order, status: newStatus } : order
         // ))
         console.log("Handle status change");
-
     }
 
     const toggleOrderExpansion = (orderId) => {

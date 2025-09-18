@@ -50,11 +50,12 @@ const key = "";
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { productid } = useParams();
-  console.log("Product ID:", productid);
+  // const { productid } = useParams();
+  // console.log("Product ID:", productid);
   const location = useLocation();
   // Redux state
   const cartItems = useSelector((state) => state.cart.cartItems);
+  const { isBuyNowRequest, buyNowProductInfo } = useSelector(state => state.cart);
   const subTotal = useSelector(selectCartTotal);
   const cartLoading = useSelector((state) => state.cart.loading);
   const addresses = useSelector(selectAddresses);
@@ -95,45 +96,49 @@ const CheckoutPage = () => {
 
   // Calculate order totals
   const orderTotals = useMemo(() => {
-    const subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
-    const tax = subtotal * 0.05; // 5% tax
-    const shipping =
-      shippingMethod === "dtdc"
-        ? 99
-        : shippingMethod === "fasteg"
-          ? 199
-          : shippingMethod === "worldwide"
-            ? 299
-            : 99;
-    const total = subtotal + shipping + tax;
+    // const subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
 
-    return { subtotal, tax, shipping, total };
-  }, [cartItems, shippingMethod]);
+    const tax = (isBuyNowRequest ? buyNowProductInfo?.productPrice : subTotal) * 0.05; // 5% tax
+    console.log("NisBuyNowRequest : ", isBuyNowRequest);
+
+
+    const shipping =
+      (isBuyNowRequest ? buyNowProductInfo?.productPrice : subTotal) >= 10000 ? 0 :
+        shippingMethod === "dtdc" ? 99
+          : shippingMethod === "fasteg"
+            ? 199
+            : shippingMethod === "worldwide"
+              ? 299
+              : 99;
+    const total = (isBuyNowRequest ? buyNowProductInfo?.productPrice : subTotal) + shipping + tax;
+
+    return { subTotal: (isBuyNowRequest ? buyNowProductInfo?.productPrice : subTotal), tax, shipping, total };
+  }, [cartItems, shippingMethod, isBuyNowRequest]);
 
   // Order details for payment
-  const orderDetails = useMemo(
-    () => ({
-      customerName: selectedAddress?.fullName || "",
-      customerPhone: selectedAddress?.phone || "",
-      shippingAddress: selectedAddress
-        ? {
-          address: selectedAddress.address,
-          city: selectedAddress.city,
-          state: selectedAddress.state,
-          pinCode: selectedAddress.pinCode,
-          country: selectedAddress.country,
-        }
-        : null,
-      items: cartItems.map((item) => ({
-        productid: item.productid,
-        quantity: item.quantity,
-        price: item.totalPrice / item.quantity,
-      })),
-      shippingMethod,
-      totalAmount: orderTotals.total,
-    }),
-    [selectedAddress, cartItems, shippingMethod, orderTotals]
-  );
+  // const orderDetails = useMemo(
+  //   () => ({
+  //     customerName: selectedAddress?.fullName || "",
+  //     customerPhone: selectedAddress?.phone || "",
+  //     shippingAddress: selectedAddress
+  //       ? {
+  //         address: selectedAddress.address,
+  //         city: selectedAddress.city,
+  //         state: selectedAddress.state,
+  //         pinCode: selectedAddress.pinCode,
+  //         country: selectedAddress.country,
+  //       }
+  //       : null,
+  //     items: cartItems.map((item) => ({
+  //       productid: item.productid,
+  //       quantity: item.quantity,
+  //       price: item.totalPrice / item.quantity,
+  //     })),
+  //     shippingMethod,
+  //     totalAmount: orderTotals.total,
+  //   }),
+  //   [selectedAddress, cartItems, shippingMethod, orderTotals]
+  // );
 
   // Handle place order
   const handlePlaceOrder = async () => {
@@ -141,10 +146,13 @@ const CheckoutPage = () => {
       toast.error("Please select a delivery address");
       return;
     }
-
+    const { shipping, tax } = orderTotals;
     const orderPayload = {
       shippingAddressId: selectedAddress?.addressId,
       shippingMethod,
+      shippingAndTaxAmount: shipping + tax,
+      isBuyNowRequest: isBuyNowRequest,
+      productId: buyNowProductInfo?.productId
     };
 
     // console.log("Order Details:", orderPayload);
@@ -169,8 +177,6 @@ const CheckoutPage = () => {
           };
 
           // console.log("Payment verification data : ", paymentVerificationData);
-
-
           try {
             // Step 2: Verify Payment
             await dispatch(verifyRazorpayPayment(paymentVerificationData)).unwrap();
@@ -220,8 +226,9 @@ const CheckoutPage = () => {
     if (paymentStatus === "verified" && razorpayOrderData) {
       // toast.success("Payment successful!");
       dispatch(clearPaymentState());
-      if(cartItems) 
-      dispatch(clearCart());
+      //no need to clear cart if Buy Now Request
+      if (cartItems && !isBuyNowRequest)
+        dispatch(clearCart());
       navigate("/order-confirmation", {
         state: {
           orderId: razorpayOrderData.razorpayOrderId,
@@ -234,7 +241,7 @@ const CheckoutPage = () => {
     } else if (paymentStatus === "failed") {
       toast.error("Payment failed. Please try again.");
     }
-  }, [paymentStatus, paymentError, razorpayOrderData, selectedAddress]);
+  }, [paymentStatus, paymentError, razorpayOrderData, selectedAddress, isBuyNowRequest]);
 
   // Fetch addresses on mount
   useEffect(() => {
@@ -251,30 +258,30 @@ const CheckoutPage = () => {
 
 
 
- const {product} = useSelector((state) => state.product);
- useEffect(()=>{
-   if(productid){
-     dispatch(fetchSingleProduct(productid));
-   }
- },[dispatch,productid])
+  // const { product } = useSelector((state) => state.product);
+  // useEffect(() => {
+  //   if (productid) {
+  //     dispatch(fetchSingleProduct(productid));
+  //   }
+  // }, [dispatch, productid])
 
   // Parse query param
   // Update checkout items when productid or quantity changes
-  useEffect(() => {
-  if (productid) {
-    console.log("Product from URL:", product); 
-    if (product) {
-      setCheckoutItems([{
-        ...product,
-        quantity: 1, // always 1
-        totalPrice: product.price, // same as product.price
-      }]);
-    }
-  } else {
-    // fallback: checkout from cart
-    setCheckoutItems(cartItems);
-  }
-}, [productid, cartItems,product]);
+  // useEffect(() => {
+  //   if (productid) {
+  //     console.log("Product from URL:", product);
+  //     if (product) {
+  //       setCheckoutItems([{
+  //         ...product,
+  //         quantity: 1, // always 1
+  //         totalPrice: product.price, // same as product.price
+  //       }]);
+  //     }
+  //   } else {
+  //     // fallback: checkout from cart
+  //     setCheckoutItems(cartItems);
+  //   }
+  // }, [productid, cartItems, product]);
 
   // Loading and empty cart states
   if (cartLoading || paymentLoading || addressLoading) {
@@ -651,13 +658,13 @@ const CheckoutPage = () => {
                     {item.imageUrl && (
                       <img
                         src={item.imageUrl}
-                        alt={`Product ${item.productid}`}
+                        alt={`Product ${item?.productid}`}
                         className="w-full h-full object-cover"
                       />
                     )}
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium">Product #{item.productid}</p>
+                    <p className="font-medium">Product #{item?.productid}</p>
                     <div className="flex justify-between text-sm text-gray-500">
                       <p>Qty: {item.quantity}</p>
                       <p>₹{item?.totalPrice.toFixed(2)}</p>
@@ -671,7 +678,7 @@ const CheckoutPage = () => {
             <div className="border-t pt-4 space-y-2">
               <div className="flex justify-between">
                 <span className="text-gray-600">Subtotal</span>
-                <span>₹{subTotal}</span>
+                <span>₹{orderTotals?.subTotal}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Shipping</span>

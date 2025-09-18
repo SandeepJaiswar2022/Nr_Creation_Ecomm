@@ -109,7 +109,7 @@ const App = () => {
         });
       } catch (err) {
         dispatch(clearAuthState());
-        console.error("Auto-refresh failed:");
+        console.info("Auto-refresh failed");
       }
     };
 
@@ -143,7 +143,7 @@ const App = () => {
             <Route path="/" element={<RootLayout />}>
               <Route path="/cart" element={<NewCartPage />} />
               <Route path="/wishlist" element={<WishlistPage />} />
-              <Route path="/checkout/:productid" element={<CheckoutPage />} />
+              <Route path="/checkout" element={<CheckoutPage />} />
               <Route path="/profile/:tabId" element={<ProfilePage />} />
               <Route path="/track-order" element={<OrderTrackingPage />} />
               <Route path="/order-confirmation" element={<OrderSuccess />} />
