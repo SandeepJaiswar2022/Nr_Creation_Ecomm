@@ -18,16 +18,15 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class CartServiceImpl implements CartService{
+public class CartServiceImpl implements CartService {
     private final CartRepository cartRepo;
     private final CartItemRepository cartItemRepo;
     private final UserService userService;
 
     @Override
-    public Cart getCartById(Long cartId)
-    {
+    public Cart getCartById(Long cartId) {
         return cartRepo.findById(cartId)
-                .orElseThrow(()->new ResourceNotFoundException("Cart Not Found!"));
+                .orElseThrow(() -> new ResourceNotFoundException("Cart Not Found!"));
     }
 
     @Override
@@ -35,16 +34,15 @@ public class CartServiceImpl implements CartService{
         Cart cart = getCartById(cartId);
         Set<CartItemDTO> cartItems = cart.getItems().stream()
                 .map(item -> new CartItemDTO(
-                                item.getId(),
-                                item.getQuantity(),
-                                item.getUnitPrice(),
-                                item.getProduct().getId(),
-                                item.getProduct().getImageUrls().get(0),
-                                item.getTotalPrice()
-                        )
-                ).collect(Collectors.toSet());
+                        item.getId(),
+                        item.getQuantity(),
+                        item.getUnitPrice(),
+                        item.getProduct().getId(),
+                        item.getProduct().getImageUrls().get(0),
+                        item.getTotalPrice()))
+                .collect(Collectors.toSet());
 
-        return new CartDTO(cart.getCartId(),cartItems,cart.getTotalAmount());
+        return new CartDTO(cart.getCartId(), cartItems, cart.getTotalAmount());
     }
 
     @Override
@@ -56,11 +54,10 @@ public class CartServiceImpl implements CartService{
         Cart cart = getCartByUserId(user.getId());
         user.setCart(null); // Remove reference
 
-
         cartItemRepo.deleteAllByCart_CartId(cart.getCartId());
         cart.getItems().clear();
         cartRepo.delete(cart);
-        //Cleared All the cartItem and Removed Cart from DB;
+        // Cleared All the cartItem and Removed Cart from DB;
     }
 
     @Override
@@ -71,7 +68,8 @@ public class CartServiceImpl implements CartService{
 
     @Override
     public Cart initializeNewCart(User user) {
-//        System.out.println("M I initializing new Cart with customer: " + user.getEmail());
+        // System.out.println("M I initializing new Cart with customer: " +
+        // user.getEmail());
         return cartRepo.findByUserId(user.getId())
                 .orElseGet(() -> {
                     Cart cart = new Cart();
@@ -83,6 +81,6 @@ public class CartServiceImpl implements CartService{
 
     @Override
     public Cart getCartByUserId(Long userId) {
-        return cartRepo.findByUserId(userId).orElseThrow(()-> new ResourceNotFoundException("No Cart Item Found, Cart is Empty!"));
+        return cartRepo.findByUserId(userId).orElseThrow(() -> new ResourceNotFoundException("Cart not found!"));
     }
 }

@@ -2,6 +2,7 @@ package com.learning.NrCreation.Service.Order;
 
 import com.learning.NrCreation.Entity.*;
 import com.learning.NrCreation.Enum.OrderStatus;
+import com.learning.NrCreation.Exception.ResourceNotFoundException;
 import com.learning.NrCreation.Repository.OrderRepository;
 import com.learning.NrCreation.Request.CreateOrderRequest;
 import com.learning.NrCreation.Response.AddressDTO;
@@ -9,6 +10,7 @@ import com.learning.NrCreation.Response.OrderDTO;
 import com.learning.NrCreation.Response.OrderItemDTO;
 import com.learning.NrCreation.Service.Address.AddressService;
 import com.learning.NrCreation.Service.Cart.CartService;
+import com.learning.NrCreation.Service.Product.ProductService;
 import com.learning.NrCreation.Service.Razorpay.RazorpayService;
 import com.learning.NrCreation.Service.User.UserService;
 import com.razorpay.RazorpayException;
@@ -34,9 +36,8 @@ public class OrderServiceImpl implements OrderService {
     private final CartService cartService;
     private final RazorpayService razorpayService;
     private final AddressService addressService;
-
     private final UserService userService;
-
+    private final ProductService productService;
 
 
     @Transactional
@@ -60,22 +61,44 @@ public class OrderServiceImpl implements OrderService {
         Set<OrderItem> orderItems = new HashSet<>();
         BigDecimal totalAmount = BigDecimal.ZERO;
 
-        // Create order items
-        Cart cart = cartService.getCartByUserId(user.getId());
+        //If buy now request then do dependency on Cart
+        if (orderRequest.getIsBuyNowRequest()) {
+            Product product = productService.getProductById(orderRequest.getProductId());
 
-        for (CartItem cartItem : cart.getItems()) {
             OrderItem item = new OrderItem();
-            item.setProductId(cartItem.getProduct().getId());
-            item.setProductName(cartItem.getProduct().getName());
-            item.setQuantity(cartItem.getQuantity());
-            item.setPrice(cartItem.getUnitPrice());
-            item.setTotalPrice(cartItem.getTotalPrice());
-            System.out.println("Image url : " + cartItem.getProduct().getImageUrls().get(0));
-            item.setImageUrl(cartItem.getProduct().getImageUrls().get(0));
+            item.setProductId(product.getId());
+            item.setProductName(product.getName());
+            item.setQuantity(1);
+            item.setPrice(product.getPrice());
+            item.setTotalPrice(product.getPrice());
+            item.setImageUrl(product.getImageUrls().get(0));
             item.setOrder(order);
-            totalAmount = totalAmount.add(item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
             orderItems.add(item);
+            totalAmount = totalAmount.add(product.getPrice());
+        } else {
+            // Create order items
+            Cart cart = cartService.getCartByUserId(user.getId());
+
+            if (cart.getItems().isEmpty()) {
+                throw new ResourceNotFoundException("No Cart Item Found, Cart is Empty!");
+            }
+
+            for (CartItem cartItem : cart.getItems()) {
+                OrderItem item = new OrderItem();
+                item.setProductId(cartItem.getProduct().getId());
+                item.setProductName(cartItem.getProduct().getName());
+                item.setQuantity(cartItem.getQuantity());
+                item.setPrice(cartItem.getUnitPrice());
+                item.setTotalPrice(cartItem.getTotalPrice());
+                System.out.println("Image url : " + cartItem.getProduct().getImageUrls().get(0));
+                item.setImageUrl(cartItem.getProduct().getImageUrls().get(0));
+                item.setOrder(order);
+                totalAmount = totalAmount.add(item.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
+                orderItems.add(item);
+            }
         }
+
+        totalAmount = totalAmount.add(orderRequest.getShippingAndTaxAmount());
         order.setOrderAmount(totalAmount);
         order.setOrderItems(orderItems);
 
@@ -86,7 +109,7 @@ public class OrderServiceImpl implements OrderService {
         orderRequestJson.put("currency", "INR");
         orderRequestJson.put("receipt", "order_rcptid_" + user.getId());
 
-        Map<String,String> razorpayResponse = razorpayService.createRazorPayOrder(orderRequestJson);
+        Map<String, String> razorpayResponse = razorpayService.createRazorPayOrder(orderRequestJson);
         order.setRazorpayOrderId(razorpayResponse.get("razorpayOrderId"));
 
         // Save order
@@ -106,7 +129,7 @@ public class OrderServiceImpl implements OrderService {
         User user = userService.findUserByJwtToken(authHeader);
 
         //Filter and pagination
-        Specification<Order> spec = OrderSpecification.withFilters(search,status,  shippingMethod, startDate, endDate, priceLow, priceHigh, user.getId());
+        Specification<Order> spec = OrderSpecification.withFilters(search, status, shippingMethod, startDate, endDate, priceLow, priceHigh, user.getId());
         return orderRepository.findAll(spec, pageable).map(this::convertToDto);
     }
 
@@ -148,8 +171,8 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public Page<OrderDTO> getAllOrders(String search,OrderStatus status, String shippingMethod, LocalDate startDate, LocalDate endDate, BigDecimal low, BigDecimal high, Pageable pageable) {
-        Specification<Order> spec = OrderSpecification.withFilters(search,status, shippingMethod, startDate, endDate, low, high, null);
+    public Page<OrderDTO> getAllOrders(String search, OrderStatus status, String shippingMethod, LocalDate startDate, LocalDate endDate, BigDecimal low, BigDecimal high, Pageable pageable) {
+        Specification<Order> spec = OrderSpecification.withFilters(search, status, shippingMethod, startDate, endDate, low, high, null);
         return orderRepository.findAll(spec, pageable).map(this::convertToDto);
     }
 
