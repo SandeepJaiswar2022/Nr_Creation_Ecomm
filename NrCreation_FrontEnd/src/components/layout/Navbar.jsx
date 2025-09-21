@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Search, ShoppingCart, User, Menu, LogOut } from "lucide-react";
+import { Search, ShoppingCart, User, Menu, LogOut, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
@@ -96,6 +96,7 @@ const Navbar = () => {
             isMobile ? (
               // Mobile: show Sheet
               <>
+
                 <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setIsMobileSheetOpen(true)}>
                   <User className="h-5 w-5" />
                 </Button>
@@ -141,9 +142,27 @@ const Navbar = () => {
               </div>
             )
           ) : (
-            <Link to="/auth" className="hidden px-3 py-1.5 rounded-lg bg-[#871845] text-white hover:bg-[#611031] lg:flex">
-              Login
-            </Link>
+            <>
+              <Button variant="ghost" size="icon" className="lg:hidden bg-gray-300" onClick={() => setIsMobileSheetOpen(true)}>
+                <LogIn className="h-5 w-5" />
+              </Button>
+
+              {!isMobile && <Link to="/auth" className="hidden px-3 py-1.5 rounded-lg bg-[#871845] text-white hover:bg-[#611031] lg:flex">
+                Login
+              </Link>}
+
+
+              <Sheet open={isMobileSheetOpen} onOpenChange={setIsMobileSheetOpen}>
+                <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                  <SheetTitle className="sr-only">Login</SheetTitle>
+                  <div className="mt-8 space-y-1">
+                    <Link to="/category/dupattas" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={() => setIsMobileSheetOpen(false)}>Dupattas</Link>
+                    <Link to="/auth" className="block px-4 py-2 text-gray-700 hover:bg-gray-100" onClick={() => setIsMobileSheetOpen(false)}>Login</Link>
+                  </div>
+                </SheetContent>
+              </Sheet>
+            </>
+
           )}
         </div>
 

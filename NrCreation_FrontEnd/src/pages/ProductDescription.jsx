@@ -193,10 +193,10 @@ const ProductDescription = () => {
       {/* Product Details Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 mb-16">
         {/* Left Column - Image Gallery */}
-        <div className="lg:col-span-4 lg:sticky lg:top-8 lg:self-start">
+        <div className="lg:col-span-4 lg:sticky  lg:top-8 lg:self-start">
           <div className="flex gap-4 h-full">
             {/* Thumbnail List */}
-            <div className="relative flex flex-col">
+            <div className="relative flex flex-col ">
               <button
                 className={`absolute -top-7 left-1/2 -translate-x-1/2 p-1 rounded-full bg-[#871845] text-white shadow-md z-10 ${startIndex === 0
                   ? "opacity-50 cursor-not-allowed"
@@ -229,7 +229,7 @@ const ProductDescription = () => {
               </div>
 
               <button
-                className={`absolute -bottom-2 left-1/2 -translate-x-1/2 p-1 rounded-full bg-[#871845] shadow-md text-white z-10 ${startIndex >= images.length - 4
+                className={`absolute -bottom-7 left-1/2 -translate-x-1/2 p-1 rounded-full bg-[#871845] shadow-md text-white z-10 ${startIndex >= images.length - 4
                   ? "opacity-50 cursor-not-allowed"
                   : "hover:bg-[#871845]"
                   }`}

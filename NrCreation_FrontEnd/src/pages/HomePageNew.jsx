@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Star, Truck, Gift, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 const HomePageNew = () => {
@@ -135,15 +135,15 @@ const HomePageNew = () => {
                         Handpicked ethnic dupattas crafted for every occasion
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4">
-                        <Button className="bg-[#871845] hover:bg-[#6b1336] text-white px-6 py-5  hover:scale-105 duration-500 transition-all rounded-full text-base sm:text-lg">
+                        <Link to={`/category/dupattas`} className="bg-[#871845] hover:bg-[#6b1336] text-white px-6 py-2  hover:scale-105 duration-500 transition-all rounded-full text-base sm:text-lg">
                             Shop Now
-                        </Button>
-                        <Button
-                            variant="outline"
-                            className="border-white hover:scale-105 hover:text-[#871845]  duration-500 transition-all bg-white text-[#871845] px-6 py-5 rounded-full sm:text-lg"
+                        </Link>
+                        <Link
+                            to={`/category/dupattas`}
+                            className="border-white hover:scale-105 hover:text-[#871845]  duration-500 transition-all bg-white text-[#871845] px-6 py-2 rounded-full sm:text-lg"
                         >
                             Explore Collection →
-                        </Button>
+                        </Link>
                     </div>
                 </div>
             </section>
@@ -168,7 +168,7 @@ const HomePageNew = () => {
                                 <p className="text-gray-600 text-sm mt-2">{collection.description}</p>
                             </CardContent>
                             <CardFooter>
-                                <Button variant="link" className="text-[#871845] text-sm">Shop Now</Button>
+                                <Link to={`/category/dupattas`} className="text-[#871845] text-sm hover:underline">Shop Now</Link>
                             </CardFooter>
                         </Card>
                     ))}

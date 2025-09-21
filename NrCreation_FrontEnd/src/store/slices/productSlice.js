@@ -196,10 +196,10 @@ const productSlice = createSlice({
         state.loading = false;
         state.products = action.payload?.data || [];
         state.totalPages = action.payload?.totalPages;
-        if (action.payload?.data?.length > 0)
-          toast.success(action.payload?.message);
-        else
-          toast.error("No products found with selected filters!")
+        // if (action.payload?.data?.length > 0)
+        //   toast.success(action.payload?.message);
+        // else
+        //   toast.error("No products found with selected filters!")
       })
       .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
