@@ -100,7 +100,7 @@ public class PublicController {
                                                           @RequestParam(defaultValue = "asc") String sortDir)
     {
 
-        System.out.println("\n\nSearch : "+search+"\nCategory : "+category+"\nAvailable : "+available+"\nPage : "+page+"\nSize : "+size+ "\nLow : "+low+"\nHigh : "+high);
+//        System.out.println("\n\nSearch : "+search+"\nCategory : "+category+"\nAvailable : "+available+"\nPage : "+page+"\nSize : "+size+ "\nLow : "+low+"\nHigh : "+high);
         int maxPageSize = 50;
         if (size > maxPageSize) size = maxPageSize;
 

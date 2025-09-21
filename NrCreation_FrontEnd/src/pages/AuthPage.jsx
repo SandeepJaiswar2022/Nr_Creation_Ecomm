@@ -88,7 +88,7 @@ const AuthPage = () => {
   const handleForgotPassword = async (data) => {
     try {
       // Here you would typically make an API call to send OTP
-      console.log("Sending OTP to:", data.email);
+      // console.log("Sending OTP to:", data.email);
 
       // Reset all states and forms
       forgotPasswordForm.reset({
@@ -111,9 +111,9 @@ const AuthPage = () => {
   const handleResetPassword = async (data) => {
     try {
       // Here you would typically make an API call to reset password
-      console.log("Resetting password for:", emailForReset);
-      console.log("OTP:", data.otp);
-      console.log("New Password:", data.newPassword);
+      // console.log("Resetting password for:", emailForReset);
+      // console.log("OTP:", data.otp);
+      // console.log("New Password:", data.newPassword);
 
       // Reset all states and forms
       resetPasswordForm.reset({

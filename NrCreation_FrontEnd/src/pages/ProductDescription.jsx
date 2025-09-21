@@ -19,7 +19,7 @@ import { fetchSingleProduct } from "@/store/slices/productSlice";
 import { EmptyState, PageLoader } from "@/components/ReusableComponents";
 import axios from "axios";
 import { add } from "date-fns";
-import { addToCartAsync } from "@/store/slices/cartSlice";
+import { addToCartAsync, setCartItemForBuyNow } from "@/store/slices/cartSlice";
 import { toast } from "react-toastify";
 import { fetchProducts } from "@/store/slices/productSlice";
 const ProductDescription = () => {
@@ -38,15 +38,31 @@ const ProductDescription = () => {
 
   const navigate = useNavigate();
 
-  const products = useSelector((state) => state.product.products);
-  // console.log("product.id: ", product.id)
+  const products = useSelector((state) => state.product?.products);
+  // console.log("product?.id: ", product?.id)
   const sortedProducts = [...products]
-    .filter((p) => p.id !== product.id)
+    .filter((p) => p.id !== product?.id)
     .sort((a, b) => b.id - a.id);
 
   useEffect(() => {
     dispatch(fetchProducts());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (id) {
+      dispatch(fetchSingleProduct(id));
+    }
+  }, [dispatch, id]);
+
+  useEffect(() => {
+    if (product) {
+      // console.log(product);
+      setSelectedImage(product?.imageUrls[0]);
+      setQuantity(1);
+      // setSelectedColor("maroon");
+      setSelectedSize(product?.size);
+    }
+  }, [product]);
 
   // console.log("All Products:", products);
 
@@ -62,20 +78,18 @@ const ProductDescription = () => {
     }
 
     const cartItem = {
-      productId: product.id,
+      productId: product?.id,
       quantity,
     };
 
     try {
       const response = await dispatch(addToCartAsync(cartItem)).unwrap();
       // console.log("Cart item added:", response);
-      navigate(`/checkout/null`) // Redirect on success
+      navigate(`/cart`) // Redirect on success
     } catch (err) {
       console.error("Can't Buy this item for this perticular moment", err);
     }
   };
-
-
 
   const handleBuyNow = () => {
     if (!user) {
@@ -83,39 +97,16 @@ const ProductDescription = () => {
       return;
     }
 
-    // Optionally set buy now item in redux if you want to keep that logic
-    // dispatch(
-    //   setBuyNowItem({
-    //     product,
-    //     quantity,
-    //   })
-    // );
 
-    // Pass productId and quantity in URL for checkout page
-    // console.log("Navigating to checkout with product:", product.id);
-    navigate(`/checkout/${product.id}`);
+    // console.log("Navigating to checkout with product:", product?.id);
+    dispatch(setCartItemForBuyNow({ product, isBuyNowRequest: true }))
+    navigate(`/checkout`);
   };
 
-  // const product = [...featuredProducts, ...womensProducts, ...mensProducts].find(product => product.id === id);
+  // const product = [...featuredProducts, ...womensProducts, ...mensProducts].find(product => product?.id === id);
 
 
-  useEffect(() => {
-    if (id) {
-      dispatch(fetchSingleProduct(id));
-    }
-  }, [dispatch, id]);
 
-  useEffect(() => {
-    if (product) {
-      console.log(product);
-      setSelectedImage(product.imageUrls[0]);
-      setQuantity(1);
-      // setSelectedColor("maroon");
-      setSelectedSize(product.size);
-    }
-
-    // console.log(id);
-  }, [product]);
 
   if (loading) {
     return <PageLoader />;
@@ -149,7 +140,7 @@ const ProductDescription = () => {
     { name: "gcolorreen", value: "#065F46" },
     { name: "black", value: "#111827" },
   ];
-  const sizes = [product.size, product.size];
+  const sizes = [product?.size, product?.size];
 
   const toggleSection = (section) => {
     setOpenSection(openSection === section ? null : section);
@@ -218,7 +209,7 @@ const ProductDescription = () => {
               </button>
 
               <div className="flex flex-col gap-4 py-2 h-[calc(6*5rem+3*1rem)] overflow-hidden">
-                {product.imageUrls.map((img, index) => (
+                {product?.imageUrls.map((img, index) => (
                   <motion.div
                     key={startIndex + index}
                     className={`w-20 max-sm:w-16 h-28 max-sm:h-24 cursor-pointer border-2 ${selectedImage === startIndex + index
@@ -294,7 +285,7 @@ const ProductDescription = () => {
                 ₹{product?.price}
               </span>
               <span className="text-lg text-gray-500 line-through">
-                ₹{product?.price ? product.price + 400 : 0}
+                ₹{product?.price ? product?.price + 400 : 0}
               </span>
               <span className="text-green-600 font-medium">30% off</span>
             </div>
@@ -538,7 +529,7 @@ const ProductDescription = () => {
             </TabsList>
             <TabsContent value="description" className="mt-4">
               <p className="text-gray-600">
-                {product?.description || "No description available for this product."}
+                {product?.description || "No description available for this product?."}
               </p>
             </TabsContent>
             <TabsContent value="specifications" className="mt-4">
@@ -581,8 +572,8 @@ const ProductDescription = () => {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-5 gap-6">
           {sortedProducts.map((product) => (
-            <Link to={`/product/${product.id}`} key={product.id}>
-              <ProductCard key={product.id} product={product} />
+            <Link to={`/product/${product?.id}`} key={product?.id}>
+              <ProductCard key={product?.id} product={product} />
             </Link>
           ))}
         </div>

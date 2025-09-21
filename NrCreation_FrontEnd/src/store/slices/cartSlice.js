@@ -153,12 +153,7 @@ const cartSlice = createSlice({
       }
     },
 
-    // clearCart: (state) => {
-    //   state.cartItems = [];
-    //   state.totalQuantity = 0;
-    //   state.cartTotalAmount = 0;
-    //   toast.info("Cart cleared!");
-    // },
+    clearCartState: () => initialState
   },
   extraReducers: (builder) => {
     builder
@@ -293,6 +288,6 @@ export const selectCartLoading = (state) => state.cart.loading;
 export const selectCartError = (state) => state.cart.error;
 
 // Actions
-export const { setCartItems, removeFromCart, setCartItemForBuyNow } = cartSlice.actions;
+export const { setCartItems, removeFromCart, setCartItemForBuyNow, clearCartState } = cartSlice.actions;
 
 export default cartSlice.reducer;

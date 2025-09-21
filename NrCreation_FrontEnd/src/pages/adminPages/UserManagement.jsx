@@ -84,7 +84,7 @@ const UserManagement = () => {
 
 
     const handleSearch = async () => {
-        console.log("Search key : ", searchQuery);
+        // console.log("Search key : ", searchQuery);
         await handleFilterChange({
             ...filters,
             search: searchQuery,
@@ -93,7 +93,7 @@ const UserManagement = () => {
 
     const handleRoleChange = (value) => {
         setSelectedRole(value)
-        console.log("Selected role: ", value);
+        // console.log("Selected role: ", value);
         handleFilterChange({
             ...filters,
             role: value === "all" ? "" : value,

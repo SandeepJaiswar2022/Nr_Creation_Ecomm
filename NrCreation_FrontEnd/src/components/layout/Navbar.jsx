@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
-import { clearCart, fetchCartItems, selectUniqueItemsCount } from "@/store/slices/cartSlice";
+import { clearCart, clearCartState, fetchCartItems, selectUniqueItemsCount } from "@/store/slices/cartSlice";
 import { logoutUser } from "@/store/slices/Auth/authSlice";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 
@@ -22,7 +22,7 @@ const Navbar = () => {
   // console.log("user : ", user);
   const handleLogout = async () => {
     try {
-      await dispatch(clearCart()).unwrap(); // wait for clearCart to finish
+      dispatch(clearCartState()); // wait for clearCart to finish
       dispatch(logoutUser()); // then logout
     } catch (error) {
       console.error("Failed to clear cart before logout:");
@@ -32,7 +32,6 @@ const Navbar = () => {
   useEffect(() => {
     if (user && user?.role === "USER")
       // console.info("Fetching cart Information in NAVBAR....");
-
       dispatch(fetchCartItems())
   }, [user, dispatch]);
 

@@ -50,13 +50,11 @@ const key = "";
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { productid } = useParams();
-  console.log("Product ID:", productid);
+
   const location = useLocation();
   // Redux state
-  const cartItems = useSelector((state) => state.cart.cartItems);
+  const { cartItems, cartLoading, buyNowProductInfo, isBuyNowRequest } = useSelector((state) => state.cart);
   const subTotal = useSelector(selectCartTotal);
-  const cartLoading = useSelector((state) => state.cart.loading);
   const addresses = useSelector(selectAddresses);
   const selectedAddress = useSelector(selectSelectedAddress);
   const selectedAddressId = useSelector(getSelectedAddressId);
@@ -79,6 +77,43 @@ const CheckoutPage = () => {
   const [showAllAddresses, setShowAllAddresses] = useState(false);
   const [checkoutItems, setCheckoutItems] = useState([]);
 
+  // Handle payment status changes
+  useEffect(() => {
+    if (paymentStatus === "verified" && razorpayOrderData) {
+      // toast.success("Payment successful!");
+      dispatch(clearPaymentState());
+      if (cartItems) {
+        if (!isBuyNowRequest)
+          dispatch(clearCart());
+      }
+
+      navigate("/order-confirmation", {
+        state: {
+          orderId: razorpayOrderData.razorpayOrderId,
+          // paymentId: razorpayOrderData.razorpayOrderId,
+          shippingDetails: selectedAddress,
+        },
+        replace: true,
+      });
+
+    } else if (paymentStatus === "failed") {
+      toast.error("Payment failed. Please try again.");
+    }
+  }, [paymentStatus, paymentError, razorpayOrderData, selectedAddress]);
+
+  // Fetch addresses on mount
+  useEffect(() => {
+    dispatch(fetchAddresses());
+  }, [dispatch]);
+
+  // Set first address as selected by default when addresses are loaded
+  useEffect(() => {
+    if (addresses.length > 0 && !selectedAddress) {
+      if (selectedAddressId)
+        dispatch(setSelectedAddress(selectedAddressId));
+    }
+  }, [addresses, selectedAddress, dispatch, selectedAddressId]);
+
   // Form setup
   const form = useForm({
     resolver: zodResolver(addressSchema),
@@ -95,7 +130,7 @@ const CheckoutPage = () => {
 
   // Calculate order totals
   const orderTotals = useMemo(() => {
-    const subtotal = cartItems.reduce((sum, item) => sum + item.totalPrice, 0);
+    const subtotal = isBuyNowRequest ? buyNowProductInfo?.productPrice : cartItems.reduce((sum, item) => sum + item?.totalPrice, 0);
     const tax = subtotal * 0.05; // 5% tax
     const shipping =
       shippingMethod === "dtdc"
@@ -110,31 +145,6 @@ const CheckoutPage = () => {
     return { subtotal, tax, shipping, total };
   }, [cartItems, shippingMethod]);
 
-  // Order details for payment
-  const orderDetails = useMemo(
-    () => ({
-      customerName: selectedAddress?.fullName || "",
-      customerPhone: selectedAddress?.phone || "",
-      shippingAddress: selectedAddress
-        ? {
-          address: selectedAddress.address,
-          city: selectedAddress.city,
-          state: selectedAddress.state,
-          pinCode: selectedAddress.pinCode,
-          country: selectedAddress.country,
-        }
-        : null,
-      items: cartItems.map((item) => ({
-        productid: item.productid,
-        quantity: item.quantity,
-        price: item.totalPrice / item.quantity,
-      })),
-      shippingMethod,
-      totalAmount: orderTotals.total,
-    }),
-    [selectedAddress, cartItems, shippingMethod, orderTotals]
-  );
-
   // Handle place order
   const handlePlaceOrder = async () => {
     if (!selectedAddress) {
@@ -145,6 +155,9 @@ const CheckoutPage = () => {
     const orderPayload = {
       shippingAddressId: selectedAddress?.addressId,
       shippingMethod,
+      shippingAndTaxAmount: orderTotals?.tax + orderTotals?.shipping,
+      productId: buyNowProductInfo?.productId,
+      isBuyNowRequest: isBuyNowRequest
     };
 
     // console.log("Order Details:", orderPayload);
@@ -183,7 +196,7 @@ const CheckoutPage = () => {
 
             console.log("✅ Payment verified and order updated successfully!");
           } catch (verifyError) {
-            console.error("❌ Error verifying payment:", verifyError);
+            console.error("❌ Error verifying payment");
           }
         },
         prefill: {
@@ -205,7 +218,7 @@ const CheckoutPage = () => {
   // Handle address form submission
   const onSubmit = async (data) => {
     try {
-      console.log("Address data to dispatch ");
+      // console.log("Address data to dispatch ");
 
       await dispatch(addAddress(data)).unwrap();
       setShowAddressForm(false);
@@ -215,66 +228,6 @@ const CheckoutPage = () => {
     }
   };
 
-  // Handle payment status changes
-  useEffect(() => {
-    if (paymentStatus === "verified" && razorpayOrderData) {
-      // toast.success("Payment successful!");
-      dispatch(clearPaymentState());
-      if(cartItems) 
-      dispatch(clearCart());
-      navigate("/order-confirmation", {
-        state: {
-          orderId: razorpayOrderData.razorpayOrderId,
-          // paymentId: razorpayOrderData.razorpayOrderId,
-          shippingDetails: selectedAddress,
-        },
-        replace: true,
-      });
-
-    } else if (paymentStatus === "failed") {
-      toast.error("Payment failed. Please try again.");
-    }
-  }, [paymentStatus, paymentError, razorpayOrderData, selectedAddress]);
-
-  // Fetch addresses on mount
-  useEffect(() => {
-    dispatch(fetchAddresses());
-  }, [dispatch]);
-
-  // Set first address as selected by default when addresses are loaded
-  useEffect(() => {
-    if (addresses.length > 0 && !selectedAddress) {
-      if (selectedAddressId)
-        dispatch(setSelectedAddress(selectedAddressId));
-    }
-  }, [addresses, selectedAddress, dispatch, selectedAddressId]);
-
-
-
- const {product} = useSelector((state) => state.product);
- useEffect(()=>{
-   if(productid){
-     dispatch(fetchSingleProduct(productid));
-   }
- },[dispatch,productid])
-
-  // Parse query param
-  // Update checkout items when productid or quantity changes
-  useEffect(() => {
-  if (productid) {
-    console.log("Product from URL:", product); 
-    if (product) {
-      setCheckoutItems([{
-        ...product,
-        quantity: 1, // always 1
-        totalPrice: product.price, // same as product.price
-      }]);
-    }
-  } else {
-    // fallback: checkout from cart
-    setCheckoutItems(cartItems);
-  }
-}, [productid, cartItems,product]);
 
   // Loading and empty cart states
   if (cartLoading || paymentLoading || addressLoading) {
@@ -299,15 +252,6 @@ const CheckoutPage = () => {
       </div>
     );
   }
-
-  // const isBuyNow = !!buyNowProduct;
-  // const checkoutItemsToUse = isBuyNow
-  //   ? [{
-  //       ...buyNowProduct,
-  //       quantity: buyNowQuantity,
-  //       totalPrice: buyNowProduct.price * buyNowQuantity,
-  //     }]
-  //   : cartItems;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -531,13 +475,13 @@ const CheckoutPage = () => {
                 {selectedAddress && (
                   <div className="p-4 border border-[#871845] rounded-lg bg-[#871845]/5">
                     <div className="space-y-1">
-                      <p className="font-medium">{selectedAddress.fullName}</p>
-                      <p className="text-sm text-gray-600">{selectedAddress.phone}</p>
-                      <p className="text-sm text-gray-600">{selectedAddress.address}</p>
+                      <p className="font-medium">{selectedAddress?.fullName}</p>
+                      <p className="text-sm text-gray-600">{selectedAddress?.phone}</p>
+                      <p className="text-sm text-gray-600">{selectedAddress?.address}</p>
                       <p className="text-sm text-gray-600">
-                        {selectedAddress.city}, {selectedAddress.state} - {selectedAddress.pinCode}
+                        {selectedAddress?.city}, {selectedAddress?.state} - {selectedAddress?.pinCode}
                       </p>
-                      <p className="text-sm text-gray-600">{selectedAddress.country}</p>
+                      <p className="text-sm text-gray-600">{selectedAddress?.country}</p>
                     </div>
                     <Button
                       variant="outline"
@@ -646,20 +590,20 @@ const CheckoutPage = () => {
             {/* Order Items */}
             <div className="space-y-4 mb-6">
               {checkoutItems.map((item) => (
-                <div key={item.itemId} className="flex gap-4">
+                <div key={item?.itemId} className="flex gap-4">
                   <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden">
-                    {item.imageUrl && (
+                    {item?.imageUrl && (
                       <img
-                        src={item.imageUrl}
-                        alt={`Product ${item.productid}`}
+                        src={item?.imageUrl}
+                        alt={`Product ${item?.productid}`}
                         className="w-full h-full object-cover"
                       />
                     )}
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium">Product #{item.productid}</p>
+                    <p className="font-medium">Product #{item?.productid}</p>
                     <div className="flex justify-between text-sm text-gray-500">
-                      <p>Qty: {item.quantity}</p>
+                      <p>Qty: {item?.quantity}</p>
                       <p>₹{item?.totalPrice.toFixed(2)}</p>
                     </div>
                   </div>
@@ -671,7 +615,7 @@ const CheckoutPage = () => {
             <div className="border-t pt-4 space-y-2">
               <div className="flex justify-between">
                 <span className="text-gray-600">Subtotal</span>
-                <span>₹{subTotal}</span>
+                <span>₹{orderTotals?.subtotal}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Shipping</span>

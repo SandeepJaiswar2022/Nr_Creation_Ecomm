@@ -64,8 +64,8 @@ const ProductListingPage = () => {
 
   const handleSearch = () => {
     if (searchTerm.trim()) {
-      console.log("Search Term:", searchTerm);
-      console.log("Filters with Search:", { ...selectedFilters, search: searchTerm });
+      // console.log("Search Term:", searchTerm);
+      // console.log("Filters with Search:", { ...selectedFilters, search: searchTerm });
       setSearchTerm("");
     }
   };

@@ -40,7 +40,7 @@ export const fetchAllCategories = createAsyncThunk(
   async (_, { rejectWithValue }) => {
     try {
       // const response = await axios.get(`${API_BASE_URL}/public/product/get/all`);
-      console.log("Slice : Get All Categories");
+      // console.log("Get All Categories");
       const response = await api.get("/public/category/get/all");
       // console.log("My Products : ", response.data.data);
       return response.data;
@@ -75,9 +75,9 @@ export const updateProduct = createAsyncThunk(
   async (productDataWithId, { rejectWithValue }) => {
     try {
       const { id, ...productData } = productDataWithId;
-      console.log("product data : ", productData);
+      // console.log("product data : ", productData);
       const response = await api.put(`/product/update/${id}`, productData);
-      console.log("Product save/update response : ", response.data);
+      // console.log("Product save/update response : ", response.data);
 
       return response.data;
     } catch (error) {
@@ -92,10 +92,10 @@ export const addProduct = createAsyncThunk(
   "products/addProduct",
   async (productData, { rejectWithValue }) => {
     try {
-      console.log("product data : ", productData);
+      // console.log("product data : ", productData);
 
       const response = await api.post(`/product/add`, productData);
-      console.log("Product save/update response : ", response.data);
+      // console.log("Product save/update response : ", response.data);
 
       return response.data;
     } catch (error) {
@@ -148,8 +148,8 @@ export const uploadProductImages = createAsyncThunk(
         formData.append("images", image);
       });
 
-      console.log("My data images : ", images);
-      console.log("productid : ", productId);
+      // console.log("My data images : ", images);
+      // console.log("productid : ", productId);
 
 
       const response = await api.post(
@@ -316,7 +316,7 @@ const productSlice = createSlice({
       })
       .addCase(uploadProductImages.fulfilled, (state, action) => {
         state.loading = false;
-        console.log("Upload product : ", action.payload.data);
+        // console.log("Upload product : ", action.payload.data);
         // console.log("productid : ", productId);
 
         state.productImages = action.payload?.data?.imageUrls;

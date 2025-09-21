@@ -8,11 +8,13 @@ import {
   fetchCartItems,
   updateQuantity,
   deleteCartItem,
+  setCartItemForBuyNow,
 } from "@/store/slices/cartSlice";
 import { SkeletonLoader } from "@/components/ReusableComponents";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 const NewCartPage = () => {
   const dispatch = useDispatch();
+  const navigateTo = useNavigate();
   const { cartId, cartItems, cartTotalAmount, cartLoading } = useSelector(
     (state) => state.cart
   );
@@ -22,14 +24,15 @@ const NewCartPage = () => {
   // }, [dispatch]);
 
   const handleQuantityChange = (cartItemId, newQuantity) => {
-    console.log("Quantity changed:", { cartItemId, quantity: newQuantity });
+    console.log("Quantity changed!");
+    // console.log("Quantity changed:", { cartItemId, quantity: newQuantity });
     dispatch(updateQuantity({ cartItemId, quantity: newQuantity }));
   };
 
   const handleDelete = async (cartItemId) => {
     try {
 
-      console.log("Deleting item with Cart ID : ", cartId, " and Item ID : ", cartItemId);
+      // console.log("Deleting item with Cart ID : ", cartId, " and Item ID : ", cartItemId);
 
       if (!cartId) {
         toast.error("Cart ID not found");
@@ -209,9 +212,16 @@ const NewCartPage = () => {
                       </p>
                     </div>
                   </div>
-                  <Button className="w-full mt-6 bg-[#871845] hover:bg-[#671234] text-white">
-                    <Link to={"/checkout"}>Proceed to Checkout </Link>
+                  <Button
+                    onClick={() => {
+                      dispatch(setCartItemForBuyNow({ product: null, isBuyNowRequest: false }));
+                      navigateTo("/checkout");
+                    }}
+                    className="w-full mt-6 bg-[#871845] hover:bg-[#671234] text-white"
+                  >
+                    Proceed to Checkout
                   </Button>
+
                 </div>
               </motion.div>
             )}
@@ -231,7 +241,7 @@ const NewCartPage = () => {
               <p className="text-muted-foreground mb-6">
                 Add items to your cart to see them here
               </p>
-              <Link onClick={() => console.log("Continue Shopping Clicked")
+              <Link onClick={() => console.log("Continue Shopping!")
               } to={`/category/dupattas`} className="bg-[#871845] text-white p-2 rounded-sm hover:bg-[#671234]">
                 Continue Shopping
               </Link>

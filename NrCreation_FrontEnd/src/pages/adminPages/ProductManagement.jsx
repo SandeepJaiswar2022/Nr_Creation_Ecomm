@@ -279,11 +279,16 @@ const ProductManagement = () => {
             </SelectTrigger>
             <SelectContent>
               <SelectGroup>
-                {categories?.map((category) => (
-                  <SelectItem key={category?.id} value={category?.name}>
-                    {category?.name}
-                  </SelectItem>
-                ))}
+                {/* FIXED: Add filtering here too */}
+                {categories
+                  ?.filter(
+                    (category) => category?.name && category.name.trim() !== ""
+                  )
+                  .map((category) => (
+                    <SelectItem key={category?.id} value={category?.name}>
+                      {category?.name}
+                    </SelectItem>
+                  ))}
               </SelectGroup>
             </SelectContent>
           </Select>
@@ -339,9 +344,8 @@ const ProductManagement = () => {
                 className="p-1 hover:bg-gray-100 rounded-full"
               >
                 <ChevronDown
-                  className={`w-4 h-4 transform transition-transform ${
-                    expandedProduct === product?.id ? "rotate-180" : ""
-                  }`}
+                  className={`w-4 h-4 transform transition-transform ${expandedProduct === product?.id ? "rotate-180" : ""
+                    }`}
                 />
               </button>
             </div>
@@ -498,13 +502,12 @@ const ProductManagement = () => {
                       </td>
                       <td className="py-3 sm:py-4 px-3 sm:px-6 whitespace-nowrap">
                         <span
-                          className={`px-1.5 py-0.5 rounded-full text-xs ${
-                            product?.inventory > 20
-                              ? "bg-green-100 text-green-800"
-                              : product?.inventory > 0
+                          className={`px-1.5 py-0.5 rounded-full text-xs ${product?.inventory > 20
+                            ? "bg-green-100 text-green-800"
+                            : product?.inventory > 0
                               ? "bg-yellow-100 text-yellow-800"
                               : "bg-red-100 text-red-800"
-                          }`}
+                            }`}
                         >
                           {product?.inventory}
                         </span>
@@ -631,11 +634,17 @@ const ProductManagement = () => {
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {categories?.map((category) => (
-                        <SelectItem key={category?.id} value={category?.name}>
-                          {category?.name}
-                        </SelectItem>
-                      ))}
+                      {/* FIXED: Added filtering to exclude empty/invalid categories */}
+                      {categories
+                        ?.filter(
+                          (category) =>
+                            category?.name && category.name.trim() !== ""
+                        )
+                        .map((category) => (
+                          <SelectItem key={category?.id} value={category?.name}>
+                            {category?.name}
+                          </SelectItem>
+                        ))}
                     </SelectContent>
                   </Select>
                 </div>
