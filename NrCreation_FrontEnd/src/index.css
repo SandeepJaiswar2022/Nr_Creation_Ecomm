@@ -72,3 +72,7 @@
     @apply max-w-[90rem] md:max-w-[96%] max-sm:max-w-[92%] mx-auto;
   }
 }
+
+.color-transition-delay {
+  transition: color 0.5s ease, background-color 0.5s ease;
+}

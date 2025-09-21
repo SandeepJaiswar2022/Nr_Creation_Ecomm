@@ -72,6 +72,7 @@ const OrderManagement = () => {
     //     }
     // ])
 
+    
     const { orders, loading, selectedOrderFilters, totalPages } = useSelector(state => state.orders);
     const [tempOrderFilters, setTempOrderFilters] = useState(selectedOrderFilters);
     const [expandedOrder, setExpandedOrder] = useState(null);
@@ -82,13 +83,13 @@ const OrderManagement = () => {
         setTempOrderFilters(selectedOrderFilters);
     }, [selectedOrderFilters]);
 
+
     // Fetch all orders when filters change
     useEffect(() => {
         dispatch(fetchAllOrders(selectedOrderFilters));
     }, [dispatch, selectedOrderFilters]);
 
     // console.log("Orders in OrderManagement: ", orders);
-
 
     // Filter Handlers
     const handleOrderFilterChange = (type, value) => {

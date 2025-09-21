@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  springapp:
+    image: sushil072/nrcreation:v2   # or build locally (see below)
+    container_name: springapp
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: nrcreationaivendb-nrcreationdiary1.e.aivencloud.com
+      DB_PORT: 20102
+      DB_NAME: defaultdb
+      DB_USER: avnadmin
+      DB_PASSWORD: AVNS_mNofdXJn_LbHc02i4ra
+    restart: always
+
+

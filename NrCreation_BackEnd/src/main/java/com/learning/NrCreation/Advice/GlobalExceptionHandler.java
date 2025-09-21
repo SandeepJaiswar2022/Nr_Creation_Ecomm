@@ -71,7 +71,7 @@ public class GlobalExceptionHandler {
 	@ExceptionHandler(MethodArgumentTypeMismatchException.class)
 	public ResponseEntity<ApiResponse> handleArgumentMismatched(MethodArgumentTypeMismatchException ex) {
 //		System.out.println("Invalid Argument for this API!\n\n");
-		return new ResponseEntity<>(new ApiResponse("Invalid Argument for this API!", null), HttpStatus.BAD_REQUEST);
+		return new ResponseEntity<>(new ApiResponse("Server Error, Invalid Argument!", null), HttpStatus.BAD_REQUEST);
 	}
 
 

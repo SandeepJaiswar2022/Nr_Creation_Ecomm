@@ -68,7 +68,6 @@ import UserManagement from "./pages/adminPages/UserManagement";
 import Analytics from "./pages/adminPages/Analytics";
 import PageNotFound from "@/components/ReusableComponents/PageNotFound";
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
 import { ToastContainer } from "react-toastify";
 import { ProtectedRoute } from "./routes";
 import AdminLayout from "./components/layout/AdminLayout";
@@ -85,39 +84,39 @@ import OrderSuccess from "./pages/OrderSuccess";
 import api from "./utils/api";
 import ProductImageAddUpdate from "./pages/adminPages/ProductImageAddUpdate";
 import HomePageNew from "./pages/HomePageNew";
+import { useMinimumLoading } from "./hooks/useMinimumLoading";
 
 const App = () => {
   const dispatch = useDispatch();
   const { accessToken } = useSelector((state) => state.auth);
   const [loading, setLoading] = useState(true);
 
+  const { isLoading, startLoading } = useMinimumLoading(2000, 5000);
+
   useEffect(() => {
     const tryRefreshToken = async () => {
       try {
-        // console.log(`My access token in app : `, accessToken);
-
-        if (!accessToken) {
-          // console.log(`Token is not there then refresh it : `, accessToken);
-          const res = await api.post(
-            "/auth/refresh-token",
-            {},
-            { withCredentials: true }
-          );
-          dispatch(setAccessToken(res.data.data?.accessToken));
-          dispatch(setUser(res.data.data?.user));
-        }
+        await startLoading(async () => {
+          if (!accessToken) {
+            const res = await api.post(
+              "/auth/refresh-token",
+              {},
+              { withCredentials: true }
+            );
+            dispatch(setAccessToken(res.data.data?.accessToken));
+            dispatch(setUser(res.data.data?.user));
+          }
+        });
       } catch (err) {
         dispatch(clearAuthState());
-        console.error("Auto-refresh failed:", err);
-      } finally {
-        setLoading(false);
+        console.info("Auto-refresh failed");
       }
     };
 
     tryRefreshToken();
-  }, [dispatch]);
+  }, [dispatch, accessToken, startLoading]);
 
-  if (loading) {
+  if (isLoading) {
     return <PageLoader />;
   }
 
@@ -159,7 +158,7 @@ const App = () => {
               <Route path="products/images/:productId" element={<ProductImageAddUpdate />} />
               <Route path="orders" element={<OrderManagement />} />
               <Route path="users" element={<UserManagement />} />
-              <Route path="analytics" element={<Analytics />} />
+              {/* <Route path="analytics" element={<Analytics />} /> */}
             </Route>
           </Route>
 

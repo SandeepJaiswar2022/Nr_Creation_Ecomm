@@ -34,3 +34,8 @@ build/
 
 ### VS Code ###
 .vscode/
+
+!docker-compose.yml
+!Dockerfile
+# Ignore all application.properties / application-*.properties
+src/main/resources/application*.properties

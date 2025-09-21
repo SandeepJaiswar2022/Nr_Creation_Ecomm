@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { CreditCard, MapPin, Truck, Plus } from "lucide-react";
 import { useSelector, useDispatch } from "react-redux";
 import { selectCartTotal, fetchCartItems, clearCart } from "@/store/slices/cartSlice";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useParams, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
 import {
   clearPaymentState,
@@ -43,16 +43,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import "@/styles/scrollbar.css";
+import { fetchSingleProduct } from "@/store/slices/productSlice";
 
 const key = "";
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-
+  const { productid } = useParams();
+  console.log("Product ID:", productid);
+  const location = useLocation();
   // Redux state
   const cartItems = useSelector((state) => state.cart.cartItems);
-  const cartTotal = useSelector(selectCartTotal);
+  const subTotal = useSelector(selectCartTotal);
   const cartLoading = useSelector((state) => state.cart.loading);
   const addresses = useSelector(selectAddresses);
   const selectedAddress = useSelector(selectSelectedAddress);
@@ -67,11 +70,14 @@ const CheckoutPage = () => {
   const paymentStatus = payment ? payment.paymentStatus : null;
   const razorpayOrderData = payment ? payment.razorpayOrderData : null;
 
+  // const buyNowProduct = useSelector((state) => state.buyNow.product);
+  // const buyNowQuantity = useSelector((state) => state.buyNow.quantity);
 
   // Local state
   const [shippingMethod, setShippingMethod] = useState("dtdc");
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [showAllAddresses, setShowAllAddresses] = useState(false);
+  const [checkoutItems, setCheckoutItems] = useState([]);
 
   // Form setup
   const form = useForm({
@@ -119,7 +125,7 @@ const CheckoutPage = () => {
         }
         : null,
       items: cartItems.map((item) => ({
-        productId: item.productId,
+        productid: item.productid,
         quantity: item.quantity,
         price: item.totalPrice / item.quantity,
       })),
@@ -214,6 +220,7 @@ const CheckoutPage = () => {
     if (paymentStatus === "verified" && razorpayOrderData) {
       // toast.success("Payment successful!");
       dispatch(clearPaymentState());
+      if(cartItems) 
       dispatch(clearCart());
       navigate("/order-confirmation", {
         state: {
@@ -242,6 +249,33 @@ const CheckoutPage = () => {
     }
   }, [addresses, selectedAddress, dispatch, selectedAddressId]);
 
+
+
+ const {product} = useSelector((state) => state.product);
+ useEffect(()=>{
+   if(productid){
+     dispatch(fetchSingleProduct(productid));
+   }
+ },[dispatch,productid])
+
+  // Parse query param
+  // Update checkout items when productid or quantity changes
+  useEffect(() => {
+  if (productid) {
+    console.log("Product from URL:", product); 
+    if (product) {
+      setCheckoutItems([{
+        ...product,
+        quantity: 1, // always 1
+        totalPrice: product.price, // same as product.price
+      }]);
+    }
+  } else {
+    // fallback: checkout from cart
+    setCheckoutItems(cartItems);
+  }
+}, [productid, cartItems,product]);
+
   // Loading and empty cart states
   if (cartLoading || paymentLoading || addressLoading) {
     return (
@@ -252,7 +286,7 @@ const CheckoutPage = () => {
     );
   }
 
-  if (!cartItems.length) {
+  if (!cartItems.length && !checkoutItems) {
     return (
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-8">Checkout</h1>
@@ -265,6 +299,15 @@ const CheckoutPage = () => {
       </div>
     );
   }
+
+  // const isBuyNow = !!buyNowProduct;
+  // const checkoutItemsToUse = isBuyNow
+  //   ? [{
+  //       ...buyNowProduct,
+  //       quantity: buyNowQuantity,
+  //       totalPrice: buyNowProduct.price * buyNowQuantity,
+  //     }]
+  //   : cartItems;
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -602,22 +645,22 @@ const CheckoutPage = () => {
 
             {/* Order Items */}
             <div className="space-y-4 mb-6">
-              {cartItems.map((item) => (
+              {checkoutItems.map((item) => (
                 <div key={item.itemId} className="flex gap-4">
                   <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden">
                     {item.imageUrl && (
                       <img
                         src={item.imageUrl}
-                        alt={`Product ${item.productId}`}
+                        alt={`Product ${item.productid}`}
                         className="w-full h-full object-cover"
                       />
                     )}
                   </div>
                   <div className="flex-1">
-                    <p className="font-medium">Product #{item.productId}</p>
+                    <p className="font-medium">Product #{item.productid}</p>
                     <div className="flex justify-between text-sm text-gray-500">
                       <p>Qty: {item.quantity}</p>
-                      <p>₹{item.totalPrice.toFixed(2)}</p>
+                      <p>₹{item?.totalPrice.toFixed(2)}</p>
                     </div>
                   </div>
                 </div>
@@ -628,7 +671,7 @@ const CheckoutPage = () => {
             <div className="border-t pt-4 space-y-2">
               <div className="flex justify-between">
                 <span className="text-gray-600">Subtotal</span>
-                <span>₹{orderTotals.subtotal.toFixed(2)}</span>
+                <span>₹{subTotal}</span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Shipping</span>

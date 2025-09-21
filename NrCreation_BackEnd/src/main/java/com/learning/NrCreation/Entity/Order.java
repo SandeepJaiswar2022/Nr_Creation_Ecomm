@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashSet;
@@ -39,8 +38,8 @@ public class Order {
     private Address shippingAddress;
 
     @ManyToOne
-    @JoinColumn(name = "customerId")
-    private Customer customer;
+    @JoinColumn(name = "user_id", nullable = false) // foreign key column pointing to AppUser.id
+    private User user;
 
     @OneToMany(mappedBy = "order")
     private List<Payment> payments;

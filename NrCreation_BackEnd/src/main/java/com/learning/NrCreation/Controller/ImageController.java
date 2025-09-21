@@ -1,6 +1,5 @@
 package com.learning.NrCreation.Controller;
 
-import com.learning.NrCreation.Entity.Product;
 import com.learning.NrCreation.Response.ApiResponse;
 import com.learning.NrCreation.Service.Product.ProductService;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +9,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

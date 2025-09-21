@@ -23,8 +23,8 @@ public class Cart {
     private Set<CartItem> items = new HashSet<>();
 
     @OneToOne
-    @JoinColumn(name = "customer_id", nullable = false)
-    private Customer customer;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
     public void addItem(CartItem item) {
         this.items.add(item);

@@ -9,10 +9,21 @@ import api from "@/utils/api";
 // Async Thunk to fetch All Users
 export const fetchAllUser = createAsyncThunk(
     "products/fetchAllUser",
-    async (currentAdminEmail, { rejectWithValue }) => {
+    async ({ loggedInAdminEmail, filters }, { rejectWithValue }) => {
         try {
-            const response = await api.get("/user/get-all");
-            return { currentAdminEmail, ...response.data };
+            // console.log("Fetching all users with filters:", filters);
+
+            const params = {
+                search: filters.search || null,
+                birthYear: filters.birthYear || null,
+                city: filters.city || null,
+                state: filters.state || null,
+                page: (filters.page - 1) || 0,
+                size: filters.pageSize || 10,
+            };
+
+            const response = await api.get("/user/get-all", { params });
+            return { loggedInAdminEmail, ...response.data };
         } catch (error) {
             const message = normalizeError(error);
             return rejectWithValue(message);
@@ -46,8 +57,24 @@ const userSlice = createSlice({
         users: [],
         loading: false,
         error: null,
+        filters: {
+            search: "",
+            birthYear: "",
+            city: "",
+            state: "",
+            role: "",
+            page: 1,
+            pageSize: 10,
+            totalPages: 0,
+            totalElements: 0,
+            last: false
+        },
     },
-    reducers: {},
+    reducers: {
+        setFilters: (state, action) => {
+            state.filters = { ...state.filters, ...action.payload };
+        },
+    },
     extraReducers: (builder) => {
         builder
             // Fetch All Products
@@ -57,7 +84,11 @@ const userSlice = createSlice({
             })
             .addCase(fetchAllUser.fulfilled, (state, action) => {
                 state.loading = false;
-                state.users = action.payload?.data.filter(user => user?.email !== action.payload?.currentAdminEmail) || [];
+                state.users = action.payload?.data.filter(user => user?.email !== action.payload?.loggedInAdminEmail) || [];
+                state.filters.totalPages = action.payload?.totalPages || 0;
+                state.filters.page = action.payload?.pageNumber || 1;
+                state.filters.totalElements = action.payload?.totalElements || 0;
+                state.filters.last = action.payload?.last;
                 toast.success(action.payload?.message);
             })
             .addCase(fetchAllUser.rejected, (state, action) => {
@@ -88,4 +119,5 @@ const userSlice = createSlice({
     },
 });
 
+export const { setFilters } = userSlice.actions;
 export default userSlice.reducer;

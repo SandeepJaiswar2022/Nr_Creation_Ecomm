@@ -4,7 +4,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
-import java.util.List;
 
 
 @Data
@@ -23,15 +22,15 @@ public class UserDTO {
 
 	private Date dateOfBirth;
 
-	private List<AddressDTO> addresses;
-
-	private CartDTO cart;
-
-	private List<OrderDTO> orders;
-
-	private List<ReviewDTO> reviews;
-
-	private List<PaymentDTO> paymentHistory;
+//	private List<AddressDTO> addresses;
+//
+//	private CartDTO cart;
+//
+//	private List<OrderDTO> orders;
+//
+//	private List<ReviewDTO> reviews;
+//
+//	private List<PaymentDTO> paymentHistory;
 	
 	private String role;
 }

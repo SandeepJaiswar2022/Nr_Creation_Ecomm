@@ -13,7 +13,7 @@ const AdminLayout = () => {
     { to: "/admin/products", label: "Products" },
     { to: "/admin/orders", label: "Orders" },
     { to: "/admin/users", label: "Users" },
-    { to: "/admin/analytics", label: "Analytics" },
+    // { to: "/admin/analytics", label: "Analytics" },
   ];
   const dispatch = useDispatch();
   const handleLogout = () => {

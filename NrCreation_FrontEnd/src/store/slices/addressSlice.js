@@ -162,7 +162,7 @@ const addressSlice = createSlice({
 // Selectors
 export const selectAddresses = (state) => state.address.addresses;
 export const selectSelectedAddress = (state) =>
-    state.address.addresses.find((addr) => addr?.addressId === state.address.selectedAddressId);
+    state.address.addresses.find((addr) => addr?.addressId === state.address?.selectedAddressId);
 export const selectAddressLoading = (state) => state.address.loading;
 export const getSelectedAddressId = (state) => state.address.selectedAddressId;
 export const selectAddressError = (state) => state.address.error;

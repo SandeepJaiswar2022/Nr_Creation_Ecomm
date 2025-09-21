@@ -24,6 +24,6 @@ public class Review {
     private Product product;
 
     @ManyToOne
-    @JoinColumn(name = "customer_id")
-    private Customer customer;
+    @JoinColumn(name = "user_id", nullable = false) // foreign key column pointing to AppUser.id
+    private User user;
 }

@@ -27,27 +27,27 @@ import java.util.List;
 @EnableMethodSecurity(prePostEnabled = true)
 public class SecurityConfig {
 	private final AuthenticationProvider authProvider;
+
 	@Bean
-	public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter)throws Exception{
+	public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
 		http
-				.cors(cors->cors.configurationSource(corsConfigurationSource()))
+				.cors(cors -> cors.configurationSource(corsConfigurationSource()))
 				.csrf(AbstractHttpConfigurer::disable)
-		         .authorizeHttpRequests(request -> request.requestMatchers("/api/nr-creation/v1/auth/**",
-								 "/api/nr-creation/v1/public/**",
-								 "/error","/swagger-ui/**","/v3/api-docs"
-						 )
-		        		 .permitAll().anyRequest().authenticated())
-		         .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-		         .authenticationProvider(authProvider)
-		         .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+				.authorizeHttpRequests(request -> request.requestMatchers("/api/nr-creation/v1/auth/**",
+						"/api/nr-creation/v1/public/**",
+						"/error", "/swagger-ui/**", "/v3/api-docs")
+						.permitAll().anyRequest().authenticated())
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+				.authenticationProvider(authProvider)
+				.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 		return http.build();
 	}
-
 
 	@Bean
 	public CorsConfigurationSource corsConfigurationSource() {
 		CorsConfiguration configuration = new CorsConfiguration();
-		configuration.setAllowedOrigins(List.of("http://localhost:5173","https://nr-creation-ecomm-frontend.onrender.com")); // Allow frontend origin
+		configuration.setAllowedOrigins(List.of("http://localhost:5173", "https://nr-creation-ecomm-gpoo.vercel.app",
+				"https://nr-creation-ecomm-gpoo.vercel.app/")); // Allow frontend origin
 		configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // Allowed HTTP methods
 		configuration.setAllowedHeaders(List.of("Authorization", "Content-Type")); // Allowed headers
 		configuration.setAllowCredentials(true);

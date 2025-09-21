@@ -1,9 +1,7 @@
 package com.learning.NrCreation.Controller;
 
 import com.learning.NrCreation.Entity.Cart;
-import com.learning.NrCreation.Entity.Customer;
 import com.learning.NrCreation.Entity.User;
-import com.learning.NrCreation.Repository.CustomerRepository;
 import com.learning.NrCreation.Response.ApiResponse;
 import com.learning.NrCreation.Response.CartDTO;
 import com.learning.NrCreation.Service.Cart.CartService;
@@ -12,7 +10,6 @@ import com.learning.NrCreation.Service.User.UserService;
 import lombok.RequiredArgsConstructor;
 
 import java.math.BigDecimal;
-import java.util.Optional;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 public class CartController {
     private final CartService cartService;
     private final UserService userService;
-    private final CustomerRepository customerRepo;
 
     @GetMapping("my-cart")
     @PreAuthorize("hasAnyAuthority('admin:read','user:read')")
@@ -34,12 +30,7 @@ public class CartController {
     {
         try {
             User user = userService.findUserByJwtToken(authHeader);
-            Optional<Customer> customer = customerRepo.findByEmail(user.getEmail());
-            if (customer.isEmpty()) {
-                return new ResponseEntity<>(new ApiResponse("Customer not found with email : "+user.getEmail(), null)
-                        ,HttpStatus.NOT_FOUND);
-            }
-            Cart cart = cartService.getCartByCustomerId(customer.get().getCustomerId());
+            Cart cart = cartService.getCartByUserId(user.getId());
             CartDTO cartResponse = cartService.getCartDTOResponseById(cart.getCartId());
             return new ResponseEntity<>(new ApiResponse("Cart Fetched Successfully", cartResponse)
                     ,HttpStatus.OK);
