@@ -4,6 +4,7 @@ import com.learning.NrCreation.Entity.Order;
 import com.learning.NrCreation.Enum.OrderStatus;
 import com.learning.NrCreation.Request.CreateOrderRequest;
 import com.learning.NrCreation.Response.OrderDTO;
+import com.learning.NrCreation.Response.OrderStatusUpdateDTO;
 import com.razorpay.RazorpayException;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
@@ -24,4 +25,6 @@ public interface OrderService {
     Page<OrderDTO> getAllOrders(String search,OrderStatus status, String shippingMethod, LocalDate startDate, LocalDate endDate, BigDecimal low, BigDecimal high, Pageable pageable);
 
     void deleteOrderById(Long orderId);
+
+    OrderStatusUpdateDTO updateOrderStatus(OrderStatusUpdateDTO orderStatusRequest);
 }

@@ -8,6 +8,7 @@ import com.learning.NrCreation.Request.CreateOrderRequest;
 import com.learning.NrCreation.Response.AddressDTO;
 import com.learning.NrCreation.Response.OrderDTO;
 import com.learning.NrCreation.Response.OrderItemDTO;
+import com.learning.NrCreation.Response.OrderStatusUpdateDTO;
 import com.learning.NrCreation.Service.Address.AddressService;
 import com.learning.NrCreation.Service.Cart.CartService;
 import com.learning.NrCreation.Service.Product.ProductService;
@@ -46,7 +47,6 @@ public class OrderServiceImpl implements OrderService {
 
         User user = userService.findUserByJwtToken(authHeader);
 
-
         Address address = addressService.getAddressByIdAndAuthHeader(orderRequest.getShippingAddressId(), authHeader);
 
         // Create order entity
@@ -56,7 +56,6 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderStatus(OrderStatus.PENDING);
         order.setShippingMethod(orderRequest.getShippingMethod());
         order.setShippingAddress(address);
-
 
         Set<OrderItem> orderItems = new HashSet<>();
         BigDecimal totalAmount = BigDecimal.ZERO;
@@ -180,6 +179,15 @@ public class OrderServiceImpl implements OrderService {
     public void deleteOrderById(Long orderId) {
         Order order = getOrderById(orderId);
         orderRepository.deleteById(order.getOrderId());
+    }
+
+    @Override
+    public OrderStatusUpdateDTO updateOrderStatus(OrderStatusUpdateDTO orderStatusRequest) {
+        System.out.println("Order Status Update service "+orderStatusRequest);
+        Order order = getOrderById(orderStatusRequest.getOrderId());
+        order.setOrderStatus(OrderStatus.valueOf(orderStatusRequest.getOrderStatus()));
+        orderRepository.save(order);
+        return new OrderStatusUpdateDTO(order.getOrderId(),order.getOrderStatus().toString());
     }
 
     private BigDecimal calculateTotalAmount(Set<OrderItem> orderItems) {

@@ -1,11 +1,13 @@
 package com.learning.NrCreation.Controller;
 
 
+import com.learning.NrCreation.Entity.Order;
 import com.learning.NrCreation.Enum.OrderStatus;
 import com.learning.NrCreation.Request.CreateOrderRequest;
 import com.learning.NrCreation.Request.PaymentVerificationRequest;
 import com.learning.NrCreation.Response.ApiResponse;
 import com.learning.NrCreation.Response.OrderDTO;
+import com.learning.NrCreation.Response.OrderStatusUpdateDTO;
 import com.learning.NrCreation.Response.PagedResponse;
 import com.learning.NrCreation.Service.Order.OrderService;
 import com.learning.NrCreation.Service.Razorpay.RazorpayService;
@@ -141,5 +143,14 @@ public ResponseEntity<?> getMyOrders(
 
         return isPaymentVerified ? new ResponseEntity<>(new ApiResponse(message, response)
                 , HttpStatus.OK) : new ResponseEntity<>(new ApiResponse(message, response), HttpStatus.BAD_REQUEST) ;
+    }
+
+
+    //update orderStatus
+    @PatchMapping("/update-OrderStatus")
+    public ResponseEntity<ApiResponse> updateOrderStatus(@RequestBody OrderStatusUpdateDTO orderStatusRequest) {
+        System.out.println("Order Status Update controller"+ orderStatusRequest);
+        ApiResponse response = new ApiResponse("Order Status Updated!", orderService.updateOrderStatus(orderStatusRequest));
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 }

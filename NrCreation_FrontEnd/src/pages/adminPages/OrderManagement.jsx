@@ -26,53 +26,12 @@ import {
     User
 } from "lucide-react"
 import { useDispatch, useSelector } from "react-redux"
-import { fetchAllOrders } from "@/store/slices/ordersSlice"
+import { fetchAllOrders, updateOrderStatus } from "@/store/slices/ordersSlice"
 import { formatDate } from "@/utils/formatString"
 import Pagination from "@/components/ReusableComponents/Pagination"
 import { setSelectedOrderFilters } from "@/store/slices/ordersSlice"
 
 const OrderManagement = () => {
-    // const [orders, setOrders] = useState([
-    //     {
-    //         id: "ORD001",
-    //         customer: "John Doe",
-    //         date: "2024-02-20",
-    //         time: "14:30",
-    //         total: "₹2,499",
-    //         status: "Processing",
-    //         items: [
-    //             { name: "Silk Dupatta", quantity: 2, price: 999 },
-    //             { name: "Lehenga Set", quantity: 1, price: 1499 }
-    //         ],
-    //         paymentStatus: "Paid"
-    //     },
-    //     {
-    //         id: "ORD002",
-    //         customer: "Jane Smith",
-    //         date: "2024-02-19",
-    //         time: "16:45",
-    //         total: "₹1,999",
-    //         status: "Shipped",
-    //         items: [
-    //             { name: "Designer Saree", quantity: 1, price: 1999 }
-    //         ],
-    //         paymentStatus: "Paid"
-    //     },
-    //     {
-    //         id: "ORD003",
-    //         customer: "Mike Johnson",
-    //         date: "2024-02-18",
-    //         time: "09:15",
-    //         total: "₹3,499",
-    //         status: "Delivered",
-    //         items: [
-    //             { name: "Bridal Lehenga", quantity: 1, price: 3499 }
-    //         ],
-    //         paymentStatus: "Paid"
-    //     }
-    // ])
-
-    
     const { orders, loading, selectedOrderFilters, totalPages } = useSelector(state => state.orders);
     const [tempOrderFilters, setTempOrderFilters] = useState(selectedOrderFilters);
     const [expandedOrder, setExpandedOrder] = useState(null);
@@ -164,23 +123,23 @@ const OrderManagement = () => {
 
     const getStatusIcon = (status) => {
         switch (status) {
-            case "Pending":
+            case "PENDING":
                 return <Clock className="w-4 h-4 text-yellow-500" />
-            case "Processing":
+            case "PROCESSING":
                 return <Package className="w-4 h-4 text-blue-500" />
-            case "Confirmed":
+            case "CONFIRMED":
                 return <CheckCircle className="w-4 h-4 text-green-500" />
-            case "Shipped":
+            case "SHIPPED":
                 return <Truck className="w-4 h-4 text-indigo-500" />
-            case "Out for Delivery":
+            case "OUT_FOR_DELIVERY":
                 return <ShoppingBag className="w-4 h-4 text-purple-500" />
-            case "Delivered":
+            case "DELIVERED":
                 return <CheckCircle className="w-4 h-4 text-green-500" />
-            case "Cancelled":
+            case "CANCELLED":
                 return <XCircle className="w-4 h-4 text-red-500" />
-            case "Refunded":
+            case "REFUNDED":
                 return <CreditCard className="w-4 h-4 text-orange-500" />
-            case "Failed Delivery":
+            case "FAILED_DELIVERY":
                 return <AlertCircle className="w-4 h-4 text-red-500" />
             default:
                 return <Package className="w-4 h-4 text-gray-500" />
@@ -191,19 +150,19 @@ const OrderManagement = () => {
         switch (status) {
             case "PENDING":
                 return "bg-yellow-100 text-yellow-800"
-            case "Processing":
+            case "PROCESSING":
                 return "bg-blue-100 text-blue-800"
             case "CONFIRMED":
                 return "bg-green-100 text-green-800"
             case "SHIPPED":
                 return "bg-indigo-100 text-indigo-800"
-            case "Out for Delivery":
+            case "OUT_FOR_DELIVERY":
                 return "bg-purple-100 text-purple-800"
             case "DELIVERED":
                 return "bg-green-100 text-green-800"
             case "CANCELLED":
                 return "bg-red-100 text-red-800"
-            case "Refunded":
+            case "REFUNDED":
                 return "bg-orange-100 text-orange-800"
             case "PAYMENT_FAILED":
                 return "bg-red-100 text-red-800"
@@ -212,13 +171,9 @@ const OrderManagement = () => {
         }
     }
 
-    const handleStatusUpdate = (orderId, newStatus) => {
-        // setOrders(orders.map(order =>
-        //     order.id === orderId ? { ...order, status: newStatus } : order
-        // ))
-        console.log("Handle status change");
-
-    }
+   const handleStatusUpdate = (orderId, newStatus) => {
+    dispatch(updateOrderStatus({ orderId, newStatus }));
+  };
 
     const toggleOrderExpansion = (orderId) => {
         setExpandedOrder(expandedOrder === orderId ? null : orderId)
@@ -307,22 +262,22 @@ const OrderManagement = () => {
 
             {/* Orders List - Mobile View */}
             <div className="block sm:hidden space-y-3">
-                {orders.map((order) => (
-                    <div key={order?.razorpayOrderId} className="bg-white rounded-lg shadow-md p-3">
+                {(orders ?? []).map((order, index) => (
+        <div key={order?.orderId || order?.razorpayOrderId || index}  className="bg-white rounded-lg shadow-md p-3">
                         <div className="flex items-center justify-between mb-3">
                             <div>
-                                <div className="font-medium text-sm">Order #{order?.id}</div>
+                                <div className="font-medium text-sm">Order #{order?.orderId}</div>
                                 <div className="text-xs text-gray-500">{order?.date}</div>
                             </div>
                             <button
-                                onClick={() => toggleOrderExpansion(order?.id)}
+                                onClick={() => toggleOrderExpansion(order?.orderId)}
                                 className="p-1 hover:bg-gray-100 rounded-full"
                             >
-                                <ChevronDown className={`w-4 h-4 transform transition-transform ${expandedOrder === order?.id ? 'rotate-180' : ''}`} />
+                                <ChevronDown className={`w-4 h-4 transform transition-transform ${expandedOrder === order?.orderId ? 'rotate-180' : ''}`} />
                             </button>
                         </div>
 
-                        {expandedOrder === order?.id && (
+                        {expandedOrder === order?.orderId && (
                             <div className="space-y-3 pt-3 border-t">
                                 <div className="space-y-1.5">
                                     <div className="text-xs">
@@ -338,7 +293,7 @@ const OrderManagement = () => {
 
                                 <div className="space-y-1.5">
                                     <div className="text-xs font-medium">Order Items:</div>
-                                    {order?.items?.map((item, index) => (
+                                    {order?.orderItems?.map((item, index) => (
                                         <div key={index} className="text-xs">
                                             {item?.quantity}x {item?.productName} - ₹{item?.price}
                                         </div>
@@ -351,28 +306,28 @@ const OrderManagement = () => {
                                 <div className="flex items-center gap-1.5">
                                     {getStatusIcon(order?.orderStatus)}
                                     <span className={`px-1.5 py-0.5 rounded-full text-xs ${getStatusColor(order?.orderStatus)}`}>
-                                        {order.orderStatus}
+                                        {order?.orderStatus}
                                     </span>
                                 </div>
 
                                 <div className="flex gap-2">
                                     <Select
-                                        value={order.status}
-                                        onValueChange={(value) => handleStatusUpdate(order?.id, value)}
+                                        value={order?.orderStatus}
+                                        onValueChange={(value) => handleStatusUpdate(order?.orderId, value)}
                                     >
                                         <SelectTrigger className="flex-1 text-xs px-2 py-1">
                                             <SelectValue />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            <SelectItem value="Pending">Pending</SelectItem>
-                                            <SelectItem value="Processing">Processing</SelectItem>
-                                            <SelectItem value="Confirmed">Confirmed</SelectItem>
-                                            <SelectItem value="Shipped">Shipped</SelectItem>
-                                            <SelectItem value="Out for Delivery">Out for Delivery</SelectItem>
-                                            <SelectItem value="Delivered">Delivered</SelectItem>
-                                            <SelectItem value="Cancelled">Cancelled</SelectItem>
-                                            <SelectItem value="Refunded">Refunded</SelectItem>
-                                            <SelectItem value="Failed Delivery">Failed Delivery</SelectItem>
+                                            <SelectItem value="PENDING">Pending</SelectItem>
+                                            {/* <SelectItem value="Processing">Processing</SelectItem> */}
+                                            <SelectItem value="CONFIRMED">Confirmed</SelectItem>
+                                            <SelectItem value="SHIPPED">Shipped</SelectItem>
+                                            {/* <SelectItem value="Out for Delivery">Out for Delivery</SelectItem> */}
+                                            <SelectItem value="DELIVERED">Delivered</SelectItem>
+                                            {/* <SelectItem value="Cancelled">Cancelled</SelectItem> */}
+                                            {/* <SelectItem value="Refunded">Refunded</SelectItem> */}
+                                            {/* <SelectItem value="Failed Delivery">Failed Delivery</SelectItem> */}
                                         </SelectContent>
                                     </Select>
                                 </div>
@@ -399,8 +354,8 @@ const OrderManagement = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                {orders.map((order) => (
-                                    <tr key={order?.razorpayOrderId} className="border-b hover:bg-gray-50 transition-colors">
+                                  {(orders ?? []).map((order, index) => (
+  <tr key={order?.orderId || order?.razorpayOrderId || index} className="border-b hover:bg-gray-50 transition-colors">
                                         <td className="py-3 sm:py-4 px-3 sm:px-6 text-sm sm:text-base whitespace-nowrap">{order?.razorpayOrderId}</td>
                                         <td className="py-3 sm:py-4 px-3 sm:px-6 whitespace-nowrap">
                                             <div>
@@ -409,7 +364,7 @@ const OrderManagement = () => {
                                         </td>
                                         <td className="py-3 sm:py-4 px-3 sm:px-6">
                                             <div className="space-y-0.5">
-                                                {order?.orderItems.map((item, index) => (
+                                                {order?.orderItems?.map((item, index) => (
                                                     <div key={index} className="text-xs sm:text-sm">
                                                         {item?.quantity}x {item?.productName}
                                                     </div>
@@ -430,21 +385,21 @@ const OrderManagement = () => {
                                             <div className="flex gap-1.5">
                                                 <Select
                                                     value={order?.orderStatus}
-                                                    onValueChange={(value) => handleStatusUpdate(order?.id, value)}
+                                                    onValueChange={(value) => handleStatusUpdate(order?.orderId, value)}
                                                 >
                                                     <SelectTrigger className="text-xs sm:text-sm px-2 sm:px-3 py-1 sm:py-1.5">
                                                         <SelectValue />
                                                     </SelectTrigger>
                                                     <SelectContent>
                                                         <SelectItem value="PENDING">Pending</SelectItem>
-                                                        <SelectItem value="Processing">Processing</SelectItem>
+                                                        {/* <SelectItem value="Processing">Processing</SelectItem> */}
                                                         <SelectItem value="CONFIRMED">Confirmed</SelectItem>
                                                         <SelectItem value="SHIPPED">Shipped</SelectItem>
-                                                        <SelectItem value="Out for Delivery">Out for Delivery</SelectItem>
-                                                        <SelectItem value="Delivered">Delivered</SelectItem>
-                                                        <SelectItem value="Cancelled">Cancelled</SelectItem>
-                                                        <SelectItem value="Refunded">Refunded</SelectItem>
-                                                        <SelectItem value="Failed Delivery">Failed Delivery</SelectItem>
+                                                        {/* <SelectItem value="Out for Delivery">Out for Delivery</SelectItem> */}
+                                                        <SelectItem value="DELIVERED">Delivered</SelectItem>
+                                                        {/* <SelectItem value="Cancelled">Cancelled</SelectItem> */}
+                                                        {/* <SelectItem value="Refunded">Refunded</SelectItem>
+                                                        <SelectItem value="Failed Delivery">Failed Delivery</SelectItem> */}
                                                     </SelectContent>
                                                 </Select>
                                             </div>
