@@ -41,8 +41,13 @@ const ProductDescription = () => {
   const products = useSelector((state) => state.product?.products);
   // console.log("product?.id: ", product?.id)
   const sortedProducts = [...products]
+<<<<<<< Updated upstream
     .filter((p) => p.id !== product?.id)
     .sort((a, b) => b.id - a.id);
+=======
+    .filter((p) => p?.id!== product?.id)
+    .sort((a, b) => b?.id - a?.id);
+>>>>>>> Stashed changes
 
   useEffect(() => {
     dispatch(fetchProducts());
