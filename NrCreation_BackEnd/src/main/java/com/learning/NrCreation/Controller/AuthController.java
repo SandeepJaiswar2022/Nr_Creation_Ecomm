@@ -44,7 +44,7 @@ public class AuthController {
 				.secure(true)
 				.path("/")
 				.maxAge(7 * 24 * 60 * 60) // 7 days
-				.sameSite("Strict")
+				.sameSite("None")
 				.build();
 		response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
@@ -71,7 +71,7 @@ public class AuthController {
 				.secure(true)
 				.path("/")
 				.maxAge(7 * 24 * 60 * 60) // 7 days
-				.sameSite("Strict")
+				.sameSite("None")
 				.build();
 		response.addHeader(HttpHeaders.SET_COOKIE, cookie.toString());
 
