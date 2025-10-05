@@ -13,6 +13,7 @@ export const fetchProducts = createAsyncThunk(
       // console.log("Slice : Get All product : ", selectedFilters);
 
       const search = selectedFilters?.search || "";
+      // const state = getState().product;
       const category = "dupattas"
       const available = selectedFilters?.avavailability === 'Out of Stock' ? false : true;
       const low = selectedFilters?.priceLow || 0;
@@ -181,10 +182,15 @@ const productSlice = createSlice({
     totalPages: 0,
     productImages: [],
     categories: [],
+    searchTerm: "",
     loading: false,
     error: null,
   },
-  reducers: {},
+  reducers: {
+    setSearchTermToProductState: (state, action) => {
+      state.searchTerm = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       // Fetch All Products
@@ -336,5 +342,7 @@ export const selectProductById = (state, productId) =>
   state.product.products.find((product) => product.id === productId);
 export const selectProductsLoading = (state) => state.product.loading;
 export const selectProductsError = (state) => state.product.error;
+
+export const setSearchTermToProductState = productSlice.actions.setSearchTermToProductState;
 
 export default productSlice.reducer;

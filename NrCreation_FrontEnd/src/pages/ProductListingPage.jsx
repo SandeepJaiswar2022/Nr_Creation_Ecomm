@@ -29,7 +29,6 @@ const ProductListingPage = () => {
   const { category } = useParams();
   const [showFilters, setShowFilters] = useState(false);
   const [priceRange, setPriceRange] = useState([0, 5000]);
-  const [searchTerm, setSearchTerm] = useState("");
   const [selectedFilters, setSelectedFilters] = useState({
     priceLow: 0,
     priceHigh: 100000,
@@ -42,12 +41,12 @@ const ProductListingPage = () => {
     sortOrFeaturedOrNewest: "featured"
   });
   const [tempFilters, setTempFilters] = useState(selectedFilters);
-  const { products, loading, error, totalPages } = useSelector((state) => state.product);
+  const { products, loading, error, totalPages, searchTerm } = useSelector((state) => state.product);
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(fetchProducts(selectedFilters));
-  }, [dispatch, selectedFilters.page, selectedFilters.pageSize, selectedFilters.sortOrFeaturedOrNewest]);
+    dispatch(fetchProducts({ ...selectedFilters, search: searchTerm }));
+  }, [dispatch, selectedFilters.page, searchTerm, selectedFilters.pageSize, selectedFilters.sortOrFeaturedOrNewest]);
 
   const handleFilterChange = (type, value) => {
     setTempFilters(prev => ({
@@ -62,13 +61,7 @@ const ProductListingPage = () => {
     setShowFilters(false);
   };
 
-  const handleSearch = () => {
-    if (searchTerm.trim()) {
-      // console.log("Search Term:", searchTerm);
-      // console.log("Filters with Search:", { ...selectedFilters, search: searchTerm });
-      setSearchTerm("");
-    }
-  };
+
 
   const handleSortChange = (value) => {
     let sortValue = value;
@@ -154,18 +147,7 @@ const ProductListingPage = () => {
         </p>
       </motion.div>
 
-      {/* Search Bar */}
-      {/* <div className="flex gap-2 mb-6">
-        <Input
-          placeholder="Search products..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="max-w-md"
-        />
-        <Button onClick={handleSearch} className="bg-[#871845] hover:bg-[#671234]">
-          <Search className="h-4 w-4" />
-        </Button>
-      </div> */}
+
 
       {/* Filters and Sort Bar */}
       <div className="flex items-center justify-between mb-6 sticky top-0 bg-white z-20 py-4 border-b">
